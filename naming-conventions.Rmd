@@ -27,7 +27,7 @@ Naming conventions result in improvements in terms of "four Cs": communication, 
 All entities should be named following the format: **class_objectINSTANCE_source**
 
 
-```{r, include=FALSE}
+```{r, echo=FALSE, results='asis'}
 df_class <- data.frame(eg = c("dth","p","db","mf","fm","res"),
                        egdesc = c("death counts", "proportions", "database", "model frame", "fitted model", "results"))
 df_class$component <- "class"
@@ -44,7 +44,7 @@ df_tab <- rbind(df_class, df_obj)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
 names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
 
-kable(df_tab, row.names = FALSE) %>%
+kable(df_tab, "html", row.names = FALSE) %>%
   kable_paper(full_width = F) %>%
   column_spec(1, bold = T) %>%
   collapse_rows(columns = 1:2, valign = "middle")
