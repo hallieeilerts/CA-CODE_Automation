@@ -1,0 +1,51 @@
+---
+title: "Naming conventions"
+author: "Hallie Eilerts-Spinelli"
+date: "2023-03-08"
+output:
+  md_document:
+    variant: markdown_github
+editor_options: 
+  chunk_output_type: console
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(kableExtra)
+library(tidyr)
+
+```
+
+
+## Naming conventions
+
+Naming conventions result in improvements in terms of "four Cs": communication, code integration, consistency and clarity. The idea is that "code should explain itself".
+
+All entities should be named following the format: **class_objectINSTANCE_source**
+
+
+```{r, results = 'asis'}
+df_class <- data.frame(eg = c("dth","p","db","mf","fm","res"),
+                       egdesc = c("death counts", "proportions", "database", "model frame", "fitted model", "results"))
+df_class$component <- "class"
+df_class$desc <- "Indicates the data type. These prefixes intend to capture the distinguishing aspect of the entity, rather than the type of data in a strict sense."
+df_class <- df_class[order(df_class$eg),]
+
+df_obj <- data.frame(eg = c("pred","env","[cause of death]","[age/sex group]"),
+                       egdesc = c("prediction", "envelope", "e.g., meas, tb, collectvio", "0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m"))
+df_obj <- df_obj[order(df_obj$eg),]
+df_obj$component <- "object"
+df_obj$desc <- "Describes the content of the entity."
+
+df_tab <- rbind(df_class, df_obj)
+df_tab <- df_tab[,c("component","desc","eg","egdesc")]
+names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
+
+kbl(df_tab, row.names = FALSE) %>%
+  kable_paper(full_width = F) %>%
+  column_spec(1, bold = T) %>%
+  collapse_rows(columns = 2, valign = "middle")
+```
+
