@@ -16,6 +16,9 @@ knitr::opts_chunk$set(echo = TRUE)
 #devtools::install_github(repo="haozhu233/kableExtra", ref="a6af5c0")
 library(kableExtra)
 library(tidyr)
+library(gt)
+library(tibble)
+library(dplyr)
 
 ```
 
@@ -58,7 +61,7 @@ df_tab <- rbind(df_class, df_obj, df_inst, df_source)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
 names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
 
-kbl(df_tab, format = "markdown", row.names = FALSE, escape = F) %>%
+kbl(df_tab, format = "html", row.names = FALSE, escape = F) %>%
   kable_paper(bootstrap_options = "striped", full_width = F, font_size = 10) %>%
   column_spec(1, bold = T) %>%
   collapse_rows(columns = 1:2, valign = "middle") %>%
@@ -66,10 +69,9 @@ kbl(df_tab, format = "markdown", row.names = FALSE, escape = F) %>%
 ```
 
 ```{r, results='asis'}
-kableExtra::kable(df_tab, format = "markdown", row.names = FALSE, escape = F) %>%
-  kable_paper(bootstrap_options = "striped", full_width = F, font_size = 10) %>%
-  column_spec(1, bold = T) %>%
-  collapse_rows(columns = 1:2, valign = "middle") %>%
-  unclass() %>% cat()
+as.tibble(df_tab) %>%
+  gt() %>%
+  fmt_markdown(columns = everything()) %>%
+  tab_options(table.width = px(400))
 ```
 
