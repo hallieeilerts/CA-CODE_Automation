@@ -92,18 +92,18 @@ object
 Name of object.
 </td>
 <td style="text-align:left;">
-\[age/sex group\]
-</td>
-<td style="text-align:left;">
-0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
 \[cause of death\]
 </td>
 <td style="text-align:left;">
 e.g., meas, tb, collectvio, etc.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+{\[}age/sex group{\]}
+</td>
+<td style="text-align:left;">
+0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m
 </td>
 </tr>
 <tr>
@@ -130,7 +130,7 @@ instance
 Distinguishes different instances of the same object.
 </td>
 <td style="text-align:left;">
-<country> </country>
+\<country\>
 </td>
 <td style="text-align:left;">
 e.g., China, India
