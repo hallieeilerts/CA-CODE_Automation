@@ -12,7 +12,7 @@ notation system described here could be a starting point.
 All entities should be named following the format:
 **class_objectINSTANCE_source**
 
-<table class=" hover-paper" style="font-size: 10px; font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class=" hover-paper" style="font-size: 8px; font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; width: 5pt !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:left;">
@@ -92,7 +92,7 @@ object
 Name of object.
 </td>
 <td style="text-align:left;">
-\\[age/sex group\\]
+[age/sex group]
 </td>
 <td style="text-align:left;">
 0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m
@@ -100,7 +100,7 @@ Name of object.
 </tr>
 <tr>
 <td style="text-align:left;">
-\\[cause of death\\]
+[cause of death]
 </td>
 <td style="text-align:left;">
 e.g., meas, tb, collectvio, etc.
@@ -130,7 +130,7 @@ instance
 Distinguishes different instances of the same object.
 </td>
 <td style="text-align:left;">
-\[country\]
+[country]
 </td>
 <td style="text-align:left;">
 e.g., China, India
