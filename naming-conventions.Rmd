@@ -35,8 +35,8 @@ df_class$component <- "class"
 df_class$desc <- "Type of information contained in the object."
 df_class <- df_class[order(df_class$eg),]
 
-df_obj <- data.frame(eg = c("pred","env","<cause of death>","<age/sex group>"),
-                       egdesc = c("prediction", "envelope", "e.g., meas, tb, collectvio", "0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m"))
+df_obj <- data.frame(eg = c("pred","env","[cause of death]","[age/sex group]"),
+                       egdesc = c("prediction", "envelope", "e.g., meas, tb, collectvio, etc.", "0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m"))
 df_obj <- df_obj[order(df_obj$eg),]
 df_obj$component <- "object"
 df_obj$desc <- "Name of object."
@@ -58,8 +58,8 @@ df_tab <- rbind(df_class, df_obj, df_inst, df_source)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
 names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
 
-kable(df_tab, "html", row.names = FALSE) %>%
-  kable_paper(full_width = F) %>%
+kbl(df_tab, format = "html", row.names = FALSE, escape = FALSE) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F, font_size = 10) %>%
   column_spec(1, bold = T) %>%
   collapse_rows(columns = 1:2, valign = "middle")
 ```
