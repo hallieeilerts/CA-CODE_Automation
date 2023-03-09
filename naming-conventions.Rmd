@@ -58,7 +58,7 @@ df_tab <- rbind(df_class, df_obj, df_inst, df_source)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
 names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
 
-kbl(df_tab, row.names = FALSE, escape = F) %>%
+kbl(df_tab, format = "markdown", row.names = FALSE, escape = F) %>%
   kable_paper(bootstrap_options = "striped", full_width = F, font_size = 10) %>%
   column_spec(1, bold = T) %>%
   collapse_rows(columns = 1:2, valign = "middle") %>%
