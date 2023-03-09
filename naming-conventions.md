@@ -1,8 +1,13 @@
 ## Naming conventions
 
-Naming conventions result in improvements in terms of “four Cs”:
-communication, code integration, consistency and clarity. The idea is
-that “code should explain itself”.
+This file details the naming conventions used in the master workflow
+document which details all modelling processes from start to finish.
+
+Naming conventions result in improvements in terms of communication,
+code integration, consistency and clarity. While many of the names below
+were gleaned from the existing code, they do not match the code exactly.
+If/when we try to standardize naming conventions across all code, the
+notation system described here could be a starting point.
 
 All entities should be named following the format:
 **class_objectINSTANCE_source**
@@ -30,9 +35,7 @@ Value Description
 class
 </td>
 <td style="text-align:left;vertical-align: middle !important;" rowspan="6">
-Indicates the data type. These prefixes intend to capture the
-distinguishing aspect of the entity, rather than the type of data in a
-strict sense.
+Type of information contained in the object.
 </td>
 <td style="text-align:left;">
 db
@@ -86,10 +89,10 @@ results
 object
 </td>
 <td style="text-align:left;vertical-align: middle !important;" rowspan="4">
-Describes the content of the entity.
+Name of object.
 </td>
 <td style="text-align:left;">
-\[age/sex group\]
+\<age/sex group\>
 </td>
 <td style="text-align:left;">
 0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m
@@ -97,7 +100,7 @@ Describes the content of the entity.
 </tr>
 <tr>
 <td style="text-align:left;">
-\[cause of death\]
+\<cause of death\>
 </td>
 <td style="text-align:left;">
 e.g., meas, tb, collectvio
@@ -117,6 +120,83 @@ pred
 </td>
 <td style="text-align:left;">
 prediction
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;vertical-align: middle !important;" rowspan="5">
+instance
+</td>
+<td style="text-align:left;vertical-align: middle !important;" rowspan="5">
+Distinguishes different instances of the same object.
+</td>
+<td style="text-align:left;">
+\<country\>
+</td>
+<td style="text-align:left;">
+e.g., China, India
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cf/ci
+</td>
+<td style="text-align:left;">
+crisis-free/crisis-included
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+end/epi
+</td>
+<td style="text-align:left;">
+endemic/epidemic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hmm/lmm
+</td>
+<td style="text-align:left;">
+high/low mortality modelled
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+resp/nonr
+</td>
+<td style="text-align:left;">
+respiratory/non-respiratory
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;vertical-align: middle !important;" rowspan="3">
+source
+</td>
+<td style="text-align:left;vertical-align: middle !important;" rowspan="3">
+Indicates the source of the entity, if external. Written in all
+uppercase. Paired instances should have the same number of letters.
+</td>
+<td style="text-align:left;">
+igme
+</td>
+<td style="text-align:left;">
+UN Inter-agency Group of Mortality Estimation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+who
+</td>
+<td style="text-align:left;">
+World Population Prospects
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wpp
+</td>
+<td style="text-align:left;">
+World Health Organization
 </td>
 </tr>
 </tbody>
