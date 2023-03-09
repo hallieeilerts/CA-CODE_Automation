@@ -11,14 +11,15 @@ always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 #devtools::install_github(repo="haozhu233/kableExtra", ref="a6af5c0")
 library(kableExtra)
 library(tidyr)
-library(gt)
-library(tibble)
+#library(gt)
+#library(tibble)
 library(dplyr)
+options(knitr.table.format = "html")
 
 ```
 
@@ -44,7 +45,7 @@ df_obj <- df_obj[order(df_obj$eg),]
 df_obj$component <- "object"
 df_obj$desc <- "Name of object."
 
-df_inst <- data.frame(eg = c("cf/ci","end/epi", "hmm/lmm", "resp/nonr", "<country>"),
+df_inst <- data.frame(eg = c("cf/ci","end/epi", "hmm/lmm", "resp/nonr", "[country]"),
                        egdesc = c("crisis-free/crisis-included", "endemic/epidemic", "high/low mortality modelled", "respiratory/non-respiratory", "e.g., China, India"))
 df_inst <- df_inst[order(df_inst$eg),]
 df_inst$component <- "instance"
@@ -61,17 +62,9 @@ df_tab <- rbind(df_class, df_obj, df_inst, df_source)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
 names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
 
-kbl(df_tab, format = "html", row.names = FALSE, escape = F) %>%
-  kable_paper(bootstrap_options = "striped", full_width = F, font_size = 10) %>%
+kbl(df_tab, row.names = FALSE, escape = F) %>%
+  kable_paper(bootstrap_options = "hover", full_width = F, font_size = 10) %>%
   column_spec(1, bold = T) %>%
-  collapse_rows(columns = 1:2, valign = "middle") %>%
-  column_spec(2, width = "30em", background = "yellow")
-```
-
-```{r, results='asis'}
-as.tibble(df_tab) %>%
-  gt() %>%
-  fmt_markdown(columns = everything()) %>%
-  tab_options(table.width = px(400))
+  collapse_rows(columns = 1:2)
 ```
 
