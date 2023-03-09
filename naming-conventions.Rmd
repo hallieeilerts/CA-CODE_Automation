@@ -39,24 +39,24 @@ df_class$component <- "class"
 df_class$desc <- "Type of information contained in the object."
 df_class <- df_class[order(df_class$eg),]
 
-df_obj <- data.frame(eg = c("pred","env","[cause of death]","[age/sex group]"),
+df_obj <- data.frame(eg = c("pred","env","(cause of death)","(age/sex group)"),
                        egdesc = c("prediction", "envelope", "e.g., meas, tb, collectvio, etc.", "0to1, 1to59, 5to9, 10to14, 15to19f, 15to19m"))
 df_obj <- df_obj[order(df_obj$eg),]
 df_obj$component <- "object"
 df_obj$desc <- "Name of object."
 
-df_inst <- data.frame(eg = c("cf/ci","end/epi", "hmm/lmm", "resp/nonr", "[country]"),
+df_inst <- data.frame(eg = c("cf/ci","end/epi", "hmm/lmm", "resp/nonr", "(country)"),
                        egdesc = c("crisis-free/crisis-included", "endemic/epidemic", "high/low mortality modelled", "respiratory/non-respiratory", "e.g., China, India"))
 df_inst <- df_inst[order(df_inst$eg),]
 df_inst$component <- "instance"
-df_inst$desc <- "Distinguishes different instances of the same object."
+df_inst$desc <- "Distinguishes different instances of the same object. Written in all uppercase. Paired instances should have the same number of letters."
 
 
 df_source <- data.frame(eg = c("igme","who", "wpp"),
                        egdesc = c("UN Inter-agency Group of Mortality Estimation", "World Population Prospects", "World Health Organization"))
 df_source <- df_source[order(df_source$eg),]
 df_source$component <- "source"
-df_source$desc <- "Indicates the source of the entity, if external. Written in all uppercase. Paired instances should have the same number of letters."
+df_source$desc <- "Indicates the source of the entity, if external."
 
 df_tab <- rbind(df_class, df_obj, df_inst, df_source)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
