@@ -11,7 +11,7 @@ always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 #devtools::install_github(repo="haozhu233/kableExtra", ref="a6af5c0")
 library(kableExtra)
@@ -32,7 +32,7 @@ Naming conventions result in improvements in terms of communication, code integr
 
 All entities should be named following the format: **class_objectINSTANCE_source**
 
-```{r, echo=FALSE, results='asis'}
+```{r, results='asis'}
 df_class <- data.frame(eg = c("dth","p","db","mf","fm","res"),
                        egdesc = c("death counts", "proportions", "database", "model frame", "fitted model", "results"))
 df_class$component <- "class"
@@ -62,7 +62,7 @@ df_tab <- rbind(df_class, df_obj, df_inst, df_source)
 df_tab <- df_tab[,c("component","desc","eg","egdesc")]
 names(df_tab) <- c("Component",	"Description",	"Example Values",	"Value Description")
 
-kbl(df_tab, row.names = FALSE, escape = F) %>%
+kbl(df_tab, row.names = FALSE, escape = TRUE) %>%
   kable_paper(bootstrap_options = "hover", full_width = F, font_size = 10) %>%
   column_spec(1, bold = T) %>%
   collapse_rows(columns = 1:2)
