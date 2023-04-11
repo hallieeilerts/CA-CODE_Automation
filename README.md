@@ -20,6 +20,7 @@ Source code is made available in the src folder. There are subdirectories for ea
 │   ├───single_causes
 │   └───study_database
 ├───docs
+│   ├───diagram
 │   └───workflow
 ├───gen
 │   ├───data_preparation
@@ -32,7 +33,12 @@ Source code is made available in the src folder. There are subdirectories for ea
 │   │   ├───input
 │   │   ├───output
 │   │   └───temp
-│   └───prediction
+│   ├───prediction
+│   │   ├───audit
+│   │   ├───input
+│   │   ├───output
+│   │   └───temp
+│   └───squeezing
 │       ├───audit
 │       ├───input
 │       ├───output
@@ -40,7 +46,9 @@ Source code is made available in the src folder. There are subdirectories for ea
 └───src
     ├───data_preparation
     ├───estimation
-    └───prediction
+    ├───prediction
+    ├───squeezing
+    └───uncertainty
 ```
 
 ## Developer instructions
