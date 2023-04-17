@@ -22,7 +22,7 @@ Our pipeline consists of five stages:
 -   squeezing
 -   uncertainty
 
-The directory structure for the `/src` directory is thus:
+The directory structure for `/src` is thus:
 
     /src/data_preparation/
     /src/estimation/
