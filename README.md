@@ -4,7 +4,7 @@ Demo-ing automation for CA-CODE simple update to 2021.
 
 ## Process spreadsheet
 
-[Spreadsheet](https://docs.google.com/spreadsheets/d/1Yi904nUtTaoQu0HJcjPuPzmXdDtzOLPuktkfNjG4a2k/edit#gid=484739312) for progress tracking and process descriptions.
+[Spreadsheet](https://docs.google.com/spreadsheets/d/1Yi904nUtTaoQu0HJcjPuPzmXdDtzOLPuktkfNjG4a2k/edit#gid=484739312) for progress tracking, variable names, and process descriptions.
 
 ## Directory structure
 
