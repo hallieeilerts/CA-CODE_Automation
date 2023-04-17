@@ -1,6 +1,6 @@
-# CACODE-automation
+# CA-CODE automation
 
-Demo-ing automation for CA-CODE simple update to 2021
+Demo-ing automation for CA-CODE simple update to 2021.
 
 ## Process spreadsheet
 

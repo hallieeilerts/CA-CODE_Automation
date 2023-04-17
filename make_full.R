@@ -18,20 +18,35 @@ agegrp <- "00to01"
 # agegrp <- "15to19f"
 # agegrp <- "15to19m"
 
+################################################
+# Data preparation
+################################################
+
+source(src/data_preparation/dataprep_igmeenvelopes.R)
+source(src/data_preparation/dataprep_chinadsp.R)
+source(src/data_preparation/dataprep_chinanmch.R)
 
 ################################################
 # Estimation
 ################################################
 
+source(src/estimation/prepare_model_input.R)
+#source(src/estimation/covariate_selection.R)
+source(src/estimation/create_parameter_grid.R)
+source(src/estimation/formal_parameter_selection.R)
+source(src/estimation/run_model.R)
+
 ################################################
 # Prediction
 ################################################
+
+source(src/prediction/predict_csmf.R)
 
 ################################################
 # Squeezing
 ################################################
 
-source(src/squeezing/reshapeForSqueezing.R)
+source(src/squeezing/reshape_for_squeezing.R)
 
 if(agegrp == "00to01"){
   source(src/squeezing/splt_sepsis.R)
@@ -66,6 +81,10 @@ if(agegrp %in% c("15to19f", "15to19m")){
   source(src/squeezing/sqz_crisisEpi.R)
 }
 
+source(src/squeezing/format_squeezed_output.R)
+
 ################################################
 # Uncertainty
 ################################################
+
+source(src/uncertainty/calculate_uncertainty_intervals.R)

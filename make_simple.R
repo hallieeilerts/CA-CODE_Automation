@@ -22,11 +22,13 @@ agegrp <- "00to01"
 # Prediction
 ################################################
 
+source(src/prediction/predict_csmf.R)
+
 ################################################
 # Squeezing
 ################################################
 
-source(src/squeezing/reshapeForSqueezing.R)
+source(src/squeezing/reshape_for_squeezing.R)
 
 if(agegrp == "00to01"){
   source(src/squeezing/splt_sepsis.R)
@@ -61,8 +63,12 @@ if(agegrp %in% c("15to19f", "15to19m")){
   source(src/squeezing/sqz_crisisEpi.R)
 }
 
+source(src/squeezing/format_squeezed_output.R)
+
 ################################################
 # Uncertainty
 ################################################
+
+source(src/uncertainty/calculate_uncertainty_intervals.R)
 
 
