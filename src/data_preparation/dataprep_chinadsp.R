@@ -1,16 +1,15 @@
-###############################################################################
-# Prepare session
-###############################################################################
 
-# Packages
-library(readstata13) # Read Stata 13 databases
+
+###################################################################
+###################################################################
 
 # Load session variables
 load("./simple_update_2021/gen/data_preparation/input/session_variables.Rdata")
 ls()
 
 # These variables are passed by the make file
-# If just running this script alone, need to be defined.
+# If just running this script alone, they need to be defined.
+# Set variables below
 if(!exists("runmake")){
   Years <- 2000:2020
   ageLow <- 5
@@ -24,8 +23,14 @@ if(!(exists("idVars") &
      exists("ageLow") & 
      exists("ageUp") & 
      exists("ageGroup"))){
-    stop("Required variables are missing")
+  stop("Required variables are missing")
 }
+
+###################################################################
+###################################################################
+
+# Packages
+library(readstata13) # Read Stata 13 databases
 
 # China data
 datCHN <- read.dta13('./data/simple_update_2021/china/20210330-ChinaDSP.dta', nonint.factors = T)
