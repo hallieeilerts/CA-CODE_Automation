@@ -10,15 +10,13 @@ Demo-ing automation for CA-CODE simple update to 2021.
 
 This project framework was conceptualized using resources from the [Tilburg Science Hub](https://tilburgsciencehub.com/), in accordance with recommended workflow and data management principles for research projects.
 
-change
-
 ### Source code
 
 Source code is made available in the `src` folder, with sub-folders for each stage of the project pipeline. Source code are all files that are required to execute the project's pipeline. In addition, there is a makefile in the main directory folder which makes explicit how the source code needs to be run.
 
 Our pipeline consists of five stages:
 
--   data_preparation
+-   data-prep
 -   estimation
 -   prediction
 -   squeezing
@@ -26,7 +24,7 @@ Our pipeline consists of five stages:
 
 The directory structure for `/src` is thus:
 
-    /src/data_preparation/
+    /src/data-prep/
     /src/estimation/
     /src/prediction/
     /src/squeezing/
@@ -46,17 +44,17 @@ Each subdirectory in `gen` contains the following subdirectories:
 ``` bash
 ├───data
 │   ├───china
-│   ├───classification_keys
-│   ├───goodVR
+│   ├───classification-keys
+│   ├───good-vr
 │   ├───igme
-│   ├───prediction_database
-│   ├───single_causes
-│   └───study_database
+│   ├───prediction-database
+│   ├───single-causes
+│   └───study-database
 ├───docs
 │   ├───diagram
 │   └───workflow
 ├───gen
-│   ├───data_preparation
+│   ├───data-prep
 │   │   ├───audit
 │   │   ├───input
 │   │   ├───output
@@ -77,7 +75,7 @@ Each subdirectory in `gen` contains the following subdirectories:
 │       ├───output
 │       └───temp
 └───src
-    ├───data_preparation
+    ├───data-prep
     ├───estimation
     ├───prediction
     ├───squeezing
