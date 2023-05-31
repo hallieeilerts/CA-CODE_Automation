@@ -7,9 +7,9 @@ for (fi in fileEndings) {
 
 # Delete all files in temp directories
 # (does note delete hidden files starting with . (e.g. .gitkeep is not deleted))
-unlink(paste(getwd(),'/gen/analysis/temp/*',sep=''),recursive=T,force=T)
-unlink(paste(getwd(),'/gen/data-preparation/temp/*',sep=''),recursive=T,force=T)
-unlink(paste(getwd(),'/gen/paper/temp/*',sep=''),recursive=T,force=T)
+unlink(paste(getwd(),'./gen/data-prep/temp/*',sep=''),recursive=T,force=T)
+unlink(paste(getwd(),'./gen/prediction/temp/*',sep=''),recursive=T,force=T)
+unlink(paste(getwd(),'./gen/squeezing/temp/*',sep=''),recursive=T,force=T)
 
 # Delete temporary (hidden) R files
 file.remove('.RData')
