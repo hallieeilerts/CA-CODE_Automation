@@ -6,7 +6,7 @@ Demo-ing automation for CA-CODE simple update to 2021.
 
 -   Clone repository to computer
 -   Copy and paste data inputs for desired update from CA-CODE_Warehouse folder on Dropbox into `/data` 
--   Copy and paste corresponding data-prep code from `/src/archive` into `/src/data-prep`
+      -   If necessary, replace code in `/src/data-prep` with corresponding data-prep code from `/src/archive`
 -   Set age group and update years at top of make file
       - Do not make changes to any other scripts
 -   Run make file
