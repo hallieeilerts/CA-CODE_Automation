@@ -7,29 +7,26 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
   load("./gen/data-prep/input/session-variables.Rdata")}
 
 # Load input(s)
-### 
+if(ageGroup == "05to09"){load("./data/estimation/mod_fit/20210328-5to9-lam400SD007-VRMCM003-Test8b.RData")}
+if(ageGroup == "10to14"){load("./data/estimation/mod_fit/20210327-10to14-lam300SD007-VRMCM003-Test6b.RData")}
+if(ageGroup == "15to19f"){load("./data/estimation/mod_fit/20210328-15to19Fem-lam300SD007-VRMCM003-Test6g.RData")}
+if(ageGroup == "15to19m"){load("./data/estimation/mod_fit/20210331-15to19Men-lam400SD007-VRMCM003-Test6e.RData")}
 
 ###################################################################
 ########################## END-INPUTS #############################
 ###################################################################
 
-# Add code that creates model inputs
-# As a place holder, I will just re-save model inputs using the updated names
-if(ageGroup == "05to09"){load("./data/estimation/mod_input/20201217-Data5to9-VAMCM009-Test3.RData")}
-if(ageGroup == "10to14"){load("./data/estimation/mod_input/20201222-Data10to14-VAMCM009-Test8j.RData")}
-if(ageGroup == "15to19f"){load("./data/estimation/mod_input/20210207-Data15to19Fem-VAMCM009-Test9.RData")}
-if(ageGroup == "15to19m"){load("./data/estimation/mod_input/20210212-Data15to19Men-VAMCM009-Test9e.RData")}
+# Resave outputs with standardized name
 
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################
 ###################################################################
 
 # Save output(s)
-save.image(paste("./gen/estimation/input/mod_input_",ageGroup, "HMM.RData",sep=""))
+saveRDS(out, file = paste("./gen/estimation/output/mod_fit_", ageGroup, "LMM.rds",sep=""))
 
 # Remove unnecessary objects
-rm(data.predict, deaths, studies, model, rateTrans, refCat, test, vdt, vers, vxf,
-   vxr, yearCov, ageMort, sex)
+rm(out, fileName, model, rateTrans, refCat, sex, test, Time, vers)
 
 ###################################################################
 ######################### END-OUTPUTS #############################

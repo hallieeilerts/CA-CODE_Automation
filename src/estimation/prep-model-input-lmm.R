@@ -15,10 +15,10 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 
 # Add code that creates model inputs
 # As a place holder, I will just re-save model inputs using the updated names
-if(ageGroup == "05to09"){load("./gen/estimation/input/20210327-Data5to9-VRMCM003-Test8b.RData")}
-if(ageGroup == "10to14"){load("./gen/estimation/input/20210327-Data10to14-VRMCM003-Test6b.RData")}
-if(ageGroup == "15to19f"){load("./gen/estimation/input/20210327-Data15to19Fem-VRMCM003-Test6g.RData")}
-if(ageGroup == "15to19m"){load("./gen/estimation/input/20210327-Data15to19Men-VRMCM003-Test6e.RData")}
+if(ageGroup == "05to09"){load("./data/estimation/mod_input/20210327-Data5to9-VRMCM003-Test8b.RData")}
+if(ageGroup == "10to14"){load("./data/estimation/mod_input/20210327-Data10to14-VRMCM003-Test6b.RData")}
+if(ageGroup == "15to19f"){load("./data/estimation/mod_input/20210327-Data15to19Fem-VRMCM003-Test6g.RData")}
+if(ageGroup == "15to19m"){load("./data/estimation/mod_input/20210327-Data15to19Men-VRMCM003-Test6e.RData")}
 
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################

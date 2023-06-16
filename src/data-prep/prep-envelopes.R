@@ -7,8 +7,8 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
   load("./gen/data-prep/input/session-variables.Rdata")}
 
 # Load input(s)
-env_crisisfree_u20_igme <- read_excel("./data/igme/national/UN IGME 2022 Rates & Deaths_Country Summary (crisis free) 1980-2021 all ages.xlsx")
-env_crisisincl_u20_igme <- read_excel("./data/igme/national/UN IGME 2022 Rates & Deaths_Country Summary 1980-2021 all ages.xlsx")
+env_crisisfree_u20_igme <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary (crisis free) 1980-2021 all ages.xlsx")
+env_crisisincl_u20_igme <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary 1980-2021 all ages.xlsx")
 key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
 
 ###################################################################

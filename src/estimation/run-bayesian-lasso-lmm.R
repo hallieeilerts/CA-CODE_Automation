@@ -75,24 +75,16 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 # }
 # print(Sys.time() - Start1)
 
-# The above code is for running the estimation
-# Don't want to re-run now.
-# As a place holder, I will just re-save model outputs using the updated names
-if(ageGroup == "05to09"){load("./gen/estimation/temp/20210328-5to9-lam400SD007-VRMCM003-Test8b.RData")}
-if(ageGroup == "10to14"){load("./gen/estimation/temp/20210327-10to14-lam300SD007-VRMCM003-Test6b.RData")}
-if(ageGroup == "15to19f"){load("./gen/estimation/temp/20210328-15to19Fem-lam300SD007-VRMCM003-Test6g.RData")}
-if(ageGroup == "15to19m"){load("./gen/estimation/temp/20210331-15to19Men-lam400SD007-VRMCM003-Test6e.RData")}
 
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################
 ###################################################################
 
 # Save output(s)
-saveRDS(out, file = paste("./gen/estimation/output/mod_fit_", ageGroup, "LMM.rds",sep=""))
 #save.image(paste("./gen/estimation/output/mod_fit_",ageGroup, "LMM.RData",sep=""))
 
 # Remove unnecessary objects
-rm(out, fileName, model, rateTrans, refCat, sex, test, Time, vers)
+#rm(out, fileName, model, rateTrans, refCat, sex, test, Time, vers)
 
 ###################################################################
 ######################### END-OUTPUTS #############################
