@@ -5,7 +5,7 @@ Demo-ing automation for CA-CODE simple update to 2021.
 ## Developer instructions
 
 -   Clone repository to computer
--   Copy and paste data inputs for desired update from CA-CODE_Warehouse folder on Dropbox
+-   Copy and paste data folder for desired update from CA-CODE_Warehouse folder on Dropbox
 -   Copy and paste corresponding data-prep code from `/archive`
 -   Set age group and update years at top of make file
       - Do not make changes to any other scripts
@@ -51,7 +51,7 @@ Each subdirectory in `gen` contains the following subdirectories:
 -   `input`: any required input files to run this step of the pipeline
 -   `temp`: temporary files, such as an Excel dataset that needs to be converted into a CSV
 -   `output`: stores the final result of the pipeline stage
--   `audit`: quality checks, diagnostic information on the performance of each step in the pipeline. For example, in `/data_preparation/audit` this could be a txt file with information on missing observations in the final dataset
+-   `audit`: quality checks, diagnostic information on the performance of each step in the pipeline. For example, in `/data-prep/audit` this could be a txt file with information on missing observations in the final dataset
 
 ``` bash
 ├───data
