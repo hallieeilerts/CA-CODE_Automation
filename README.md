@@ -2,6 +2,16 @@
 
 Demo-ing automation for CA-CODE simple update to 2021.
 
+## Developer instructions
+
+-   Clone repository to computer
+-   Copy and paste data inputs for desired update from CA-CODE_Warehouse folder on Dropbox
+-   Copy and paste corresponding data-prep code from `/archive`
+-   Set age group and update years at top of make file
+      - Do not make changes to any other scripts
+-   Run make file
+-   View results in `/gen/results/output`
+
 ## Process spreadsheet
 
 [Spreadsheet](https://docs.google.com/spreadsheets/d/1Yi904nUtTaoQu0HJcjPuPzmXdDtzOLPuktkfNjG4a2k/edit#gid=484739312) for progress tracking, variable names, and process descriptions.
@@ -21,6 +31,7 @@ Our pipeline consists of five stages:
 -   prediction
 -   squeezing
 -   uncertainty
+-   results
 
 The directory structure for `/src` is thus:
 
@@ -29,6 +40,7 @@ The directory structure for `/src` is thus:
     /src/prediction/
     /src/squeezing/
     /src/uncertainty/
+    /src/results/
 
 ### Generated files
 
@@ -43,13 +55,25 @@ Each subdirectory in `gen` contains the following subdirectories:
 
 ``` bash
 ├───data
-│   ├───china
 │   ├───classification-keys
-│   ├───good-vr
 │   ├───igme
+│   │   ├───draws
+│   │   │   ├───crisis-free
+│   │   │   └───crisis-included
+│   │   ├───envelopes
+│   │   │   ├───national
+│   │   │   └───regional
+│   ├───mortality-fractions
 │   ├───prediction-database
+│   ├───previous-results
 │   ├───single-causes
-│   └───study-database
+│   │   ├───crisis
+│   │   ├───hiv
+│   │   ├───malaria
+│   │   ├───measles
+│   │   └───tb
+│   ├───study-database
+│   └───vr
 ├───docs
 │   ├───diagram
 │   └───workflow
@@ -69,20 +93,25 @@ Each subdirectory in `gen` contains the following subdirectories:
 │   │   ├───input
 │   │   ├───output
 │   │   └───temp
+│   ├───results
+│   │   ├───audit
+│   │   ├───input
+│   │   ├───output
+│   │   └───temp
 │   └───squeezing
 │       ├───audit
 │       ├───input
 │       ├───output
 │       └───temp
 └───src
+    ├───archive
+        ├───data-prep_2000-2021
     ├───data-prep
     ├───estimation
     ├───prediction
+    ├───results
     ├───squeezing
     └───uncertainty
 ```
 
-## Developer instructions
 
--   Only adjust variables at top of make file, don't make changes to any other scripts
--   Add any required inputs manually to the `/gen/[subfolder]/input folder`
