@@ -28,6 +28,9 @@ if(ageGroup %in% c("05to09", "10to14", "15to19f", "15to19m")){
 # Save output(s)
 save.image(paste("./gen/estimation/input/mod_grid_", ageGroup,"LMM.RData",sep=""))
 
+# Remove unnecessary objects
+rm(lamb, resd)
+
 ###################################################################
 ######################### END-OUTPUTS #############################
 ###################################################################

@@ -19,6 +19,43 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 # and use the updated name for this object (db_china_5to19)
 dat <- read.dta13("./gen/data-prep/temp/20210330-ChinaDSP.dta", nonint.factors = T)
 
+# Add country variable
+dat$ISO3 <- "CHN"
+
+# Rename variables
+names(dat)[names(dat) == "year"] <- "Year"
+
+# Create new age and sex variables
+dat$AgeLow <- 5
+dat$AgeLow[dat$group == "Both 10-14"] <- 10
+dat$AgeLow[dat$group == "Female 15-19_(4)"] <- 15
+dat$AgeLow[dat$group == "Male 15-19"] <- 15
+dat$Sex <- sexLabels[1]
+dat$Sex[dat$group == "Female 15-19_(4)"] <- sexLabels[2]
+dat$Sex[dat$group == "Male 15-19"] <- sexLabels[3]
+
+# Re-label variables
+names(dat)[names(dat) == "csdf3"] <- "dia"
+names(dat)[names(dat) == "csdf4"] <- "mea"
+names(dat)[names(dat) == "csdf7"] <- "mening"
+names(dat)[names(dat) == "csdf9"] <- "lri"
+names(dat)[names(dat) == "csdf10"] <- "tb"
+names(dat)[names(dat) == "csdf11"] <- "maternal"
+names(dat)[names(dat) == "csdf12"] <- "othercd"
+names(dat)[names(dat) == "csdf14"] <- "congen"
+names(dat)[names(dat) == "csdf15"] <- "neoplasm"
+names(dat)[names(dat) == "csdf16"] <- "cardio"
+names(dat)[names(dat) == "csdf17"] <- "endo"
+names(dat)[names(dat) == "csdf18"] <- "digest"
+names(dat)[names(dat) == "csdf19"] <- "otherncd"
+names(dat)[names(dat) == "csdf21"] <- "rta"
+names(dat)[names(dat) == "csdf22"] <- "drown"
+names(dat)[names(dat) == "csdf23"] <- "natdis"
+names(dat)[names(dat) == "csdf24"] <- "intvio"
+names(dat)[names(dat) == "csdf25"] <- "colvio"
+names(dat)[names(dat) == "csdf27"] <- "selfharm"
+names(dat)[names(dat) == "csdf28"] <- "otherinj"
+
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################
 ###################################################################

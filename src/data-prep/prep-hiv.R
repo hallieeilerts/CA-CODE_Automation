@@ -9,11 +9,11 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 
 # Load input(s)
 # dth_hiv_5to19_wpp <- read.csv() # need to get raw hiv data
-key_ctryclass_u20 <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-if(ageGroup == "05to09"){datIGME <- read.csv("./gen/data-prep/output/env_05to09.csv")}
-if(ageGroup == "10to14"){datIGME <- read.csv("./gen/data-prep/output/env_10to14.csv")}
-if(ageGroup == "15to19f"){datIGME <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
-if(ageGroup == "15to19m"){datIGME <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
+key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+if(ageGroup == "05to09"){env <- read.csv("./gen/data-prep/output/env_05to09.csv")}
+if(ageGroup == "10to14"){env <- read.csv("./gen/data-prep/output/env_10to14.csv")}
+if(ageGroup == "15to19f"){env <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
+if(ageGroup == "15to19m"){env <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
 
 ###################################################################
 ########################## END-INPUTS #############################
@@ -45,7 +45,7 @@ dat <- dat[which(dat$age_lb == ageLow & dat$Sex %in% sexLabel), ]
 
 # Create data frame for countries/years of interest
 # For HIV data, HMM and LMM countries and China
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass_u20, Group2010 %in% c("HMM","LMM", "China DSP"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM", "China DSP"))[,c("ISO3")], each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
@@ -62,7 +62,7 @@ dat$HIV[which(is.na(dat$HIV))] <- 0
 #--------------------------#
 
 # Merge on IGME deaths
-dat <- merge(dat, datIGME[,c("ISO3","Year","Deaths1")], by = c("ISO3", "Year"), all.x = TRUE)
+dat <- merge(dat, env[,c("ISO3","Year","Deaths1")], by = c("ISO3", "Year"), all.x = TRUE)
 
 # Rescale HIV deaths into IGME envelopes
 dat$HIV <- ifelse(!is.na(dat$dth_wpp), dat$HIV * dat$Deaths1/dat$dth_wpp, dat$HIV)
@@ -77,6 +77,9 @@ rownames(dat) <- NULL
 
 # Save output(s)
 write.csv(dat, paste("./gen/squeezing/input/dth_hiv_", ageGroup, ".csv", sep=""), row.names = FALSE)
+
+# Remove unnecessary objects
+rm(key_ctryclass, env, df_ctryyears)
 
 ###################################################################
 ######################### END-OUTPUTS #############################

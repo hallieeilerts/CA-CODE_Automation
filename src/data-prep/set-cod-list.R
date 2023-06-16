@@ -21,16 +21,12 @@ if(ageGroup %in% c("15to19f", "15to19m")){dat <- read.csv("./data/classification
 #            "Congenital", "Cardiovascular", "Digestive", "Neoplasms", "OtherNCD",
 #            "InterpVio","SelfHarm", "Drowning", "RTI", "OtherInj", "NatDis", "CollectVio")
 
-key_cod <- dat
-ageGroup2 <- ifelse(ageGroup %in% c("15to19f", "15to19m"), "15to19", ageGroup)
-
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################
 ###################################################################
 
 # Save output(s)
-write.csv(key_cod, paste("./gen/data-prep/output/key_cod_",ageGroup2, ".csv", sep=""), row.names = FALSE)
-rm(ageGroup2)
+write.csv(dat, paste("./gen/data-prep/output/key_cod_",ageGroup, ".csv", sep=""), row.names = FALSE)
 
 ###################################################################
 ######################### END-OUTPUTS #############################

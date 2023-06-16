@@ -17,7 +17,8 @@ if(ageGroup == "15to19m"){minCD <- 0.0279}
 ###################################################################
 
 # Save output(s)
-save(minCD, file = paste("./gen/squeezing/input/minfrac_cd_", ageGroup, ".RData", sep=""))
+saveRDS(minCD, file = paste("./gen/squeezing/input/minfrac_cd_", ageGroup, ".rds", sep=""))
+#save(minCD, file = paste("./gen/squeezing/input/minfrac_cd_", ageGroup, ".RData", sep=""))
 
 ###################################################################
 ######################### END-OUTPUTS #############################

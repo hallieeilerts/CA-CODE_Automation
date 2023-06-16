@@ -27,6 +27,10 @@ if(ageGroup == "15to19m"){load("./gen/estimation/input/20210327-Data15to19Men-VR
 # Save output(s)
 save.image(paste("./gen/estimation/input/mod_input_",ageGroup, "LMM.RData",sep=""))
 
+# Remove unnecessary objects
+rm(data.predict, deaths, studies, model, rateTrans, refCat, test, vdt, vers, vxf,
+   vxr, yearCov, ageMort, sex)
+
 ###################################################################
 ######################### END-OUTPUTS #############################
 ###################################################################

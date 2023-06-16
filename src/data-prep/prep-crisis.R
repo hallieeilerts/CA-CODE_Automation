@@ -9,11 +9,11 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 
 # Load input(s)
 # dth_crisis_5to19_igme <- read.csv() # need to get raw crisis data
-key_ctryclass_u20 <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-if(ageGroup == "05to09"){datIGME <- read.csv("./gen/data-prep/output/env_05to09.csv")}
-if(ageGroup == "10to14"){datIGME <- read.csv("./gen/data-prep/output/env_10to14.csv")}
-if(ageGroup == "15to19f"){datIGME <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
-if(ageGroup == "15to19m"){datIGME <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
+key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+if(ageGroup == "05to09"){env <- read.csv("./gen/data-prep/output/env_05to09.csv")}
+if(ageGroup == "10to14"){env <- read.csv("./gen/data-prep/output/env_10to14.csv")}
+if(ageGroup == "15to19f"){env <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
+if(ageGroup == "15to19m"){env <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
 
 ###################################################################
 ########################## END-INPUTS #############################
@@ -45,7 +45,7 @@ dat <- dat[which(dat$age_lb == ageLow & dat$Sex %in% sexLabel), ]
 
 # Create data frame for countries/years of interest
 # For crisis data, HMM and LMM countries and China
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass_u20, Group2010 %in% c("HMM","LMM", "China DSP"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM", "China DSP"))[,c("ISO3")], each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
@@ -58,17 +58,30 @@ dat$NatDis[which(is.na(dat$NatDis))] <- 0
 dat$epi_colvio[which(is.na(dat$epi_colvio))] <- 0
 dat$epi_natdis[which(is.na(dat$epi_natdis))] <- 0
 
+# Tidy up
+dat <- dat[, c("ISO3","Year","Sex","epi_colvio", "epi_natdis", "CollectVio", "NatDis")]
+
 #----------------#
 #                #
 # Quality checks #
 #                #
 #----------------#
 
-# CHECK THAT THERE ARE NO CRISIS SPLITS FOR COUNTRIES WHERE CRISIS-FREE/INCLUDED ENVELOPES ARE SAME
-
-
-# Tidy up
-dat <- dat[, c("ISO3","Year","Sex","epi_colvio", "epi_natdis", "CollectVio", "NatDis")]
+# 1. Check that there are no endemic or epidemic crisis deaths for countries with zero deaths
+# 2. Check that there are no epidemic crisis deaths when crisis-free and -included envelopes are same size
+df_check <- dat
+df_check$crisistotal <- apply(df_check[,!(names(df_check) %in% idVars)], 1, sum)
+df_check$epicrisistotal <- df_check$epi_colvio + df_check$epi_natdis
+df_check <- merge(df_check, env, by = idVars)
+df_check$ind1 <- ifelse(df_check$crisistotal > 0 & df_check$Deaths2 == 0, 1, 0)
+df_check$ind2 <- ifelse(df_check$epicrisistotal > 0 & df_check$Deaths1 == df_check$Deaths2, 1, 0)
+if(sum(df_check$ind1) > 0){
+  stop("Crisis deaths reported when country-year has zero deaths.")
+}
+if(sum(df_check$ind2) > 0){
+  stop("Epidemic crisis deaths reported when crisis-free and crisis-included envelopes are the same.")
+}
+rm(df_check)
 
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################
@@ -76,6 +89,9 @@ dat <- dat[, c("ISO3","Year","Sex","epi_colvio", "epi_natdis", "CollectVio", "Na
 
 # Save output(s)
 write.csv(dat, paste("./gen/squeezing/input/dth_crisis_", ageGroup, ".csv", sep=""), row.names = FALSE)
+
+# Remove unnecessary objects
+rm(env, key_ctryclass, df_ctryyears)
 
 ###################################################################
 ######################### END-OUTPUTS #############################

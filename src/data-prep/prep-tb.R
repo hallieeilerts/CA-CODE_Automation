@@ -10,11 +10,11 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 # Load input(s)
 dth_tb_u20_who <- read.csv("./data/single-causes/tb/20201023-ProgramTB.csv") # TB Program estimates (WHO) (Updated 23 Oct 2020)
 dth_tbAux_u20_who <- read.csv("./data/single-causes/tb/20201214-ProgramTB-GMB-MOZ.csv") # Updated estimates for GMB and MOZ
-key_ctryclass_u20 <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-if(ageGroup == "05to09"){datIGME <- read.csv("./gen/data-prep/output/env_05to09.csv")}
-if(ageGroup == "10to14"){datIGME <- read.csv("./gen/data-prep/output/env_10to14.csv")}
-if(ageGroup == "15to19f"){datIGME <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
-if(ageGroup == "15to19m"){datIGME <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
+key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+if(ageGroup == "05to09"){env <- read.csv("./gen/data-prep/output/env_05to09.csv")}
+if(ageGroup == "10to14"){env <- read.csv("./gen/data-prep/output/env_10to14.csv")}
+if(ageGroup == "15to19f"){env <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
+if(ageGroup == "15to19m"){env <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
 
 ###################################################################
 ########################## END-INPUTS #############################
@@ -94,7 +94,7 @@ dat$age_group <- NULL
 
 # Create data frame for countries/years of interest
 # For TB data, only HMM and LMM countries (not including China)
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass_u20, Group2010 %in% c("HMM","LMM"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM"))[,c("ISO3")], each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
@@ -102,11 +102,11 @@ df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass_u20, Group2010 %in% c
 dat <- merge(dat, df_ctryyears, by = idVars, all = TRUE)
 
 # Exclude country-years with no deaths in IGME crisis-free envelope
-noDeathCountries <- datIGME[which(datIGME$Deaths1 == 0), c("ISO3", "Year")]
+noDeathCountries <- env[which(env$Deaths1 == 0), c("ISO3", "Year")]
 noDeathCountries <- merge(dat, noDeathCountries, by = c("ISO3", "Year"))
 # Assign zero TB deaths for country-years with zero deaths in crisis-free envelope
 noDeathCountries$TB <- 0
-hasDeaths <- datIGME[which(datIGME$Deaths1 != 0), c("ISO3", "Year")]
+hasDeaths <- env[which(env$Deaths1 != 0), c("ISO3", "Year")]
 hasDeaths <- merge(dat, hasDeaths, by = c("ISO3", "Year"))
 
 # Impute missing TB values
@@ -172,7 +172,9 @@ dat <- dat[order(dat$ISO3, dat$Year),]
 rownames(dat) <- NULL
 
 # Remove unnecessary objects
-rm(dth_tb_u20_who, dth_tbAux_u20_who, key_ctryclass_u20, datIGME, df_ctryyears, hasDeaths, noDeathCountries)
+rm(dth_tb_u20_who, dth_tbAux_u20_who, key_ctryclass, env, df_ctryyears, 
+   hasDeaths, noDeathCountries, v_years_nodata, v_years_data, fit)
+suppressWarnings(rm(i))
 
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################

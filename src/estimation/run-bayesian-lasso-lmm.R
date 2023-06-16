@@ -7,8 +7,8 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
   load("./gen/data-prep/input/session-variables.Rdata")}
 
 # Load packages for estimation
-library(R2jags)
-library(doParallel)
+#library(R2jags)
+#library(doParallel)
 
 # Load input(s)
 # if(ageGroup == "05to09"){load("./gen/estimation/output/mod_input_05to09LMM.RData")
@@ -88,7 +88,11 @@ if(ageGroup == "15to19m"){load("./gen/estimation/temp/20210331-15to19Men-lam400S
 ###################################################################
 
 # Save output(s)
-save.image(paste("./gen/estimation/output/mod_fit_",ageGroup, "LMM.RData",sep=""))
+saveRDS(out, file = paste("./gen/estimation/output/mod_fit_", ageGroup, "LMM.rds",sep=""))
+#save.image(paste("./gen/estimation/output/mod_fit_",ageGroup, "LMM.RData",sep=""))
+
+# Remove unnecessary objects
+rm(out, fileName, model, rateTrans, refCat, sex, test, Time, vers)
 
 ###################################################################
 ######################### END-OUTPUTS #############################

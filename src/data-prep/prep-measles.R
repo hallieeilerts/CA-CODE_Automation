@@ -9,7 +9,7 @@ if(!exists("sessionVars")){source("./src/prepare-session.R")
 
 # Load input(s)
 # dth_meas_5to19_who <- read.csv() # need to get raw measles data
-key_ctryclass_u20 <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
 
 ###################################################################
 ########################## END-INPUTS #############################
@@ -44,7 +44,7 @@ dat <- dat[which(dat$age_lb == ageLow & dat$age_ub == ageUp & dat$Sex %in% sexLa
 
 # Create data frame for countries/years of interest
 # For measles data, HMM and LMM countries
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass_u20, Group2010 %in% c("HMM","LMM"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM"))[,c("ISO3")], each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
@@ -60,7 +60,7 @@ dat <- dat[, c("ISO3", "Year", "Sex", "Measles", "epi_meas")]
 rownames(dat) <- NULL
 
 # Remove unnecessary objects
-rm(key_ctryclass_u20, df_ctryyears)
+rm(key_ctryclass, df_ctryyears)
 
 ###################################################################
 ######################### BEGIN-OUTPUTS ###########################
