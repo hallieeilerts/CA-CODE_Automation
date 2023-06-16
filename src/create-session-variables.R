@@ -10,7 +10,7 @@ sessionVars <- TRUE
 
 # Age group labels
 ageLow <- as.numeric(sub("to.*", "", ageGroup))
-ageUp <- ageLow + 4
+ageUp <- as.numeric(gsub("[[:alpha:]]", "", sub(".*to", "", ageGroup)))
 ageUp  <- ifelse(ageGroup == "00to28", 1/12, ageUp)
 ageLow <- ifelse(ageGroup == "01to04", 28/365.25, ageLow)
 ageUp  <- ifelse(ageGroup == "01to04", 4, ageUp)
@@ -41,10 +41,11 @@ respTB <- ifelse(ageGroup %in% c("05to09", "10to14"), TRUE, FALSE)
 # Variables to uniquely identify records
 idVars <- c("ISO3", "Year", "Sex")
 
-# Date of results for visualization
-# Can either set manually or use the results generated on the current run (from today).
-resDate <- "20230531"
-# resDate <- format(Sys.Date(), format="%Y%m%d")
+# Vector with COD in correct order
+codAll <- c("Measles", "Maternal", "HIV", "LRI",  "TB", "Diarrhoeal", "Malaria", "OtherCMPN",
+            "Congenital", "Cardiovascular", "Digestive", "Neoplasms", "OtherNCD",
+            "InterpVio","SelfHarm", "Drowning", "RTI", "OtherInj", "NatDis", "CollectVio")    
 
 save.image(file = "./gen/data-prep/input/session-variables.RData")
+
 
