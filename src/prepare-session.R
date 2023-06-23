@@ -18,7 +18,8 @@ pkgs <- c(
   "tidyverse",
   "data.table",
   "ggplot2",
-  "gridExtra"
+  "gridExtra",
+  "msm" # Truncated normal distribution
 )
 
 # install the missing packages
