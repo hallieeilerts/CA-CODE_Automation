@@ -20,13 +20,15 @@ key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
 # As a place holder, I will just do data prep on measles_2000-2021_adol.dta
 # and use the updated name for this object (dth_meas_ageGroup)
 
+## Measles deaths
+
 dat <- read.dta13("./data/single-causes/measles/measles_2000-2021_adol.dta") 
 names(dat)[names(dat) == "iso3"] <- idVars[1]
 names(dat)[names(dat) == "year"] <- idVars[2]
 names(dat)[names(dat) == "sex"] <- idVars[3]
-dat$msl <- dat$measin + dat$measout
+dat$meas_all <- dat$measin + dat$measout
 names(dat)[names(dat) == "measin"] <- "Measles"
-names(dat)[names(dat) == "measout"] <- "epi_meas"
+names(dat)[names(dat) == "measout"] <- "meas_epi"
 
 # Recode sex variable
 dat$Sex[dat$Sex == "MF"] <- sexLabels[1]
@@ -35,6 +37,17 @@ dat$Sex[dat$Sex == "M"] <- sexLabels[3]
 
 # Keep age/sex group of interest
 dat <- dat[which(dat$age_lb == ageLow & dat$age_ub == ageUp & dat$Sex %in% sexLabel), ]
+
+## Measles uncertainty
+
+dat_unc <- read.dta13("./data/single-causes/measles/measles_2000-2021_adolunc.dta") 
+names(dat_unc)[names(dat_unc) == "iso3"] <- idVars[1]
+names(dat_unc)[names(dat_unc) == "year"] <- idVars[2]
+dat_unc$msl <- NULL
+
+## Merge
+
+dat <- merge(dat, dat_unc, by = c("ISO3", "Year"), all.x = T, all.y = F)
 
 #------------------------#
 #                        #
@@ -53,10 +66,12 @@ dat <- merge(dat, df_ctryyears, by = idVars, all = TRUE)
 
 # Recode missing measles as 0
 dat$Measles[which(is.na(dat$Measles))] <- 0
-dat$epi_meas[which(is.na(dat$epi_meas))] <- 0
+dat$meas_epi[which(is.na(dat$meas_epi))] <- 0
+dat$msl_lb[which(is.na(dat$msl_lb))] <- 0
+dat$msl_ub[which(is.na(dat$msl_ub))] <- 0
 
 # Tidy up
-dat <- dat[, c("ISO3", "Year", "Sex", "Measles", "epi_meas")]
+dat <- dat[, c("ISO3", "Year", "Sex", "Measles", "meas_epi", "meas_all", "msl_lb", "msl_ub")]
 rownames(dat) <- NULL
 
 # Remove unnecessary objects

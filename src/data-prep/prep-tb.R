@@ -31,11 +31,11 @@ names(dat)[names(dat) == "iso3"] <- "ISO3"
 names(dat)[names(dat) == "year"] <- "Year"
 names(dat)[names(dat) == "sex"] <- "Sex"
 names(dat)[names(dat) == "mort.nh.nr.num"] <- "TB"
-names(dat)[names(dat) == "mort.nh.nr.lo.num"] <- "TBlo"
-names(dat)[names(dat) == "mort.nh.nr.hi.num"] <- "TBup"
+names(dat)[names(dat) == "mort.nh.nr.lo.num"] <- "tb_lb"
+names(dat)[names(dat) == "mort.nh.nr.hi.num"] <- "tb_ub"
 names(dat)[names(dat) == "mort.nh.re.num"] <- "TBre"
-names(dat)[names(dat) == "mort.nh.re.lo.num"] <- "TBreLo"
-names(dat)[names(dat) == "mort.nh.re.hi.num"] <- "TBreUp"
+names(dat)[names(dat) == "mort.nh.re.lo.num"] <- "tbre_lb"
+names(dat)[names(dat) == "mort.nh.re.hi.num"] <- "tbre_ub"
 
 # Recode sex variable
 dat$Sex[dat$Sex == "MF"] <- sexLabels[1]
@@ -66,7 +66,7 @@ rm(dat2020)
 
 # Aggregate sexes for 5-14 years
 if(!sexSplit){
-  dat <- aggregate(dat[, c("TB", "TBlo", "TBup", "TBre", "TBreLo", "TBreUp")], list(dat$ISO3, dat$Year, dat$age_group), sum)
+  dat <- aggregate(dat[, c("TB", "tb_lb", "tb_ub", "TBre", "tbre_lb", "tbre_ub")], list(dat$ISO3, dat$Year, dat$age_group), sum)
   dat$Sex <- sexLabel
   names(dat)[names(dat) == "Group.1"] <- "ISO3"
   names(dat)[names(dat) == "Group.2"] <- "Year"
@@ -76,9 +76,9 @@ if(!sexSplit){
 # Collapse respiratory and non-respiratory for 15-19 years
 if(sexSplit){
   dat$TB <- dat$TB + dat$TBre
-  dat$TBlo <- dat$TBlo + dat$TBreLo
-  dat$TBup <- dat$TBup + dat$TBreUp
-  dat <- dat[, c("ISO3", "Year", "Sex", "age_group", "TB", "TBlo", "TBup")]
+  dat$tb_lb <- dat$tb_lb + dat$tbre_lb
+  dat$tb_ub <- dat$tb_ub + dat$tbre_ub
+  dat <- dat[, c("ISO3", "Year", "Sex", "age_group", "TB", "tb_lb", "tb_ub")]
 }
 
 
@@ -123,11 +123,11 @@ for(i in unique(hasDeaths$ISO3[is.na(hasDeaths$TB)])){
       fit <- lm(hasDeaths$TB[!is.na(hasDeaths$TB) & hasDeaths$ISO3 == i] ~ v_years_data)
       hasDeaths$TB[is.na(hasDeaths$TB) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]
       # Lower bound
-      fit <- lm(hasDeaths$TBlo[!is.na(hasDeaths$TBlo) & hasDeaths$ISO3 == i] ~ v_years_data)
-      hasDeaths$TBlo[is.na(hasDeaths$TBlo) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]
+      fit <- lm(hasDeaths$tb_lb[!is.na(hasDeaths$tb_lb) & hasDeaths$ISO3 == i] ~ v_years_data)
+      hasDeaths$tb_lb[is.na(hasDeaths$tb_lb) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]
       # Upper bound
-      fit <- lm(hasDeaths$TBup[!is.na(hasDeaths$TBup) & hasDeaths$ISO3 == i] ~ v_years_data)
-      hasDeaths$TBup[is.na(hasDeaths$TBup) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]  
+      fit <- lm(hasDeaths$tb_ub[!is.na(hasDeaths$tb_ub) & hasDeaths$ISO3 == i] ~ v_years_data)
+      hasDeaths$tb_ub[is.na(hasDeaths$tb_ub) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]  
     }
   }  
 }
@@ -150,11 +150,11 @@ if(respTB) {
         fit <- lm(hasDeaths$TBre[!is.na(hasDeaths$TBre) & hasDeaths$ISO3 == i] ~ v_years_data)
         hasDeaths$TBre[is.na(hasDeaths$TBre) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]
         # Lower bound
-        fit <- lm(hasDeaths$TBreLo[!is.na(hasDeaths$TBreLo) & hasDeaths$ISO3 == i] ~ v_years_data)
-        hasDeaths$TBreLo[is.na(hasDeaths$TBreLo) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]
+        fit <- lm(hasDeaths$tbre_lb[!is.na(hasDeaths$tbre_lb) & hasDeaths$ISO3 == i] ~ v_years_data)
+        hasDeaths$tbre_lb[is.na(hasDeaths$tbre_lb) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]
         # Upper bound
-        fit <- lm(hasDeaths$TBreUp[!is.na(hasDeaths$TBreUp) & hasDeaths$ISO3 == i] ~ v_years_data)
-        hasDeaths$TBreUp[is.na(hasDeaths$TBreUp) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]  
+        fit <- lm(hasDeaths$tbre_ub[!is.na(hasDeaths$tbre_ub) & hasDeaths$ISO3 == i] ~ v_years_data)
+        hasDeaths$tbre_ub[is.na(hasDeaths$tbre_ub) & hasDeaths$ISO3 == i] <- coefficients(fit)[1] + v_years_nodata * coefficients(fit)[2]  
       }
     }  
   }
