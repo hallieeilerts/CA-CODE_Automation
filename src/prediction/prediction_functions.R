@@ -5,6 +5,9 @@
 ####
 ##################################################
 
+#dat <- db_CHN
+#ctryGrp <- "CHN"
+
 # group = country group; either GOODVR or CHN
 fn_calc_csmf <- function(dat, key_ctryclass, key_cod, ctryGrp, env = NULL){
   
@@ -14,8 +17,6 @@ fn_calc_csmf <- function(dat, key_ctryclass, key_cod, ctryGrp, env = NULL){
   if(ctryGrp == "GOODVR" & length(env) == 0){
     stop("Must provide argument for env")
   }
-  
-  v_cod <- unique(key_cod$Reclass) # Vector with all CODs (including single-cause estimates)
   
   # Add missing categories to match VA COD list
   if (!"typhoid" %in% names(dat)) dat$typhoid <- 0
@@ -31,6 +32,14 @@ fn_calc_csmf <- function(dat, key_ctryclass, key_cod, ctryGrp, env = NULL){
   # Select countries of interest
   v_ctries <- c(key_ctryclass$ISO3[key_ctryclass$Group2010 == "VR"], "CHN")
   dat <- dat[dat$ISO3 %in% v_ctries, ]
+  
+  # Vector with all CODs (including single-cause estimates)
+  v_cod <- unique(key_cod$Reclass)
+  v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
+  # If China, also exclude HIV as this will be added through squeezing
+  if(ctryGrp == "CHN"){ 
+    v_cod <- v_cod[v_cod != "HIV"]
+  }
   
   # Re-classify causes of death
   for(i in 1:length(v_cod)){
@@ -52,11 +61,6 @@ fn_calc_csmf <- function(dat, key_ctryclass, key_cod, ctryGrp, env = NULL){
   idExclude <- which(!key_cod$Original %in% v_cod)
   if (length(idExclude) > 0) {
     dat <- dat[, !names(dat) %in% paste(key_cod$Original[idExclude])]
-  }
-  dat <- dat[, !names(dat) %in% c("Other", "Undetermined")]
-  # If China, also delete HIV as this will be added through squeezing
-  if(ctryGrp == "CHN"){
-    dat <- dat[, !names(dat) %in% c("HIV")]
   }
   
   # For GOODVR, collapse data points when there is no sex-split
