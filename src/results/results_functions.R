@@ -1,4 +1,99 @@
 
+
+##################################################
+####
+####   Calculate uncertainty intervals from draws
+####
+##################################################
+
+# NOTE: make this usable on regions
+# make different funciton for AARR
+
+#test <- mortDraws[1:5]
+#UI = .95
+#res <- fn_calc_ui(test)
+
+fn_calc_ui <- function(DRAWS_CSMF, UI){
+  
+  # Create interval
+  UI <- 1/2 + c(- UI, UI) / 2
+  
+  # Causes of death for this age group
+  v_cod <- codAll[codAll %in% names(DRAWS_CSMF[[1]])]
+  
+  # Data frame with identifying columns
+  df_idcols <- DRAWS_CSMF[[1]][, !names(DRAWS_CSMF[[1]]) %in% c('Deaths', 'Rate', paste(v_cod))]
+  
+  # Create lists for fractions, rates, deaths
+  l_frac <- DRAWS_CSMF
+  l_rates <- lapply(DRAWS_CSMF, function(x){ x[,v_cod] * x[,"Rate"] })
+  l_deaths <- lapply(DRAWS_CSMF, function(x){ x[,v_cod] * x[,"Deaths"] })
+  
+  # Convert each data.frame in list to matrix that includes only CODs
+  l_frac <- lapply(l_frac, function(x) as.matrix(x[,v_cod]))
+  l_rates <- lapply(l_rates, function(x) as.matrix(x[,v_cod]))
+  l_deaths <- lapply(l_deaths, function(x) as.matrix(x[,v_cod]))
+  
+  # Convert list to array
+  # Calculate quantiles for each cell across array
+  a_frac_lb <- apply(simplify2array(l_frac), c(1,2), quantile, UI[1], na.rm = T)
+  a_frac_ub <- apply(simplify2array(l_frac), c(1,2), quantile, UI[2], na.rm = T)
+  a_rates_lb <- apply(simplify2array(l_rates), c(1,2), quantile, UI[1], na.rm = T)
+  a_rates_ub <- apply(simplify2array(l_rates), c(1,2), quantile, UI[2], na.rm = T)
+  a_deaths_lb <- apply(simplify2array(l_deaths), c(1,2), quantile, UI[1], na.rm = T)
+  a_deaths_ub <- apply(simplify2array(l_deaths), c(1,2), quantile, UI[2], na.rm = T)
+  
+  # Format arrays in to data frames
+  df_frac_lb <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep('Fraction', nrow(df_idcols)),
+                                     Quantile = rep('Lower', nrow(df_idcols)), 
+                                     a_frac_lb))
+  df_frac_ub <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep('Fraction', nrow(df_idcols)),
+                                     Quantile = rep('Lower', nrow(df_idcols)), 
+                                     a_frac_ub))
+  df_rates_lb <- as.data.frame(cbind(df_idcols, 
+                                  Variable = rep('Rate', nrow(df_idcols)),
+                                  Quantile = rep('Lower', nrow(df_idcols)), 
+                                  a_rates_lb))
+  df_rates_ub <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep('Rate', nrow(df_idcols)),
+                                     Quantile = rep('Lower', nrow(df_idcols)), 
+                                     a_rates_ub))
+  df_deaths_lb <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep('Deaths', nrow(df_idcols)),
+                                     Quantile = rep('Lower', nrow(df_idcols)), 
+                                     a_deaths_lb))
+  df_deaths_ub <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep('Deaths', nrow(df_idcols)),
+                                     Quantile = rep('Lower', nrow(df_idcols)), 
+                                     a_deaths_ub))  
+  # Rbind
+  df_res <- rbind(df_frac_lb, df_frac_ub, df_rates_lb, df_rates_ub, df_deaths_lb, df_deaths_ub)
+  
+  return(df_res)
+}
+
+# mortDraws <- draws_csmf_ALL
+# datAux <- mortDraws[[1]]
+# 
+# codAux <- codAll[codAll %in% names(datAux)]
+# 
+# rates <- datAux
+# rates[, paste(codAux)] <- rates[, paste(codAux)] * rates[, 'Rate']
+# frac <- datAux
+# deaths <- datAux
+# deaths[, paste(codAux)] <- deaths[, paste(codAux)] * deaths[, 'Deaths']
+# 
+# apply(rates, c(1, 2), quantile, UI[1], na.rm = T)
+# test <- mortDraws[1:5]
+# test <- lapply(test, function(x) as.matrix(x[codAux]))
+# res <- apply(simplify2array(test), c(1,2), quantile, UI[1], na.rm = T)
+
+# DRAWS_CSMF <- mortDraws[1:5]
+
+
+
 ##################################################
 ####
 ####   Format CSMFs, national
@@ -12,7 +107,8 @@ fn_format_results <- function(dat, key_region, key_ctryclass, codAll){
   # Round rate
   dat$Rate <- round(dat$Rate, 5)
   # Round fractions
-  v_cod <- names(dat)[!(names(dat) %in% c(idVars, "Deaths", "Rate"))]
+  v_cod <- codAll[codAll %in% names(dat)]
+  #v_cod <- names(dat)[!(names(dat) %in% c(idVars, "Deaths", "Rate"))]
   dat[,v_cod] <- round(dat[,v_cod], 5)
   
   # Add age group
@@ -31,7 +127,7 @@ fn_format_results <- function(dat, key_region, key_ctryclass, codAll){
   # Order columns
   dat <- dat[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
                  "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
-                  "Deaths", "Rate", paste(codAll[codAll %in% v_cod]))]
+                  "Deaths", "Rate", v_cod)]
   
   # Tidy up
   dat <- dat[order(dat$ISO3, dat$Year, dat$Sex), ]
@@ -229,11 +325,11 @@ fn_calc_agg_rate <- function(ageLow, ageUp, env, dat05to09, dat10to14, dat15to19
 
 ##################################################
 ####
-####   Visualization: compare CSMFs for sample of countries to results of previous year
+####   Visualization: compare CSMFs to results of previous year
 ####
 ##################################################
 
-fn_visualize_sample <- function(dat, dat_Old, regional = FALSE, sample = NULL){
+fn_compare_csmf <- function(dat, dat_Old, regional = FALSE, sample = NULL){
   
   if(regional == FALSE){
     dat_Old$name <- dat_Old$ISO3
@@ -290,7 +386,7 @@ fn_visualize_sample <- function(dat, dat_Old, regional = FALSE, sample = NULL){
   mg <- marrangeGrob(grobs = plots, nrow=1, ncol=1, top = NULL)
   
   # Save output(s)
-  ggsave(paste("./gen/results/temp/SampleComparison_", ifelse(regional == FALSE, "National", "Regional"), "_", ageGroup,"_", format(Sys.Date(), format="%Y%m%d"), ".pdf", sep=""), mg, height = 10, width = 8, units = "in")
+  ggsave(paste("./gen/results/audit/csmf_comparison_", ifelse(regional == FALSE, "national", "regional"), "_", ageGroup,"_", format(Sys.Date(), format="%Y%m%d"), ".pdf", sep=""), mg, height = 10, width = 8, units = "in")
   
 }
 
