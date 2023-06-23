@@ -7,9 +7,12 @@
 if(!exists("sessionVars")){source("./src/prepare-session.R")
   load("./gen/data-prep/input/session-variables.Rdata")}
 
-# Predicted csmf
+# Predicted CSMF
 csmf <- read.csv(paste("./gen/prediction/output/csmf_", ageGroup, ".csv", sep=""))
+
+# Calculated CSMF
 csmf_CHN <- read.csv(paste("./gen/prediction/output/csmf_",ageGroup, "CHN.csv", sep=""))
+csmf_GOODVR <- read.csv(paste("./gen/prediction/output/csmf_", ageGroup, "GOODVR.csv", sep = ""))
 
 # Envelope
 env <- read.csv(paste("./gen/data-prep/output/env_", ageGroup, ".csv", sep=""))
