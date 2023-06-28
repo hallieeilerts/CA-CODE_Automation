@@ -1,26 +1,18 @@
-
-###################################################################
-########################## BEGIN-INPUTS ###########################
-###################################################################
-
-# Load packages and session variables if not already loaded
-if(!exists("sessionVars")){source("./src/prepare-session.R")
-  load("./gen/data-prep/input/session-variables.Rdata")}
-
-# Load input(s)
-dth_tb_u20_who <- read.csv("./data/single-causes/tb/20201023-ProgramTB.csv") # TB Program estimates (WHO) (Updated 23 Oct 2020)
+################################################################################
+#' @description Keep age-sex group of interest, impute missing values, set zero TB deaths for country-years with zero crisis-free deaths
+#' @return Data frame with c("ISO3", "Year", "Sex", "TB", "tb_lb", "tb_ub", "TBre", "tbre_lb", "tbre_ub")
+################################################################################
+#' Libraries
+#' Inputs
+source("./src/prepare-session/set-inputs.R")
+source("./src/prepare-session/create-session-variables.R")
+dth_tb_u20_who    <- read.csv("./data/single-causes/tb/20201023-ProgramTB.csv") # TB Program estimates (WHO) (Updated 23 Oct 2020)
 dth_tbAux_u20_who <- read.csv("./data/single-causes/tb/20201214-ProgramTB-GMB-MOZ.csv") # Updated estimates for GMB and MOZ
-key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-if(ageGroup == "05to09"){env <- read.csv("./gen/data-prep/output/env_05to09.csv")}
-if(ageGroup == "10to14"){env <- read.csv("./gen/data-prep/output/env_10to14.csv")}
-if(ageGroup == "15to19f"){env <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
-if(ageGroup == "15to19m"){env <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
+key_ctryclass     <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+env               <- read.csv(paste("./gen/data-prep/output/env_",ageGroup,".csv", sep = ""))
+################################################################################
 
-###################################################################
-########################## END-INPUTS #############################
-###################################################################
-
-dat <- dth_tb_u20_who
+dat    <- dth_tb_u20_who
 datAux <- dth_tbAux_u20_who
 
 # Combine all tb data
@@ -42,11 +34,7 @@ dat$Sex[dat$Sex == "MF"] <- sexLabels[1]
 dat$Sex[dat$Sex == "F"] <- sexLabels[2]
 dat$Sex[dat$Sex == "M"] <- sexLabels[3]
 
-#-----------------------------------#
-#                                   #
-# Extend estimates from latest year #
-#                                   #
-#-----------------------------------#
+## Extend estimates from latest year
 
 # APPLY ESTIMATES FROM 2019 TO 2020 AND 2021
 dat2020 <- dat[dat$Year == 2019, ]
@@ -58,11 +46,7 @@ dat <- dat[order(dat$ISO3, dat$Year, dat$Sex), ]
 rownames(dat) <- NULL
 rm(dat2020)
 
-#-----------------------------------#
-#                                   #
-# Keep age and sex group of interest#
-#                                   #
-#-----------------------------------#
+## Keep age and sex group of interest
 
 # Aggregate sexes for 5-14 years
 if(!sexSplit){
@@ -86,11 +70,7 @@ if(sexSplit){
 dat <- dat[which(dat$age_group == paste(ageLow, ageUp, sep = "_") & dat$Sex %in% sexLabel), ]
 dat$age_group <- NULL
 
-#-----------------------#
-#                       #
-# Impute missing values #
-#                       #
-#-----------------------#
+## Impute missing values
 
 # Create data frame for countries/years of interest
 # For TB data, only HMM and LMM countries (not including China)
@@ -171,19 +151,11 @@ dat <- rbind(hasDeaths, noDeathCountries)
 dat <- dat[order(dat$ISO3, dat$Year),]
 rownames(dat) <- NULL
 
+# Save output(s) ----------------------------------------------------------
+
+write.csv(dat, paste("./gen/squeezing/input/dth_tb_", ageGroup, ".csv", sep=""), row.names = FALSE)
+
 # Remove unnecessary objects
 rm(dth_tb_u20_who, dth_tbAux_u20_who, key_ctryclass, env, df_ctryyears, 
    hasDeaths, noDeathCountries, v_years_nodata, v_years_data, fit)
 suppressWarnings(rm(i))
-
-###################################################################
-######################### BEGIN-OUTPUTS ###########################
-###################################################################
-
-# Save output(s)
-write.csv(dat, paste("./gen/squeezing/input/dth_tb_", ageGroup, ".csv", sep=""), row.names = FALSE)
-
-###################################################################
-######################### END-OUTPUTS #############################
-###################################################################
-

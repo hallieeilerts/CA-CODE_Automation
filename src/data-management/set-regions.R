@@ -1,18 +1,20 @@
-###################################################################
-########################## BEGIN-INPUTS ###########################
-###################################################################
+################################################################################
+## @Purpose - Sets regional classifications for countries.
+## @Date - 2023-06-27
+## @Author - Hallie Eilerts-Spinelli
+################################################################################
 
-# Load packages and session variables if not already loaded
-if(!exists("sessionVars")){source("./src/prepare-session.R")
-  load("./gen/data-prep/input/session-variables.Rdata")}
+# Clear environment
+rm(list = ls())
 
-# Load input(s)
-key_region_u20_who <- read.dta13("./data/classification-keys/20190528-RegionClassSDG.dta", nonint.factors = T)
+# Install packages and load libraries
+
+# Load inputs
+key_region_u20_who  <- read.dta13("./data/classification-keys/20190528-RegionClassSDG.dta", nonint.factors = T)
 key_region_u20_igme <- read.csv("./data/classification-keys/20210407-RegionClassIGME.csv")
 
-###################################################################
-########################## END-INPUTS #############################
-###################################################################
+################################################################################
+
 
 #-----------------------------#
 # SDG REGIONAL CLASSIFICATION #

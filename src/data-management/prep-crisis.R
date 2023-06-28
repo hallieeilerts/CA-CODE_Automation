@@ -1,28 +1,21 @@
-
-###################################################################
-########################## BEGIN-INPUTS ###########################
-###################################################################
-
-# Load packages and session variables if not already loaded
-if(!exists("sessionVars")){source("./src/prepare-session.R")
-  load("./gen/data-prep/input/session-variables.Rdata")}
-
-# Load input(s)
-# dth_crisis_5to19_igme <- read.csv() # need to get raw crisis data
+################################################################################
+#' @description Keep age-sex group of interest, fill in missing values with zero
+#' @return Data frame with c("ISO3", "Year", "Sex", "epi_colvio", "epi_natdis", "CollectVio", "NatDis")
+################################################################################
+#' Libraries
+require(readstata13)
+#' Inputs
+source("./src/prepare-session/set-inputs.R")
+source("./src/prepare-session/create-session-variables.R")
+dat <- read.dta13("./data/single-causes/crisis/crisis_2000-2021_adolsplit_23Mar23.dta") 
+env <- read.csv(paste("./gen/data-prep/output/env_",ageGroup,".csv", sep = ""))
 key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-if(ageGroup == "05to09"){env <- read.csv("./gen/data-prep/output/env_05to09.csv")}
-if(ageGroup == "10to14"){env <- read.csv("./gen/data-prep/output/env_10to14.csv")}
-if(ageGroup == "15to19f"){env <- read.csv("./gen/data-prep/output/env_15to19f.csv")}
-if(ageGroup == "15to19m"){env <- read.csv("./gen/data-prep/output/env_15to19m.csv")}
-
-###################################################################
-########################## END-INPUTS #############################
-###################################################################
+################################################################################
 
 # Add code to create crisis_2000-2021_adolsplit_23Mar23.dta from csv
 # As a place holder, I will just do data prep on crisis_2000-2021_adolsplit_23Mar23.dta
 # and use the updated name for this object (dth_crisis_5to19)
-dat <- read.dta13("./data/single-causes/crisis/crisis_2000-2021_adolsplit_23Mar23.dta") 
+
 names(dat)[names(dat) == "iso3"] <- "ISO3"
 names(dat)[names(dat) == "year"] <- "Year"
 names(dat)[names(dat) == "sex"] <- "Sex"
@@ -37,11 +30,7 @@ dat$Sex[dat$Sex == "M"] <- sexLabels[3]
 # Keep age/sex group of interest
 dat <- dat[which(dat$age_lb == ageLow & dat$Sex %in% sexLabel), ]
 
-#------------------------#
-#                        #
-# Fill in missing values #
-#                        #
-#------------------------#
+## Fill in missing values
 
 # Create data frame for countries/years of interest
 # For crisis data, HMM and LMM countries and China
@@ -61,11 +50,7 @@ dat$epi_natdis[which(is.na(dat$epi_natdis))] <- 0
 # Tidy up
 dat <- dat[, c("ISO3","Year","Sex","epi_colvio", "epi_natdis", "CollectVio", "NatDis")]
 
-#----------------#
-#                #
-# Quality checks #
-#                #
-#----------------#
+# Quality checks ----------------------------------------------------------
 
 # 1. Check that there are no endemic or epidemic crisis deaths for countries with zero deaths
 # 2. Check that there are no epidemic crisis deaths when crisis-free and -included envelopes are same size
@@ -81,20 +66,11 @@ if(sum(df_check$ind1) > 0){
 if(sum(df_check$ind2) > 0){
   stop("Epidemic crisis deaths reported when crisis-free and crisis-included envelopes are the same.")
 }
-rm(df_check)
 
-###################################################################
-######################### BEGIN-OUTPUTS ###########################
-###################################################################
+# Save output(s) ----------------------------------------------------------
 
-# Save output(s)
 write.csv(dat, paste("./gen/squeezing/input/dth_crisis_", ageGroup, ".csv", sep=""), row.names = FALSE)
 
 # Remove unnecessary objects
-rm(env, key_ctryclass, df_ctryyears)
-
-###################################################################
-######################### END-OUTPUTS #############################
-###################################################################
-
+rm(env, key_ctryclass, df_ctryyears, df_check)
 

@@ -1,36 +1,28 @@
-###################################################################
-########################## BEGIN-INPUTS ###########################
-###################################################################
-
-# Load packages and session variables if not already loaded
-if(!exists("sessionVars")){source("./src/prepare-session.R")
-  load("./gen/data-prep/input/session-variables.Rdata")}
-
-# Load input(s)
-
-# List of countries
-load('./data/igme/draws/info.rda')
-# Location of crisis-free draws
-pathCF <- './data/igme/draws/crisis-free/'
-# Location of crisis-included draws
-pathCI <- './data/igme/draws/crisis-included/'
+################################################################################
+#' @description Format draws
+#' @return List of length 3, corresponding to crisis-free deaths, crisis-included deaths, crisis-included rates
+#' Each list element is an array with dimensions 195 x 22 x 8000
+#' 195 countries, 22 years, 8000 draws
+################################################################################
+#' Libraries
+#' Inputs
+source("./src/prepare-session/set-inputs.R")
+source("./src/prepare-session/create-session-variables.R")
+load("./data/igme/draws/info.rda") # List of countries from IGME
+pathCF <- "./data/igme/draws/crisis-free/" # Location of crisis-free draws
+pathCI <- "./data/igme/draws/crisis-included/" # Location of crisis-included draws
 # Draw file names
-if(ageGroup == "05to09"){fileDeaths <- '5-9/death0.ctj.rda'
-                         fileRates <- '5-9/imr.ctj.rda'}
-if(ageGroup == "10to14"){fileDeaths <- '10-14/death1to4.ctj.rda'
-                         fileRates <- '10-14/cmr.ctj.rda'}
-if(ageGroup == "15to19f"){fileDeaths <- '15-19/female/death0.ctj.rda'
-                          fileRates <- '15-19/female/imr.ctj.rda'}
-if(ageGroup == "15to19m"){fileDeaths <- '15-19/male/death0.ctj.rda'
-                          fileRates <- '15-19/male/imr.ctj.rda'}
-
-# Classification keys
+if(ageGroup == "05to09"){fileDeaths  <- "5-9/death0.ctj.rda"
+                         fileRates   <- "5-9/imr.ctj.rda"}
+if(ageGroup == "10to14"){fileDeaths  <- "10-14/death1to4.ctj.rda"
+                         fileRates   <- "10-14/cmr.ctj.rda"}
+if(ageGroup == "15to19f"){fileDeaths <- "15-19/female/death0.ctj.rda"
+                          fileRates  <- "15-19/female/imr.ctj.rda"}
+if(ageGroup == "15to19m"){fileDeaths <- "15-19/male/death0.ctj.rda"
+                          fileRates  <- "15-19/male/imr.ctj.rda"}
 key_region <- read.csv("./gen/data-prep/output/key_region_u20.csv")
 key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-
-###################################################################
-########################## END-INPUTS #############################
-###################################################################
+################################################################################
 
 # Merge classification keys for region and country class
 key_regclass <- merge(key_region, key_ctryclass[, c("ISO3", "Group2010", "FragileState")])
@@ -40,9 +32,7 @@ key_regclass <- merge(key_region, key_ctryclass[, c("ISO3", "Group2010", "Fragil
 # !!! Need to ensure that latest draw is same as highest value in Years.
 warning("Ensure that latest Draw is the same as latest year being predicted.")
 
-#--------------------#
-# CRISIS-FREE DEATHS #
-#--------------------#
+## Crisis-free deaths
 
 # Draws location
 load(paste0(pathCF, fileDeaths))
@@ -58,9 +48,7 @@ if (ageLow == 10) {
   rm(death1to4.ctj)
 }
   
-#------------------#
-# ALL CAUSE DEATHS #
-#------------------#
+## All-cause deaths
 
 # Draws location
 load(paste0(pathCI, fileDeaths))
@@ -75,9 +63,7 @@ if (ageLow == 10) {
   rm(death1to4.ctj)
 }
 
-#-----------------#
-# ALL CAUSE RATES #
-#-----------------#
+## All-cause rates
 
 # Draws location
 load(paste0(pathCI, fileRates))
@@ -116,11 +102,7 @@ if (length(idExclude) > 0) {
 # Format draws
 draws_igme <- list(deaths = deaths, deathsAll = deathsAll, ratesAll = ratesAll)
 
-#----------------#
-#                #
-# Quality checks #
-#                #
-#----------------#
+# Quality checks ----------------------------------------------------------
 
 # 1. Check for NAs
 
@@ -132,19 +114,11 @@ draws_igme <- list(deaths = deaths, deathsAll = deathsAll, ratesAll = ratesAll)
 # }
 # rm(df_check)
 
-# Remove unnecessary objects
-rm(info, pathCF, pathCI, fileDeaths, fileRates, key_region, key_ctryclass, key_regclass)
-# Remove objects created in this section
-rm(dif, idExclude, deaths, deathsAll, ratesAll)
+# Save output(s) ----------------------------------------------------------
 
-###################################################################
-######################### BEGIN-OUTPUTS ###########################
-###################################################################
-
-# Save output(s)
 saveRDS(draws_igme, file = paste("./gen/data-prep/output/draws_env_",ageGroup, ".rds",sep=""))
-rm(draws_igme)
 
-###################################################################
-######################### END-OUTPUTS #############################
-###################################################################
+# Remove unnecessary objects
+rm(info, pathCF, pathCI, fileDeaths, fileRates, 
+   key_region, key_ctryclass, key_regclass,
+   dif, idExclude, deaths, deathsAll, ratesAll)

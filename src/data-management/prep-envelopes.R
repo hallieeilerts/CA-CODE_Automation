@@ -1,19 +1,19 @@
-###################################################################
-########################## BEGIN-INPUTS ###########################
-###################################################################
-
-# Load packages and session variables if not already loaded
-if(!exists("sessionVars")){source("./src/prepare-session.R")
-  load("./gen/data-prep/input/session-variables.Rdata")}
-
-# Load input(s)
+################################################################################
+#' @description Format envelopes, merge crisis-free and crisis-included together
+#' @return Data frame for age-sex group of interest, c("ISO3", "Year", "Sex", "AgeLow", "AgeUp", "Deaths1", "Rate1", "Deaths2", "Rate2")
+#' @return Data frame with all ages, crisis-free only, c("ISO3", "Year", "Sex", "AgeLow", "AgeUp", "Deaths1", "Rate1")
+#' @return Data frame with all ages, crisis-included only, c("ISO3", "Year", "Sex", "AgeLow", "AgeUp", "Deaths2", "Rate2")
+################################################################################
+#' Libraries
+require(readxl)
+require(tidyverse)
+#' Inputs
+source("./src/prepare-session/set-inputs.R")
+source("./src/prepare-session/create-session-variables.R")
 env_crisisfree_u20_igme <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary (crisis free) 1980-2021 all ages.xlsx")
 env_crisisincl_u20_igme <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary 1980-2021 all ages.xlsx")
 key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-
-###################################################################
-########################## END-INPUTS #############################
-###################################################################
+################################################################################
 
 # Function to tidy up UN IGME envelopes
 fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
@@ -45,9 +45,7 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
   dat <- dat[, -1]
   names(dat)[1] <- "ISO3"
   
-  #--------#
-  # DEATHS #
-  #--------#
+  ## Deaths
   
   # Identify sex-specific columns and save in separate data frame
   idfem <- which(grepl(pattern = ".f", names(dat)))
@@ -87,9 +85,7 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
   dat <- rbind(dat1, dat)
   rm(dat1)
   
-  #-------#
-  # RATES #
-  #-------#
+  ## Rates
   
   # Identify sex-specific columns and save in separate data frame
   idfem <- which(grepl(pattern = ".f", names(dat2)))
@@ -133,9 +129,7 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
   dat <- merge(dat, dat2, by = 1:(ncol(dat) - 1))
   rm(dat2)
   
-  #----------------#
-  # TIDY UP OUTPUT #
-  #----------------#  
+  ## Tidy up
   
   # Sex labels
   dat$Sex[dat$Sex == "f"] <- sexLabels[2]
@@ -167,11 +161,11 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
 }
 
 # Tidy up envelopes
-env_crisisfree_u20 <- fn_tidy_up_envelopes(env_crisisfree_u20_igme, var1 = "Deaths1", var2 = "Rate1", years = Years)
-env_crisisincl_u20 <- fn_tidy_up_envelopes(env_crisisincl_u20_igme, var1 = "Deaths2", var2 = "Rate2", years = Years)
+dat1 <- fn_tidy_up_envelopes(env_crisisfree_u20_igme, var1 = "Deaths1", var2 = "Rate1", years = Years)
+dat2 <- fn_tidy_up_envelopes(env_crisisincl_u20_igme, var1 = "Deaths2", var2 = "Rate2", years = Years)
 
 # Merge crisis-free and crisis-included
-dat <- merge(env_crisisfree_u20, env_crisisincl_u20, by = c("ISO3","Year","AgeLow", "AgeUp", "Sex"))
+dat <- merge(dat1, dat2, by = c("ISO3","Year","AgeLow", "AgeUp", "Sex"))
 
 # Keep age/sex group of interest
 dat <- dat[which(dat$AgeLow == ageLow & dat$AgeUp == ageUp & dat$Sex %in% sexLabel), ]
@@ -179,11 +173,7 @@ dat <- dat[which(dat$AgeLow == ageLow & dat$AgeUp == ageUp & dat$Sex %in% sexLab
 # Select countries of interest
 dat <- dat[which(dat$ISO3 %in% unique(key_ctryclass$ISO3)), ]
 
-#----------------#
-#                #
-# Quality checks #
-#                #
-#----------------#
+# Quality checks ----------------------------------------------------------
 
 # 1. Check that crisis-free envelopes are not larger than crisis-included
 df_check <- dat
@@ -191,24 +181,16 @@ df_check$ind1 <- ifelse(df_check$Deaths1 > df_check$Deaths2, 1, 0)
 if(sum(df_check$ind1) > 0){
   stop("Crisis-free envelopes larger than crisis-included.")
 }
-rm(df_check)
 
+# Save output(s) ----------------------------------------------------------
 
-###################################################################
-######################### BEGIN-OUTPUTS ###########################
-###################################################################
-
-# Save output(s)
 # These envelopes used for prediction database
-write.csv(env_crisisfree_u20, paste("./gen/data-prep/output/env_crisisfree_u20.csv", sep = ""), row.names = FALSE)
-write.csv(env_crisisincl_u20, paste("./gen/data-prep/output/env_crisisincl_u20.csv", sep = ""), row.names = FALSE)
+write.csv(dat1, paste("./gen/data-prep/output/env_crisisfree_u20.csv", sep = ""), row.names = FALSE)
+write.csv(dat2, paste("./gen/data-prep/output/env_crisisincl_u20.csv", sep = ""), row.names = FALSE)
 # This one is sex-specific and used in all other cases
 write.csv(dat, paste("./gen/data-prep/output/env_",ageGroup,".csv", sep = ""), row.names = FALSE)
 
 # Remove unnecessary objects
-rm(env_crisisfree_u20_igme, env_crisisincl_u20_igme, env_crisisfree_u20, 
-   env_crisisincl_u20, key_ctryclass, fn_tidy_up_envelopes)
+rm(env_crisisfree_u20_igme, env_crisisincl_u20_igme, key_ctryclass, 
+   dat1, dat2, fn_tidy_up_envelopes, df_check)
 
-###################################################################
-######################### END-OUTPUTS #############################
-###################################################################
