@@ -3,8 +3,6 @@
 #' @return List of length 3, corresponding to crisis-free deaths, crisis-included deaths, crisis-included rates.
 #' Each first-level list element is a list of length number of draws.
 #' Within first-level list element, each second-level list element is a data frame with c("ISO3", "Year", "Sex", Deaths1/Deaths2/Rate)
-#### OLD RETURN: List of length 3, corresponding to crisis-free deaths, crisis-included deaths, crisis-included rates.
-#### Each list element is an array with dimensions 195 (countries) x 22 (years) x 8000 (draws).
 ################################################################################
 #' Libraries
 #' Inputs
