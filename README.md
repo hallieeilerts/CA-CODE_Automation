@@ -45,7 +45,10 @@ The directory structure for `/src` is thus:
     /src/results/
     /src/visualizations/
 
-There is are two additional folders in `/src`.`/src/archive` stores data-management source code for previous updates and `/src/prepare-session` is where the user manually sets the age group and years for estimation.
+There is are two additional folders in `/src`:
+
+-   `/src/archive` contains data-management source code from previous updates
+-   `/src/prepare-session` is where the user manually sets the age group and years for estimation
 
 ### Generated files
 
@@ -106,3 +109,5 @@ Each subdirectory in `gen` contains the following subdirectories:
     ├───uncertainty
     └───visualizations
 ```
+
+## Style guide
