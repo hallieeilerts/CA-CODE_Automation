@@ -25,9 +25,8 @@ This project framework was conceptualized using resources from the [Tilburg Scie
 
 Source code is made available in the `src` folder, with sub-folders for each stage of the project pipeline. Source code are all files that are required to execute the project's pipeline. In addition, there is a `make.R` file in the main directory folder which makes explicit how the source code needs to be run. Code in the visualizations folder is to be run ad-hoc and is not included in the `make.R` file.
 
-Our pipeline consists of eight stages:
+Our pipeline consists of seven stages:
 
--   prepare-session
 -   data-management
 -   estimation
 -   prediction
@@ -38,7 +37,6 @@ Our pipeline consists of eight stages:
 
 The directory structure for `/src` is thus:
 
-    /src/prepare-session/
     /src/data-management/
     /src/estimation/
     /src/prediction/
@@ -47,7 +45,7 @@ The directory structure for `/src` is thus:
     /src/results/
     /src/visualizations/
 
-There is one additional folder, in `/src/archive` which stores data-management source code for previous updates. :
+There is are two additional folders in `/src`.`/src/archive` stores data-management source code for previous updates and `/src/prepare-session` is where the user manually sets the age group and years for estimation.
 
 ### Generated files
 
@@ -58,34 +56,11 @@ Each subdirectory in `gen` contains the following subdirectories:
 -   `input`: any required input files to run this step of the pipeline
 -   `temp`: temporary files, such as an Excel dataset that needs to be converted into a CSV
 -   `output`: stores the final result of the pipeline stage
--   `audit`: quality checks, diagnostic information on the performance of each step in the pipeline. For example, in `/data-prep/audit` this could be a txt file with information on missing observations in the final dataset
+-   `audit`: quality checks, diagnostic information on the performance of each step in the pipeline. For example, in `/data-management/audit` this could be a txt file with information on missing observations in the final dataset.
 
 ``` bash
-├───data
-│   ├───classification-keys
-│   ├───igme
-│   │   ├───draws
-│   │   │   ├───crisis-free
-│   │   │   └───crisis-included
-│   │   ├───envelopes
-│   │   │   ├───national
-│   │   │   └───regional
-│   ├───mortality-fractions
-│   ├───prediction-database
-│   ├───previous-results
-│   ├───single-causes
-│   │   ├───crisis
-│   │   ├───hiv
-│   │   ├───malaria
-│   │   ├───measles
-│   │   └───tb
-│   ├───study-database
-│   └───vr
-├───docs
-│   ├───diagram
-│   └───workflow
 ├───gen
-│   ├───data-prep
+│   ├───data-management
 │   │   ├───audit
 │   │   ├───input
 │   │   ├───output
@@ -106,17 +81,28 @@ Each subdirectory in `gen` contains the following subdirectories:
 │   │   ├───output
 │   │   └───temp
 │   └───squeezing
+│   │   ├───audit
+│   │   ├───input
+│   │   ├───output
+│   │   └───temp
+│   └───uncertainty
+│   │   ├───audit
+│   │   ├───input
+│   │   ├───output
+│   │   └───temp
+│   └───visualizations
 │       ├───audit
 │       ├───input
 │       ├───output
 │       └───temp
 └───src
     ├───archive
-        ├───data-prep_2000-2021
-    ├───data-prep
+        ├───data-management_2000-2021
+    ├───data-management
     ├───estimation
     ├───prediction
     ├───results
     ├───squeezing
-    └───uncertainty
+    ├───uncertainty
+    └───visualizations
 ```
