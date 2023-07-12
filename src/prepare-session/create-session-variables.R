@@ -57,7 +57,3 @@ codAll <- c("Measles", "Maternal", "HIV", "LRI",  "TB", "Diarrhoeal", "Malaria",
 
 # Save names of all session variables
 sessionVarsList <- ls()
-
-#save.image(file = "./gen/data-prep/input/session-variables.RData")
-
-
