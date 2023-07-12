@@ -1,6 +1,6 @@
 ################################################################################
 #' @description Sets regional classifications for countries.
-#' @return Data frame with age-specific CODs with different levels of classification.
+#' @return Data frame with countries and different regional classifications.
 ################################################################################
 #' Libraries
 require(readstata13)

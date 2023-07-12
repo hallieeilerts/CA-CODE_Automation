@@ -7,17 +7,13 @@
 rm(list = ls())
 
 # Clear files in /gen
-source("./src/prepare-session/clean-gen.R")
+#source("./src/prepare-session/clean-gen.R")
 
 # Set ageGroup and Years for estimation
 source("./src/prepare-session/set-inputs.R")
 
 # Create session variables for inputs
 source("./src/prepare-session/create-session-variables.R")
-
-# !!!
-# For script sections: load packages at the top of every script where they are needed
-# For function sections: load them in the [SECTION]_functions.R script at beginning
 
 ################################################
 # Data management
@@ -47,10 +43,10 @@ source("./src/data-management/prep-malaria.R")
 source("./src/data-management/prep-tb.R")
 if(ageGroup == "05to09"){source("./src/data-management/prep-measles.R")}
 
-# Model fit
+# Model objects
 if(simpleUpdate){
-  source("./src/data-management/prep-model-fit-hmm.R")
-  source("./src/data-management/prep-model-fit-lmm.R")
+  source("./src/data-management/prep-model-objects-hmm.R")
+  source("./src/data-management/prep-model-objects-lmm.R")
 }
 
 # Clear environment
@@ -67,7 +63,7 @@ if(!simpleUpdate){
   source("src/estimation/create-parameter-grid-lmm.R")
   source("src/estimation/select-covariates-hmm.R")
   source("src/estimation/select-covariates-lmm.R")
-  # This is the file that contains the results of the formal parameter selection is named Code/LASSO_VA002.txt in Pancho's code. Can't find this file though.
+  # The file that contains the results of the formal parameter selection is named Code/LASSO_VA002.txt in Pancho's code. Can't find this file though.
   #source("src/estimation/formal-parameter-selection-hmm.R")
   #source("src/estimation/formal-parameter-selection-lmm.R")
   source("src/estimation/run-bayesian-lasso-hmm.R")
@@ -83,14 +79,14 @@ source("./src/prediction/prediction_inputs.R")
 source("./src/prediction/prediction_functions.R")
 
 # Calculate CSMFs for goodvr and China, save
-csmf_GOODVR <- fn_calc_csmf(db_VR, key_ctryclass, key_cod,  ctryGrp = "GOODVR", env)
-csmf_CHN    <- fn_calc_csmf(db_CHN, key_ctryclass, key_cod, ctryGrp  = "CHN")
+csmf_GOODVR <- fn_calc_csmf(db_VR, key_ctryclass, key_cod,  CTRYGRP = "GOODVR", env)
+csmf_CHN    <- fn_calc_csmf(db_CHN, key_ctryclass, key_cod, CTRYGRP  = "CHN")
 write.csv(csmf_GOODVR, paste("./gen/prediction/output/csmf_", ageGroup, "GOODVR.csv", sep=""), row.names = FALSE)
 write.csv(csmf_CHN,    paste("./gen/prediction/output/csmf_", ageGroup, "CHN.csv", sep=""), row.names = FALSE)
 
 # Extract covariate values from prediction database, save
-db_pred_HMM <- fn_extract_cov(vxf_HMM, db_pred, key_ctryclass, "HMM")
-db_pred_LMM <- fn_extract_cov(vxf_LMM, db_pred, key_ctryclass, "LMM")
+db_pred_HMM <- fn_extract_cov(vxf_HMM, db_pred, key_ctryclass, CTRYGRP = "HMM")
+db_pred_LMM <- fn_extract_cov(vxf_LMM, db_pred, key_ctryclass, CTRYGRP = "LMM")
 write.csv(db_pred_HMM, paste("./gen/prediction/temp/db_pred_", ageGroup, "HMM.csv",sep=""), row.names = FALSE)
 write.csv(db_pred_LMM, paste("./gen/prediction/temp/db_pred_", ageGroup, "LMM.csv",sep=""), row.names = FALSE)
 
@@ -108,8 +104,8 @@ if(ageGroup %in% c("05to09", "10to14")){
 csmf <- fn_format_prediction(l_csmf_HMM, l_csmf_LMM)
 write.csv(csmf, paste("./gen/prediction/output/csmf_", ageGroup, ".csv",sep=""), row.names = FALSE)
 
-# Clear environment of all except session variables
-rm(list=setdiff(ls(), sessionVarsList))
+# Clear environment
+rm(list = ls())
 
 ################################################
 # Squeezing
@@ -163,8 +159,8 @@ csmf_Sqz <- fn_format_sqz_output(dth_Sqz, dth_SqzCrisisepi_CHN, csmf)
 csmf_ALL <- fn_combine_csmf(csmf_Sqz, csmf_GOODVR)
 write.csv(csmf_Sqz, paste("./gen/squeezing/output/csmf_", ageGroup, ".csv", sep=""), row.names = FALSE)
 
-# Clear environment of all except session variables
-rm(list=setdiff(ls(), sessionVarsList))
+# Clear environment
+rm(list = ls())
 
 ################################################
 # Uncertainty
@@ -176,7 +172,7 @@ source("./src/uncertainty/uncertainty_functions.R")
 source("./src/prediction/prediction_functions.R")
 source("./src/squeezing/squeezing_functions.R")
 
-# --- Prediction ---#
+## Prediction
 
 # Run prediction function with uncertainty for each year, format
 draws_csmf_HMM <- lapply(Years, function(x){fn_call_p1New(x, fit_HMM, db_pred_HMM, UNCERTAINTY = TRUE) })
@@ -188,7 +184,7 @@ if(ageGroup %in% c("05to09", "10to14")){
   draws_csmf_LMM <- fn_nested_lapply(draws_csmf_LMM, function(x){fn_set_mal_frac(x) })
 }
 
-# --- Draws --- #
+## Draws
 
 # Rearrange predicted fraction draws
 draws_csmf_Rearranged_HMM <- fn_rearrange_draws(draws_csmf_HMM)
@@ -213,7 +209,7 @@ saveRDS(draws_csmf_GOODVR, file = paste("./gen/uncertainty/temp/draws_csmf_", ag
 # Randomly assign CSMFs for China for each draw, squeeze
 draws_csmf_CHN    <- lapply(draws_env_Sampled, function(x){ fn_rand_assign_vr(csmf_CHN, x, key_cod, CTRYGRP = "CHN")})
 
-# --- Squeezing --- #
+## Squeezing
 
 # Prepare modeled countries and China for squeezing
 draws_csmf_AddSinglecause     <- lapply(draws_csmf_Sampled, function(x) fn_prepare_sqz(x, env, dth_tb, dth_hiv, dth_crisis, dth_meas, minCD, minLRI))
@@ -261,15 +257,15 @@ draws_csmf_Sqz <- mapply(function(x,y,z) fn_format_sqz_output(x,y,z),
                          draws_dth_Sqz, draws_dth_SqzCrisisepi_CHN, draws_csmf_Sampled, SIMPLIFY = FALSE)
 
 # Combine squeezed draws with randomly sampled VR
-draws_csmf_ALL <- mapply(function(x,y) fn_combine_all_csmf(x,y), 
+draws_csmf_ALL <- mapply(function(x,y) fn_combine_csmf(x,y), 
                          draws_csmf_Sqz, draws_csmf_GOODVR, SIMPLIFY = FALSE)
 
 # Calculate uncertainty intervals, save
-unc_csmf <- fn_calc_ui(draws_csmf_ALL, UI = 0.95)
-write.csv(unc_csmf, paste("./gen/uncertainty/output/unc_csmf", ageGroup,".csv", sep=""), row.names = FALSE)
+unc_csmf <- fn_calc_ui(draws_csmf_ALL, UI = 0.95, codAll)
+write.csv(unc_csmf, paste("./gen/uncertainty/output/unc_csmf_", ageGroup,".csv", sep=""), row.names = FALSE)
 
-# Clear environment of all except session variables
-rm(list=setdiff(ls(), sessionVarsList))
+# Clear environment
+rm(list = ls())
 
 ################################################
 # Results
@@ -283,19 +279,26 @@ source("./src/results/results_functions.R")
 csmf_Formatted <- fn_format_point_estimates(csmf, key_region, key_ctryclass, codAll)
 write.csv(csmf_Formatted, paste("./gen/results/output/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 
-# Calculate regional estimates, format and save results
+# Format uncertainty
+unc_csmf_Formatted       <- fn_format_point_estimates(unc_csmf, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE)
+# Combine with point estimates with uncertainty and save
+point_unc_csmf_Formatted <- fn_combine_point_unc(csmf_Formatted, unc_csmf_Formatted, codAll)
+write.csv(point_unc_csmf_Formatted, paste("./gen/results/output/Uncertainty_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+
+# Calculate regional point estimates, format and save results
 csmf_Formatted_REGIONAL <- fn_calc_region(csmf_Formatted, codAll)
 write.csv(csmf_Formatted_REGIONAL, paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 
+# Calculate regional uncertainty
+
 # Calculate annual rate of reduction
-###
 
 # Calculate aggregate age groups, format and save results
 # (Need to have already produced results for all standard age groups)
 source("./src/results/calculate-agg-agegrp.R")
 
-# Clear environment of all except session variables
-rm(list=setdiff(ls(), sessionVarsList))
+# Clear environment
+rm(list = ls())
 
 
 

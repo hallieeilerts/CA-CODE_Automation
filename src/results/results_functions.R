@@ -1,18 +1,16 @@
 
-
-##################################################
-####
-####   Format CSMFs, national
-####
-##################################################
-
-#DAT <- csmf
-#DAT <- unc_csmf
-#KEY_REGION <- key_region
-#KEY_CTRYCLASS <- key_ctryclass
-#CODALL <- codAll
-
 fn_format_point_estimates <- function(DAT, KEY_REGION, KEY_CTRYCLASS, CODALL, UNCERTAINTY = FALSE){
+  
+  #' @title Format national CSMFs
+  # 
+  #' @description ...
+  #
+  #' @param DAT Data frame with squeezed CSMFs and goodvr CSMFs.
+  #' @param KEY_REGION Data frame with countries and different regional classifications.
+  #' @param KEY_CTRYCLASS Data frame which labels countries as HMM, LMM, or VR.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
+  #' @param UNCERTAINTY Boolean to denote whether to format uncertainty estimates.
+  #' @return Data frame...
   
   v_cod <- CODALL[CODALL %in% names(DAT)]
   
@@ -58,11 +56,16 @@ fn_format_point_estimates <- function(DAT, KEY_REGION, KEY_CTRYCLASS, CODALL, UN
   return(DAT)
 }
 
-#CSMF <- csmf_Formatted
-#UNC_CSMF <- unc_csmf_Formatted 
-#CODALL <- codAll
-
 fn_combine_point_unc <- function(CSMF, UNC_CSMF, CODALL){
+  
+  #' @title Combine formatted data frames for point estimates and uncertainty
+  # 
+  #' @description Combines data frames, adds identifying columns, orders rows and columns.
+  #
+  #' @param CSMF Data frame with formatted CSMFs.
+  #' @param UNC_CSMF Data frame with formatted uncertainty values.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
+  #' @return Data frame with all identifying columns and formatted point and uncertainty estimates.
   
   v_cod <- CODALL[CODALL %in% names(CSMF)]
   
@@ -97,13 +100,15 @@ fn_combine_point_unc <- function(CSMF, UNC_CSMF, CODALL){
   
 }
 
-##################################################
-####
-####   Calculate deaths, rates, csmfs for global regions; format
-####
-##################################################
-
 fn_calc_region <- function(dat, codAll){
+  
+  #' @title Calculate deaths, rates, CSMFs for global regions
+  # 
+  #' @description Converts CSMFs to deaths, back calculates denominator, aggregates deaths and population counts by region, recalculates cSMFs and mortality rates.
+  #
+  #' @param DAT Data frame with formatted CSMFs.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
+  #' @return Data frame with all identifying columns and formatted regional point estimates.
   
   # Create unified variable for region
   dat$Region <- dat$UNICEFReportRegion1
@@ -160,13 +165,21 @@ fn_calc_region <- function(dat, codAll){
 }
 
 
-##################################################
-####
-####   Calculate deaths, rates, csmfs for non-standard age intervals
-####
-##################################################
-
 fn_calc_agg_rate <- function(ageLow, ageUp, env, dat05to09, dat10to14, dat15to19f, dat15to19m){
+  
+  #' @title Calculate deaths, rates, CSMFs for non-standard age intervals
+  # 
+  #' @description ...
+  #
+  #' @param ageLow
+  #' @param ageUp
+  #' @param env        Data frame IGME envelopes for crisis-free and crisis-included deaths and rates for all ages.
+  #' @param dat05to09  Data frame with formatted CSMFs for ages 5-9y
+  #' @param dat10to14  Data frame with formatted CSMFs for ages 10-14y
+  #' @param dat15to19f Data frame with formatted CSMFs for ages 15-19yF
+  #' @param dat15to19m Data frame with formatted CSMFs for ages 15-19yM
+  #' @return Data frame...
+  
   
   v_keepcols <- c(idVars, codAll, "Rate", "Region")
   
