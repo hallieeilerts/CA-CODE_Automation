@@ -17,4 +17,4 @@ dat <- read.csv("./data/classification-keys/20201001-CountryModelClass.csv")
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, "./gen/data-prep/output/key_ctryclass_u20.csv", row.names = FALSE)
+write.csv(dat, "./gen/data-management/output/key_ctryclass_u20.csv", row.names = FALSE)

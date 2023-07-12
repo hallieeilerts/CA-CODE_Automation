@@ -6,13 +6,12 @@
 ################################################################################
 #' Libraries
 require(readxl)
-require(tidyverse)
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 env_crisisfree_u20_igme <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary (crisis free) 1980-2021 all ages.xlsx")
 env_crisisincl_u20_igme <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary 1980-2021 all ages.xlsx")
-key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+key_ctryclass           <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 # Function to tidy up UN IGME envelopes
@@ -56,19 +55,27 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
   dat <- dat[, -c(idfem, idmen)]
   
   # Re-shape sex-combined data frame
-  dat <- as.data.frame(pivot_longer(dat, cols = 2:ncol(dat), names_to = c("Age1", "Age2", "Year"),
-                                    names_pattern = "([^.]+)\\.([^.]+)\\.([^.]+)$",
-                                    values_to = var1))
+  dat <- cbind(dat[1], stack(dat[2:ncol(dat)]))
+  dat$Age1 <- sapply(dat$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][1] })
+  dat$Age2 <- sapply(dat$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][2] })
+  dat$Year <- sapply(dat$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][3] })
+  names(dat)[names(dat) == "values"] <- var1
+  dat$ind <- NULL
+  
   # Account for differences in age column formatting for under-5s and 5-19
   dat[dat == "Deaths"] <- NA
-  dat$Age <- coalesce(dat$Age1, dat$Age2)
+  dat$Age <- dat$Age1
+  dat$Age[is.na(dat$Age)] <- dat$Age2[is.na(dat$Age)]
   dat <- dat[ , -which(names(dat) %in% c("Age1", "Age2"))]
   dat$Sex <- sexLabels[1]
   
   # Re-shape sex-specific data frame
-  dat1 <- as.data.frame(pivot_longer(dat1, cols = 2:ncol(dat1), names_to = c("Age", "Year", "Sex"),
-                                     names_pattern = "([^.]+)\\.([^.]+)\\.([^.]+)$",
-                                     values_to = var1))
+  dat1 <- cbind(dat1[1], stack(dat1[2:ncol(dat1)]))
+  dat1$Age <- sapply(dat1$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][2] })
+  dat1$Year <- sapply(dat1$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][3] })
+  dat1$Sex <- sapply(dat1$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][4] })
+  names(dat1)[names(dat1) == "values"] <- var1
+  dat1$ind <- NULL
   
   # Combine sex-combined and sex-specific data frames
   dat <- rbind(dat, dat1)
@@ -96,17 +103,22 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
   dat2 <- dat2[, -c(idfem, idmen)]
   
   # Re-shape sex-combined data frame
-  dat2 <- as.data.frame(pivot_longer(dat2, cols = 2:ncol(dat2), names_to = c("Age", "Year"),
-                                    names_pattern = "([^.]+)\\.([^.]+)$",
-                                    values_to = var2))
+  dat2 <- cbind(dat2[1], stack(dat2[2:ncol(dat2)]))
+  dat2$Age <- sub("\\..*", "", dat2$ind)   # Extract text after last period
+  dat2$Year <- sub('.*\\.', '', dat2$ind)  # Extract text before first period
+  names(dat2)[names(dat2) == "values"] <- var2
+  dat2$ind <- NULL
+  
   # Account for differences in age column formatting for under-5s and 5-19
-  dat2$Age[dat2$Age == "Rate"] <- "Months1to59"
   dat2$Sex <- sexLabels[1]
   
   # Re-shape sex-specific data frame
-  dat1 <- as.data.frame(pivot_longer(dat1, cols = 2:ncol(dat1), names_to = c("Age", "Year", "Sex"),
-                                     names_pattern = "([^.]+)\\.([^.]+)\\.([^.]+)$",
-                                     values_to = var2))
+  dat1 <- cbind(dat1[1], stack(dat1[2:ncol(dat1)]))
+  dat1$Age <- sapply(dat1$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][1] })
+  dat1$Year <- sapply(dat1$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][2] })
+  dat1$Sex <- sapply(dat1$ind, function(x){ strsplit(as.character(x), ".", fixed = TRUE)[[1]][3] })
+  names(dat1)[names(dat1) == "values"] <- var2
+  dat1$ind <- NULL
   
   # Combine data frames
   dat2 <- rbind(dat2, dat1)
@@ -115,18 +127,19 @@ fn_tidy_up_envelopes <- function(dat, var1, var2, years) {
   dat2$Age <- sub("MR", "", dat2$Age)
   
   # 5 to 19 age group
-  dat1 <- merge(dat2[which(dat2$Age == "5to14"), ], 
-                dat2[which(dat2$Age == "15to19" & dat2$Sex == sexLabels[1]), c(1, 3, 4)], by = c("ISO3", "Year"))
+  dat1 <- merge(dat2[which(dat2$Age == "5to14"), c(idVars[1:2], var2)], 
+                dat2[which(dat2$Age == "15to19" & dat2$Sex == sexLabels[1]), c(idVars[1:2], var2)], by = idVars[1:2])
   dat1[, paste0(var2, ".y")] <- (1 - (1 - dat1[, paste0(var2, ".x")] / 1000) *
                                    (1 - dat1[, paste0(var2, ".y")] / 1000)) * 1000
   dat1$Age <- "5to19"
   dat1 <- dat1[, !names(dat1) == paste0(var2, ".x")]
   names(dat1)[names(dat1) == paste0(var2, ".y")] <- var2
+  dat1$Sex <- sexLabels[1]
   dat2 <- rbind(dat1, dat2)
   rm(dat1)
   
   # Merge rates onto deaths
-  dat <- merge(dat, dat2, by = 1:(ncol(dat) - 1))
+  dat <- merge(dat, dat2, by = c(idVars, "Age"))
   rm(dat2)
   
   ## Tidy up
@@ -175,7 +188,7 @@ dat <- dat[which(dat$ISO3 %in% unique(key_ctryclass$ISO3)), ]
 
 # Quality checks ----------------------------------------------------------
 
-# 1. Check that crisis-free envelopes are not larger than crisis-included
+# Check that crisis-free envelopes are not larger than crisis-included
 df_check <- dat
 df_check$ind1 <- ifelse(df_check$Deaths1 > df_check$Deaths2, 1, 0)
 if(sum(df_check$ind1) > 0){
@@ -185,10 +198,10 @@ if(sum(df_check$ind1) > 0){
 # Save output(s) ----------------------------------------------------------
 
 # These envelopes used for prediction database
-write.csv(dat1, paste("./gen/data-prep/output/env_crisisfree_u20.csv", sep = ""), row.names = FALSE)
-write.csv(dat2, paste("./gen/data-prep/output/env_crisisincl_u20.csv", sep = ""), row.names = FALSE)
+write.csv(dat1, paste("./gen/data-management/output/env_crisisfree_u20.csv", sep = ""), row.names = FALSE)
+write.csv(dat2, paste("./gen/data-management/output/env_crisisincl_u20.csv", sep = ""), row.names = FALSE)
 # This one is sex-specific and used in all other cases
-write.csv(dat, paste("./gen/data-prep/output/env_",ageGroup,".csv", sep = ""), row.names = FALSE)
+write.csv(dat, paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""), row.names = FALSE)
 
 # Remove unnecessary objects
 rm(env_crisisfree_u20_igme, env_crisisincl_u20_igme, key_ctryclass, 

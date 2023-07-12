@@ -8,8 +8,8 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dth_tb_u20_who    <- read.csv("./data/single-causes/tb/20201023-ProgramTB.csv") # TB Program estimates (WHO) (Updated 23 Oct 2020)
 dth_tbAux_u20_who <- read.csv("./data/single-causes/tb/20201214-ProgramTB-GMB-MOZ.csv") # Updated estimates for GMB and MOZ
-key_ctryclass     <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-env               <- read.csv(paste("./gen/data-prep/output/env_",ageGroup,".csv", sep = ""))
+key_ctryclass     <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
+env               <- read.csv(paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""))
 ################################################################################
 
 dat    <- dth_tb_u20_who

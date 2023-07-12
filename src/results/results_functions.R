@@ -2,138 +2,99 @@
 
 ##################################################
 ####
-####   Calculate uncertainty intervals from draws
-####
-##################################################
-
-# NOTE: make this usable on regions
-# make different funciton for AARR
-
-#test <- mortDraws[1:5]
-#UI = .95
-#res <- fn_calc_ui(test)
-
-fn_calc_ui <- function(DRAWS_CSMF, UI){
-  
-  # Create interval
-  UI <- 1/2 + c(- UI, UI) / 2
-  
-  # Causes of death for this age group
-  v_cod <- codAll[codAll %in% names(DRAWS_CSMF[[1]])]
-  
-  # Data frame with identifying columns
-  df_idcols <- DRAWS_CSMF[[1]][, !names(DRAWS_CSMF[[1]]) %in% c('Deaths', 'Rate', paste(v_cod))]
-  
-  # Create lists for fractions, rates, deaths
-  l_frac <- DRAWS_CSMF
-  l_rates <- lapply(DRAWS_CSMF, function(x){ x[,v_cod] * x[,"Rate"] })
-  l_deaths <- lapply(DRAWS_CSMF, function(x){ x[,v_cod] * x[,"Deaths"] })
-  
-  # Convert each data.frame in list to matrix that includes only CODs
-  l_frac <- lapply(l_frac, function(x) as.matrix(x[,v_cod]))
-  l_rates <- lapply(l_rates, function(x) as.matrix(x[,v_cod]))
-  l_deaths <- lapply(l_deaths, function(x) as.matrix(x[,v_cod]))
-  
-  # Convert list to array
-  # Calculate quantiles for each cell across array
-  a_frac_lb <- apply(simplify2array(l_frac), c(1,2), quantile, UI[1], na.rm = T)
-  a_frac_ub <- apply(simplify2array(l_frac), c(1,2), quantile, UI[2], na.rm = T)
-  a_rates_lb <- apply(simplify2array(l_rates), c(1,2), quantile, UI[1], na.rm = T)
-  a_rates_ub <- apply(simplify2array(l_rates), c(1,2), quantile, UI[2], na.rm = T)
-  a_deaths_lb <- apply(simplify2array(l_deaths), c(1,2), quantile, UI[1], na.rm = T)
-  a_deaths_ub <- apply(simplify2array(l_deaths), c(1,2), quantile, UI[2], na.rm = T)
-  
-  # Format arrays in to data frames
-  df_frac_lb <- as.data.frame(cbind(df_idcols, 
-                                     Variable = rep('Fraction', nrow(df_idcols)),
-                                     Quantile = rep('Lower', nrow(df_idcols)), 
-                                     a_frac_lb))
-  df_frac_ub <- as.data.frame(cbind(df_idcols, 
-                                     Variable = rep('Fraction', nrow(df_idcols)),
-                                     Quantile = rep('Lower', nrow(df_idcols)), 
-                                     a_frac_ub))
-  df_rates_lb <- as.data.frame(cbind(df_idcols, 
-                                  Variable = rep('Rate', nrow(df_idcols)),
-                                  Quantile = rep('Lower', nrow(df_idcols)), 
-                                  a_rates_lb))
-  df_rates_ub <- as.data.frame(cbind(df_idcols, 
-                                     Variable = rep('Rate', nrow(df_idcols)),
-                                     Quantile = rep('Lower', nrow(df_idcols)), 
-                                     a_rates_ub))
-  df_deaths_lb <- as.data.frame(cbind(df_idcols, 
-                                     Variable = rep('Deaths', nrow(df_idcols)),
-                                     Quantile = rep('Lower', nrow(df_idcols)), 
-                                     a_deaths_lb))
-  df_deaths_ub <- as.data.frame(cbind(df_idcols, 
-                                     Variable = rep('Deaths', nrow(df_idcols)),
-                                     Quantile = rep('Lower', nrow(df_idcols)), 
-                                     a_deaths_ub))  
-  # Rbind
-  df_res <- rbind(df_frac_lb, df_frac_ub, df_rates_lb, df_rates_ub, df_deaths_lb, df_deaths_ub)
-  
-  return(df_res)
-}
-
-# mortDraws <- draws_csmf_ALL
-# datAux <- mortDraws[[1]]
-# 
-# codAux <- codAll[codAll %in% names(datAux)]
-# 
-# rates <- datAux
-# rates[, paste(codAux)] <- rates[, paste(codAux)] * rates[, 'Rate']
-# frac <- datAux
-# deaths <- datAux
-# deaths[, paste(codAux)] <- deaths[, paste(codAux)] * deaths[, 'Deaths']
-# 
-# apply(rates, c(1, 2), quantile, UI[1], na.rm = T)
-# test <- mortDraws[1:5]
-# test <- lapply(test, function(x) as.matrix(x[codAux]))
-# res <- apply(simplify2array(test), c(1,2), quantile, UI[1], na.rm = T)
-
-# DRAWS_CSMF <- mortDraws[1:5]
-
-
-
-##################################################
-####
 ####   Format CSMFs, national
 ####
 ##################################################
 
-fn_format_results <- function(dat, key_region, key_ctryclass, codAll){
+#DAT <- csmf
+#DAT <- unc_csmf
+#KEY_REGION <- key_region
+#KEY_CTRYCLASS <- key_ctryclass
+#CODALL <- codAll
+
+fn_format_point_estimates <- function(DAT, KEY_REGION, KEY_CTRYCLASS, CODALL, UNCERTAINTY = FALSE){
   
-  # Round deaths
-  dat$Deaths <- round(dat$Deaths)
-  # Round rate
-  dat$Rate <- round(dat$Rate, 5)
+  v_cod <- CODALL[CODALL %in% names(DAT)]
+  
+  if(UNCERTAINTY == FALSE){
+    # Round deaths
+    DAT$Deaths <- round(DAT$Deaths)
+    # Round rate
+    DAT$Rate <- round(DAT$Rate, 5)
+  }
+  
   # Round fractions
-  v_cod <- codAll[codAll %in% names(dat)]
-  #v_cod <- names(dat)[!(names(dat) %in% c(idVars, "Deaths", "Rate"))]
-  dat[,v_cod] <- round(dat[,v_cod], 5)
-  
+  #v_cod <- names(DAT)[!(names(DAT) %in% c(idVars, "Deaths", "Rate"))]
+  DAT[,v_cod] <- round(DAT[,v_cod], 5)
+
   # Add age group
-  if(!("AgeLow" %in% names(dat))){
-    dat$AgeLow <- ageLow
-    dat$AgeUp <- ageUp
+  if(!("AgeLow" %in% names(DAT))){
+    DAT$AgeLow <- ageLow
+    DAT$AgeUp <- ageUp
   }
 
   # Merge on regions
-  dat <- merge(dat, key_region, by = "ISO3")
+  DAT <- merge(DAT, KEY_REGION, by = "ISO3")
 
   # Merge on country class
-  dat <- merge(dat, key_ctryclass[,c("ISO3", "Group2010", "FragileState")])
-  names(dat)[names(dat) == "Group2010"] <- "Model"
+  DAT <- merge(DAT, KEY_CTRYCLASS[,c("ISO3", "Group2010", "FragileState")])
+  names(DAT)[names(DAT) == "Group2010"] <- "Model"
 
   # Order columns
-  dat <- dat[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
-                 "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
-                  "Deaths", "Rate", v_cod)]
+  if(UNCERTAINTY == FALSE){
+    DAT <- DAT[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
+                   "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
+                    "Deaths", "Rate", v_cod)]
+    DAT <- DAT[order(DAT$ISO3, DAT$Year, DAT$Sex), ]
+  }else{
+    DAT <- DAT[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
+                   "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
+                   "Variable", "Quantile", v_cod)]
+  }
   
   # Tidy up
-  dat <- dat[order(dat$ISO3, dat$Year, dat$Sex), ]
-  rownames(dat) <- NULL
+  rownames(DAT) <- NULL
   
-  return(dat)
+  return(DAT)
+}
+
+#CSMF <- csmf_Formatted
+#UNC_CSMF <- unc_csmf_Formatted 
+#CODALL <- codAll
+
+fn_combine_point_unc <- function(CSMF, UNC_CSMF, CODALL){
+  
+  v_cod <- CODALL[CODALL %in% names(CSMF)]
+  
+  df_frac  <- CSMF
+  df_rates <- CSMF[,v_cod] * CSMF[,"Rate"]
+  df_deaths <- CSMF[,v_cod] * CSMF[,"Deaths"]
+  
+  # Merge id columns back onto df_rates and df_deaths
+  df_idcols <- CSMF[, !names(CSMF) %in% c("Deaths", "Rate", paste(v_cod))]
+  df_rates <- cbind(df_idcols, df_rates)
+  df_deaths <- cbind(df_idcols, df_deaths)
+  
+  # Delete Deaths and Rate column from df_frac
+  df_frac <- df_frac[, names(df_frac)[!names(df_frac) %in% c("Deaths", "Rate")]]
+  
+  # Add columns identifying point estimates
+  df_frac$Variable <- "Fraction"
+  df_rates$Variable <- "Rate"
+  df_deaths$Variable <- "Deaths"
+  df_frac$Quantile <- "Point"
+  df_rates$Quantile <- "Point"
+  df_deaths$Quantile <- "Point"
+  
+  # Combine and tidy
+  df_res <- rbind(df_frac, df_rates, df_deaths, UNC_CSMF)
+  df_res <- df_res[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
+                 "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
+                 "Variable", "Quantile", v_cod)]
+  df_res <- df_res[order(df_res$ISO3, df_res$Year, df_res$Sex, df_res$Variable, df_res$Quantile),]
+  
+  return(df_res)
+  
 }
 
 ##################################################
@@ -322,73 +283,5 @@ fn_calc_agg_rate <- function(ageLow, ageUp, env, dat05to09, dat10to14, dat15to19
   
   return(dat)
 }
-
-##################################################
-####
-####   Visualization: compare CSMFs to results of previous year
-####
-##################################################
-
-fn_compare_csmf <- function(dat, dat_Old, regional = FALSE, sample = NULL){
-  
-  if(regional == FALSE){
-    dat_Old$name <- dat_Old$ISO3
-    dat$name <- dat$ISO3
-  }else{
-    dat_Old$name <- dat_Old$Region
-    dat$name <- dat$Region
-  }
-
-  if(sexSplit){
-    dat_Old$Sex[dat_Old$Sex == "B"] <- sexLabels[1]
-    dat_Old$Sex[dat_Old$Sex == "F"] <- sexLabels[2]
-    dat_Old$Sex[dat_Old$Sex == "M"] <- sexLabels[3]
-    dat_Old <- subset(dat_Old, Sex == sexLabel)
-  }
-  
-  dat$update <- "new"
-  dat_Old$update <- "old"
-
-  dat <- bind_rows(dat, dat_Old)
-  dat$update <- factor(dat$update, levels = c("old", "new"))
-  
-  # Delete unnecessary columns
-  dat <- dat[-grep(c("ISO3|Region|FragileState|WHOname|SDGregion|UNICEFReportRegion1|UNICEFReportRegion2|Deaths|Rate|Qx|Model"), names(dat))]
-  
-  # Reshape mortality fractions into long format
-  dat <- melt(setDT(dat), id.vars = c("update","name","AgeLow","AgeUp", "Sex","Year"))
-  
-  # Sample countries for national results
-  if(length(sample) > 0){
-    dat <- subset(dat, name %in% sample)
-  }
-  
-  # Order plots alphabetically by world region and then nation
-  
-  plots <- dlply(dat, ~name,
-                 function(x)
-                   ggplot(data = x) + 
-                   geom_line(aes(x=Year, y=value, color = update, linetype = update), linewidth = 1) +
-                   labs(title = x$name, subtitle = paste(x$AgeLow,"-",x$AgeUp,", ", x$Sex, sep = "")) + 
-                   xlab("") + ylab("") +
-                   coord_cartesian(xlim = c(2000,2020), ylim = c(0,.8)) +
-                   scale_x_continuous(breaks = c(2000, 2010, 2020)) +
-                   scale_color_manual(values = c("gray", "firebrick2")) +
-                   scale_linetype_manual(values = c("solid", "longdash")) +
-                   facet_wrap(~variable, scales = "free") +
-                   theme_classic() +
-                   theme(panel.grid.major = element_blank(),
-                         panel.grid.minor = element_blank(),
-                         strip.background = element_blank(),
-                         panel.border = element_rect(colour = "black", fill = NA),
-                         plot.subtitle = element_text(hjust = 0),
-                         axis.text = element_text(size = 8)))
-  mg <- marrangeGrob(grobs = plots, nrow=1, ncol=1, top = NULL)
-  
-  # Save output(s)
-  ggsave(paste("./gen/results/audit/csmf_comparison_", ifelse(regional == FALSE, "national", "regional"), "_", ageGroup,"_", format(Sys.Date(), format="%Y%m%d"), ".pdf", sep=""), mg, height = 10, width = 8, units = "in")
-  
-}
-
 
 

@@ -53,4 +53,4 @@ names(dat)[names(dat) == "csdf28"] <- "otherinj"
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, paste("./gen/data-prep/output/db_china_5to19.csv", sep=""), row.names = FALSE)
+write.csv(dat, paste("./gen/data-management/output/db_china_5to19.csv", sep=""), row.names = FALSE)

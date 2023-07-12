@@ -9,7 +9,7 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dth_meas_5to19_who <- read.dta13("./data/single-causes/measles/measles_2000-2021_adol.dta")
 unc_meas_5to19_who <- read.dta13("./data/single-causes/measles/measles_2000-2021_adolunc.dta") 
-key_ctryclass     <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
+key_ctryclass      <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 # dth_meas_5to19_who <- read.csv() # need to get raw measles data

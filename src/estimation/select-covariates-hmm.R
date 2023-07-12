@@ -30,7 +30,7 @@ vxf <- out$param$VXF
 ###################################################################
 
 # Save output(s)
-saveRDS(vxf, file = paste("./gen/estimation/temp/mod_covList_", ageGroup, "HMM.rds",sep=""))
+saveRDS(vxf, file = paste("./gen/estimation/output/mod_covList_", ageGroup, "HMM.rds",sep=""))
 
 # Remove unnecessary objects
 rm(out, vxf)

@@ -1,24 +1,15 @@
 ################################################################################
-## @Purpose - Sets regional classifications for countries.
-## @Date - 2023-06-27
-## @Author - Hallie Eilerts-Spinelli
+#' @description Sets regional classifications for countries.
+#' @return Data frame with age-specific CODs with different levels of classification.
 ################################################################################
-
-# Clear environment
-rm(list = ls())
-
-# Install packages and load libraries
-
-# Load inputs
+#' Libraries
+require(readstata13)
+#' Inputs
 key_region_u20_who  <- read.dta13("./data/classification-keys/20190528-RegionClassSDG.dta", nonint.factors = T)
 key_region_u20_igme <- read.csv("./data/classification-keys/20210407-RegionClassIGME.csv")
-
 ################################################################################
 
-
-#-----------------------------#
-# SDG REGIONAL CLASSIFICATION #
-#-----------------------------#
+## SDG region classification
 
 dat1 <- key_region_u20_who
 dat1 <- dat1[, names(dat1) %in% c("dimensionmembercode", "whoname", "sdg1")]
@@ -40,9 +31,7 @@ names(dat1)[names(dat1) == "whoname"] <- "WHOname"
 names(dat1)[names(dat1) == "sdg1"] <- "SDGregion"
 head(dat1)
 
-#-----------------------------#
-# IGME REGION CLASSIFICATION  #
-#-----------------------------#
+## IGME region classification
 
 dat2 <- key_region_u20_igme
 dat2 <- dat2[, names(dat2) %in% c("ISO3Code", "UNICEFReportRegion1", "UNICEFReportRegion2")]
@@ -50,23 +39,12 @@ dat2$UNICEFReportRegion1[dat2$UNICEFReportRegion1 == "Europe and Central Asia"] 
 dat2$UNICEFReportRegion2[dat2$UNICEFReportRegion2 == "West and Central Africa"] <- "West and central Africa"
 dat2$UNICEFReportRegion2[dat2$UNICEFReportRegion2 == "Eastern Europe and Central Asia"] <- "Eastern Europe and central Asia"
 
-#-------#
-# MERGE #
-#-------#
-
 dat <- merge(dat1, dat2, by.x = "ISO3", by.y = 1)
+
+# Save output(s) ----------------------------------------------------------
+
+write.csv(dat, "./gen/data-management/output/key_region_u20.csv", row.names = FALSE)
 
 # Remove unnecessary objects
 rm(dat1, dat2, key_region_u20_who, key_region_u20_igme)
-
-###################################################################
-######################### BEGIN-OUTPUTS ###########################
-###################################################################
-
-# Save output(s)
-write.csv(dat, "./gen/data-prep/output/key_region_u20.csv", row.names = FALSE)
-
-###################################################################
-######################### END-OUTPUTS #############################
-###################################################################
 

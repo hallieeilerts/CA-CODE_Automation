@@ -37,4 +37,4 @@ dat <- dat[, !names(dat) %in% c("post_source", "post_source2",  "igmedeaths", "t
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, "./gen/data-prep/output/db_vr_5to19GOODVR.csv", row.names = FALSE)
+write.csv(dat, "./gen/data-management/output/db_vr_5to19GOODVR.csv", row.names = FALSE)

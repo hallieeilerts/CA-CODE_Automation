@@ -1,20 +1,19 @@
 
-##################################################
-####
-####   Prepare predicted CSMFs data frame for squeezing
-####
-##################################################
-
 fn_prepare_sqz <- function(DAT, ENV, DTH_TB, DTH_HIV, DTH_CRISIS, DTH_MEAS, MINCD, MINLRI){
   
-  ## DAT         Predicted CSMFs
-  ## ENV         IGME envelope for crisis-included and crisis-free deaths and rates
-  ## DTH_TB      Single cause data: tuberculosis
-  ## DTH_HIV     Single cause data: HIV
-  ## DTH_CRISIS  Single cause data: crisis
-  ## DTH_MEAS    Single cause data: measles
-  ## MINCD       Minimum fraction of communicable disease
-  ## MINLRI      Minimum fraction of LRI
+  #' @title Prepare predicted CSMFs for squeezing
+  # 
+  #' @description Merges single cause data, envelopes, and minimum fractions onto predicted CSMFs data frame.
+  #
+  #' @param DAT Data frame with predicted CSMFs
+  #' @param ENV Data frame age-specific IGME envelopes for crisis-free and crisis-included deaths and rates.
+  #' @param DTH_TB Formatted single cause data for TB.
+  #' @param DTH_HIV Formatted single cause data for HIV.
+  #' @param DTH_CRISIS Formatted single cause data for crisis.
+  #' @param DTH_MEAS Formatted single cause data for measles.
+  #' @param MINCD Integer with minimum fraction of communicable disease.
+  #' @param MINLRI Integer with minimum fraction of LRI.
+  #' @return Data frame with predicted CSMFs, single cause data, envelopes, and minimum fractions.
   
   # Merge on IGME envelopes
   dat <- merge(DAT, ENV, by = idVars, all.x = T)
@@ -40,13 +39,14 @@ fn_prepare_sqz <- function(DAT, ENV, DTH_TB, DTH_HIV, DTH_CRISIS, DTH_MEAS, MINC
   if(!is.null(MINLRI)){dat$minLRI <- dat$Deaths1 * MINLRI}
   
   #------------------------#
-  # 2023.02.23 PATCH
+  # PATCH 2023.02.23
   # Adjust epi deaths to envelopes: All countries
   v_idEpi <- which(dat$epi_colvio + dat$epi_natdis > 0 & dat$Deaths2 == dat$Deaths1)
   if (length(v_idEpi) > 0) {
     dat$epi_colvio[v_idEpi] <- 0
     dat$epi_natdis[v_idEpi] <- 0
   }
+  # END PATCH
   #------------------------#
   
   # Exclude country-years with no deaths
@@ -59,21 +59,18 @@ fn_prepare_sqz <- function(DAT, ENV, DTH_TB, DTH_HIV, DTH_CRISIS, DTH_MEAS, MINC
   return(dat)
 }
 
-
-##################################################
-####
-####   Prepare calculated CSMFs data frame for China for squeezing
-####
-##################################################
-
-
 fn_prepare_sqz_china <- function(DAT, ENV, DTH_HIV, DTH_CRISIS, MINCD){
   
-  ## DAT         Calculated CSMFs
-  ## ENV         IGME envelope for crisis-included and crisis-free deaths and rates
-  ## DTH_HIV     Single cause data: HIV
-  ## DTH_CRISIS  Single cause data: crisis
-  ## MINCD       Minimum fraction of communicable disease
+  #' @title Prepare calculated CSMFs for China DSP for squeezing
+  # 
+  #' @description Merges single cause data, envelopes, and minimum fractions (converts to deaths) onto calculated CSMFs data frame for China DSP.
+  #
+  #' @param DAT Data frame with calculated CSMFs for China DSP
+  #' @param ENV Data frame age-specific IGME envelopes for crisis-free and crisis-included deaths and rates.
+  #' @param DTH_HIV Formatted single cause data for HIV.
+  #' @param DTH_CRISIS Formatted single cause data for crisis.
+  #' @param MINCD Integer with minimum fraction of communicable disease.
+  #' @return Data frame with calculated CSMFs, single cause data, envelopes, and minimum fractions.
   
   # Merge on IGME envelopes
   dat <- merge(DAT, ENV, by = idVars, all.x = T)
@@ -89,28 +86,34 @@ fn_prepare_sqz_china <- function(DAT, ENV, DTH_HIV, DTH_CRISIS, MINCD){
   dat$minCD <- dat$Deaths1 * MINCD
   
   #------------------------#
-  # 2023.02.23 PATCH
+  # PATCH 2023.02.23 
   # Adjust epi deaths to envelopes: China
   v_idEpi <- which(dat$epi_colvio + dat$epi_natdis > 0 & dat$Deaths2 == dat$Deaths1)
   if (length(v_idEpi) > 0) {
     dat$epi_colvio[v_idEpi] <- 0
     dat$epi_natdis[v_idEpi] <- 0
   }
+  # END PATCH
   #------------------------#
   
   return(dat)
  
 }
 
-##################################################
-####
-####   Squeeze otherCMPN
-####
-##################################################
-
 fn_sqz_othercmpn <- function(DAT){
   
-  ## DAT         CSMFs data frame that has been prepared for squeezing
+  #' @title Squeeze otherCMPN
+  # 
+  #' @description Multiply predicted otherCMPN fraction by crisis-free deaths.
+  #' Subtract relevant single-cause deaths, calculate residual otherCMPN deaths.
+  #' If residual otherCMPN deaths are less than minimum otherCMPN deaths,
+  #' divide otherCMPN deaths by total of relevant single-cause deaths plus minimum otherCMPN deaths.
+  #' Use this proportion to scale down relevant single-cause and minimum otherCMPN deaths.
+  #' Calculate otherCMPN fraction from scaled down minimum otherCMPN deaths.
+  #' Convert scaled down single-cause deaths to fractions.
+  #' 
+  #' @param DAT Data frame with CSMFs that has been prepared for squeezing.
+  #' @return Data frame where CSMFs have been adjusted for otherCMPN squeezing.
   
   # Multiply othercmpn fraction by envelope, subtract (TB, HIV, Measles) deaths to get residual othercmpn deaths
   if("Measles" %in% names(DAT)){
@@ -158,16 +161,21 @@ fn_sqz_othercmpn <- function(DAT){
 
 }
 
-##################################################
-####
-####   Squeeze otherCMPN for China
-####
-##################################################
-
 fn_sqz_othercmpn_china <- function(DAT){
   
-  ## DAT         CSMFs data frame that has been prepared for squeezing
-
+  #' @title Squeeze otherCMPN for China DSP
+  # 
+  #' @description Multiply calculated otherCMPN fraction by crisis-free deaths.
+  #' Subtract HIV single-cause deaths, calculate residual otherCMPN deaths.
+  #' If residual otherCMPN deaths are less than minimum otherCMPN deaths,
+  #' divide otherCMPN deaths by total of HIV single-cause deaths plus minimum otherCMPN deaths.
+  #' Use this proportion to scale down HIV single-cause and minimum otherCMPN deaths.
+  #' Calculate otherCMPN fraction from scaled down minimum otherCMPN deaths.
+  #' Convert scaled down HIV single-cause deaths to fraction.
+  #' 
+  #' @param DAT Data frame with CSMFs that has been prepared for squeezing.
+  #' @return Data frame where CSMFs have been adjusted for otherCMPN squeezing.
+  
   # Multiply othercmpn fraction by envelope, subtract HIV deaths to get residual othercmpn deaths
   DAT$OCDresid <- (DAT$OtherCMPN * DAT$Deaths1) - DAT$HIV
   
@@ -196,19 +204,24 @@ fn_sqz_othercmpn_china <- function(DAT){
 
 }
 
-##################################################
-####
-####   Squeeze LRI
-####
-##################################################
-
-
 fn_sqz_lri <- function(DAT){
   
-  ## DAT         CSMFs data frame that has been prepared for squeezing
+  #' @title Squeeze LRI
+  # 
+  #' @description Multiply predicted LRI fraction by crisis-free deaths.
+  #' Subtract TBre single-cause deaths, calculate residual LRI deaths.
+  #' If residual LRI deaths are less than minimum LRI deaths,
+  #' divide LRI deaths by total of TBre single-cause deaths plus minimum LRI deaths.
+  #' Use this proportion to scale down TBre single-cause and minimum LRI deaths.
+  #' Calculate LRI fraction from scaled down minimum LRI deaths.
+  #' Convert scaled down TBre single-cause deaths to fractions.
+  #' Sum fractions for TB and TBre to get total TB fraction.
+  #' 
+  #' @param DAT Data frame with CSMFs that has been prepared for squeezing.
+  #' @return Data frame where CSMFs have been adjusted for LRI squeezing.
 
   # Multiply lri fraction by envelope, subtract TBre deaths to get residual lri deaths
-  DAT$LRIresid <- DAT$LRI * DAT$Deaths1 - DAT$TBre
+  DAT$LRIresid <- (DAT$LRI * DAT$Deaths1) - DAT$TBre
   
   # Identify country/years where residual lri deaths are lower than min threshold
   # Will need to squeeze the single causes for these country/years
@@ -238,20 +251,20 @@ fn_sqz_lri <- function(DAT){
 
 }
 
-##################################################
-####
-####   Squeeze endemic crisis
-####
-##################################################
-
-
 fn_sqz_crisisend <- function(DAT){
   
-  ## DAT         CSMFs data frame that has been prepared for squeezing
+  #' @title Squeeze endemic crisis deaths
+  # 
+  #' @description Sum crisis-free deaths with endemic crisis single cause deaths.
+  #' Calculate fractions for endemic crisis single cause deaths from this sum.
+  #' 
+  #' Subtract endemic crisis fractions from 1, squeeze other fractions into remaining space.
+  #' @param DAT Data frame with CSMFs that has been prepared for squeezing.
+  #' @return Data frame where CSMFs have been adjusted for endemic crisis squeezing.
   
   # Vector with all causes of death (including single-cause estimates)
-  cod <- unique(key_cod$Reclass)  
-  cod <- cod[!cod %in% c("Other", "Undetermined")]
+  v_cod <- unique(key_cod$Reclass)  
+  v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
   
   # Add crisis-free deaths with endemic CollectVio and NatDis
   v_deaths <- DAT$Deaths1 + DAT$CollectVio + DAT$NatDis
@@ -263,23 +276,29 @@ fn_sqz_crisisend <- function(DAT){
   DAT$NatDis <- DAT$NatDis/v_deaths
   
   # Squeeze other causes into remaining fraction
-  DAT[, paste(cod[which(!cod %in% c("CollectVio", "NatDis"))])] <- 
-    DAT[, paste(cod[which(!cod %in% c("CollectVio", "NatDis"))])] * (1 - DAT$CollectVio - DAT$NatDis)
+  DAT[, paste(v_cod[which(!v_cod %in% c("CollectVio", "NatDis"))])] <- 
+    DAT[, paste(v_cod[which(!v_cod %in% c("CollectVio", "NatDis"))])] * (1 - DAT$CollectVio - DAT$NatDis)
   
   return(DAT)
 
 }
 
-##################################################
-####
-####   Squeeze epidemic crisis
-####
-##################################################
-
 fn_sqz_crisisepi <- function(DAT){
   
-  ## DAT         CSMFs data frame that has been prepared for squeezing
-  
+  #' @title Squeeze epidemic crisis deaths
+  # 
+  #' @description Transform fractions to deaths by multiplying by crisis-free deaths.
+  #' Convert single-cause epi_colvio and epi_natdis deaths into proportions.
+  #' Multiply epi_colvio and epi_natdis proportions by difference between crisis-free and crisis-included envelopes.
+  #' Add deaths to CollectVio and NatDis, respectively.
+  #' If there were no epi_colvio/epi_natdis deaths but there were epi_allcause deaths, !!! shouldn't this happen anytime there are epi_allcause, regardless of whether there are epi_colvio/epi_natdis?
+  #' divide all deaths by crisis-included envelope,
+  #' normalize (distributing epi_allcause pro-rata),
+  #' and convert back to deaths.
+  #' 
+  #' @param DAT Data frame with CSMFs that has been prepared for squeezing.
+  #' @return Data frame whith deaths for all causes have been adjusted for epidemic crisis squeezing.
+
   # Vector with all causes of death (including single-cause estimates)
   v_cod <- unique(key_cod$Reclass)  
   v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
@@ -317,16 +336,20 @@ fn_sqz_crisisepi <- function(DAT){
   
 }
 
-##################################################
-####
-####   Squeeze epidemic measles
-####
-##################################################
-
-
 fn_add_measepi <- function(DAT){
   
-  ## DAT         CSMFs data frame that has been prepared for squeezing
+  #' @title Squeeze epidemic measles
+  # 
+  #' @description If epidemic measles is negative and epidemic plus endemic measles is negative, 
+  #' recode epidemic measles as the negative of endemic measles.
+  #' For all country years with epidemic measles, add epidemic to endemic measles.
+  #' Recover population denominator from crisis-included mortality rate.
+  #' Add epidemic measles to crisis-included deaths.
+  #' Recalculate crisis-included mortality rate with new deaths and population denominators.
+  #' 
+  #' @param DAT Data frame with deaths that have been squeezed.
+  #' @return Data frame with deaths for all causes where measles deaths and 
+  #' crisis-included deaths and rates have been updated to include epidemic measles.
   
   # Adjust epidemic measles so that total measles is not smaller than 0
   v_idMeasles <- which(DAT$meas_epi < 0 & (DAT$Measles + DAT$meas_epi) < 0) 
@@ -357,23 +380,25 @@ fn_add_measepi <- function(DAT){
   return(DAT)
 }
 
-##################################################
-####
-####   Format squeezed output
-####
-##################################################
-
 fn_format_sqz_output <- function(DAT, DAT_CHN, DAT_NOTSQZ){
   
-  ## DAT         CSMFs data frame that has been processed with the above squeezing functions
-  ## DAT_CHN     CSMFs data frame for China that has been processed by a subset of the above squeezing functions
-  ## DAT_NOTSQZ  CSMFs data frame from prediction (has not been squeezed)
-
+  #' @title Format squeezed output
+  #' 
+  #' @description Combine squeezed CSMFs with country years that were not squeezed due to there being zero crisis-free deaths, 
+  #' rename crisis-included deaths and rates columns.
+  #'
+  #' @param DAT Data frame with predicted CSMFs that have been processed with squeezing functions.
+  #' @param DAT_CHN Data frame with CSMFs for China that has been processed by a subset of squeezing functions.
+  #' @param DAT_NOTSQZ Data frame with predicted CSMFs, prior to squeezing.
+  #' @return Data frame with predicted CSMFs, single cause data, envelopes, and minimum fractions.
+  
   v_cod <- unique(key_cod$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
   v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
   
   # Combine China with HMM/LMM countries
-  DAT <- bind_rows(DAT, DATCHN)
+  # Add empty columns to DAT_CHN
+  DAT_CHN[setdiff(names(DAT), names(DAT_CHN))] <- NA
+  DAT <- dplyr::bind_rows(DAT, DAT_CHN)
   
   # Back-transform deaths into fractions
   DAT[, paste(v_cod)] <- DAT[, paste(v_cod)]/DAT$Deaths2
@@ -414,17 +439,15 @@ fn_format_sqz_output <- function(DAT, DAT_CHN, DAT_NOTSQZ){
   return(DAT)
 }
 
-
-##################################################
-####
-####   Combine CSMFs that have been squeezed with GOODVR countries
-####
-##################################################
-
 fn_combine_csmf <- function(DAT_SQZ, DAT_GOODVR){
   
-  ## DAT_SQZ     CSMFs data frame that has been processed with the above squeezing functions
-  ## DAT_GOODVR  CSMFs data frame for GOODVR countries (has not been squeezed)
+  #' @title Combine CSMFs that have been squeezed with GOODVR countries
+  # 
+  #' @description Combine data frames, rename crisis-included deaths and rates columns.
+  #
+  #' @param DAT_SQZ Data frame with predicted CSMFs that have been processed with squeezing functions.
+  #' @param DAT_GOODVR Data frame with CSMFs for GOODVR countries that has not been squeezed.
+  #' @return Data frame with predicted CSMFs, single cause data, envelopes, and minimum fractions.
   
   dat <- rbind(DAT_SQZ, DAT_GOODVR)
   

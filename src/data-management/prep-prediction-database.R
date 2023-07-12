@@ -7,7 +7,7 @@
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dat <- read.csv("./data/prediction-database/PredicationDatabase_2022series_2023-02-21.csv")
-env <- read.csv("./gen/data-prep/output/env_crisisincl_u20.csv")
+env <- read.csv("./gen/data-management/output/env_crisisincl_u20.csv")
 ################################################################################
 
 names(dat)[names(dat) == "iso3"] <- "ISO3"
@@ -66,7 +66,7 @@ dat <- dat[, c(idVars[1:2], sort(names(dat)[which(!names(dat) %in% idVars[1:2])]
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, "./gen/data-prep/output/db_pred_u20.csv", row.names = FALSE)
+write.csv(dat, "./gen/data-management/output/db_pred_u20.csv", row.names = FALSE)
 
 # Remove unnecessary objects
 rm(env, 

@@ -7,10 +7,10 @@ require(readstata13)
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dth_hiv_u20_un <- read.csv('./data/single-causes/hiv/HIV2022Estimates_UNAIDS_11Nov2022.csv')
+dth_hiv_u20_un   <- read.csv('./data/single-causes/hiv/HIV2022Estimates_UNAIDS_11Nov2022.csv')
 dth_hiv_u20_spec <- read.dta13("./data/single-causes/hiv/hiv_wppfractions_adol_5Jun2023.dta") 
-key_ctryclass <- read.csv("./gen/data-prep/output/key_ctryclass_u20.csv")
-env <- read.csv(paste("./gen/data-prep/output/env_",ageGroup,".csv", sep = ""))
+key_ctryclass    <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
+env              <- read.csv(paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""))
 ################################################################################
 
 # dth_hiv_u20_un <- read.csv() # need to get raw hiv data
