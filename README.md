@@ -23,7 +23,7 @@ This project framework was conceptualized using resources from the [Tilburg Scie
 
 ### Source code
 
-Source code is made available in the `src` folder, with sub-folders for each stage of the project pipeline. Source code are all files that are required to execute the project's pipeline. In addition, there is a `make.R` file in the main directory folder which makes explicit how the source code needs to be run. Code in the visualizations file is to be run ad-hoc and is not included in the `make.R` file.
+Source code is made available in the `src` folder, with sub-folders for each stage of the project pipeline. Source code are all files that are required to execute the project's pipeline. In addition, there is a `make.R` file in the main directory folder which makes explicit how the source code needs to be run. Code in the visualizations folder is to be run ad-hoc and is not included in the `make.R` file.
 
 Our pipeline consists of eight stages:
 
