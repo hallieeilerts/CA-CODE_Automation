@@ -7,7 +7,7 @@ Demo-ing automation for CA-CODE simple update to 2021.
 
 -   Clone repository to computer
 -   Copy and paste data inputs for desired update from CA-CODE_Warehouse folder on Dropbox into `/data`
-    -   If necessary, replace code in `/src/data-prep` with corresponding data-prep code from `/src/archive`
+    -   If necessary, replace code in `/src/data-management` with corresponding data-management code from `/src/archive`
 -   Manually set variables in `/src/prepare-session/set-inputs`
     -   Do not make changes to any other scripts
 -   Run make file
@@ -23,25 +23,31 @@ This project framework was conceptualized using resources from the [Tilburg Scie
 
 ### Source code
 
-Source code is made available in the `src` folder, with sub-folders for each stage of the project pipeline. Source code are all files that are required to execute the project's pipeline. In addition, there is a makefile in the main directory folder which makes explicit how the source code needs to be run.
+Source code is made available in the `src` folder, with sub-folders for each stage of the project pipeline. Source code are all files that are required to execute the project's pipeline. In addition, there is a `make.R` file in the main directory folder which makes explicit how the source code needs to be run. Code in the visualizations file is to be run ad-hoc and is not included in the `make.R` file.
 
-Our pipeline consists of five stages:
+Our pipeline consists of seven stages:
 
--   data-prep
+-   prepare-session
+-   data-management
 -   estimation
 -   prediction
 -   squeezing
 -   uncertainty
 -   results
+-   visualizations
 
 The directory structure for `/src` is thus:
 
-    /src/data-prep/
+    /src/prepare-session/
+    /src/data-management/
     /src/estimation/
     /src/prediction/
     /src/squeezing/
     /src/uncertainty/
     /src/results/
+    /src/visualizations/
+
+There is one additional folder, in `/src/archive` which stores data-management source code for previous updates. :
 
 ### Generated files
 
