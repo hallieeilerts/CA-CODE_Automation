@@ -1,229 +1,161 @@
 
-fn_format_point_estimates <- function(DAT, KEY_REGION, KEY_CTRYCLASS, CODALL, UNCERTAINTY = FALSE){
+
+fn_round_csmfsqz <- function(CSMFSQZ, KEY_COD){
   
-  #' @title Format national CSMFs
+  #' @title Round squeezed CSMFs
   # 
-  #' @description ...
+  #' @description Rounds all-cause deaths/rates and squeezed CSMFs. This is done in case we want to share our CSMF estimates prior to being ready to run the uncertainty pipeline. The uncertainty pipeline will round the point estimates (see fn_round_pointint()) and do minor adjustments some of the point estimates (see fn_adjust_pointint()). However the uncertainty pipeline may not be ready to be run due to missing inputs.
   #
-  #' @param DAT Data frame with squeezed CSMFs and goodvr CSMFs.
+  #' @param CSMFSQZ Data frame with CSMFs that have been processed in squeezing pipeline (contains all countries, even those not subject to squeezing).
+  #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @return Data frame with all-cause deaths/rates and squeezed CSMFs rounded to the same number of digits as the function fn_round_point_int() in the uncertainty pipeline.
+  
+  dat <- data.frame(CSMFSQZ)
+  
+  # Causes of death for this age group
+  v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
+  v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
+  v_cod <- v_cod[v_cod %in% names(dat)]
+  
+  # Round all-cause deaths
+  dat$Deaths2 <- round(dat$Deaths2)
+  
+  # Round all-cause rate
+  dat$Rate2 <- round(dat$Rate2, 5)
+  
+  # Round cause-specific fractions
+  dat[,v_cod] <- round(dat[,v_cod], 5)
+  
+  # Tidy up
+  rownames(dat) <- NULL
+  return(dat)
+  
+}
+
+fn_publish_estimates <- function(DAT, KEY_REGION, KEY_CTRYCLASS, CODALL, UNCERTAINTY = FALSE, REGIONAL = FALSE){
+  
+  #' @title Create final spreadsheet for results sharing for national estimates
+  # 
+  #' @description Adds identifying columns and orders CODs
+  #
+  #' @param DAT Data frame with CSMFs that have been processed in squeezing pipeline or point estimates, lower, and upper bounds for fractions/deaths/rates that have been processed in uncertainty pipeline
   #' @param KEY_REGION Data frame with countries and different regional classifications.
   #' @param KEY_CTRYCLASS Data frame which labels countries as HMM, LMM, or VR.
   #' @param CODALL Vector with CODs for all age groups in correct order.
   #' @param UNCERTAINTY Boolean to denote whether to format uncertainty estimates.
-  #' @return Data frame...
+  #' @return Data frame with all identifying columns and CSMFs or fractions/deaths/and rates for each COD in correct order.
   
-  v_cod <- CODALL[CODALL %in% names(DAT)]
+  dat <- DAT
+  v_cod <- CODALL[CODALL %in% names(dat)]
   
-  if(UNCERTAINTY == FALSE){
-    # Round deaths
-    DAT$Deaths <- round(DAT$Deaths)
-    # Round rate
-    DAT$Rate <- round(DAT$Rate, 5)
-  }
-  
-  # Round fractions
-  #v_cod <- names(DAT)[!(names(DAT) %in% c(idVars, "Deaths", "Rate"))]
-  DAT[,v_cod] <- round(DAT[,v_cod], 5)
-
   # Add age group
-  if(!("AgeLow" %in% names(DAT))){
-    DAT$AgeLow <- ageLow
-    DAT$AgeUp <- ageUp
+  if(!("AgeLow" %in% names(dat))){
+    dat$AgeLow <- ageLow # From session variables
+    dat$AgeUp <- ageUp   # From session variables
+  }
+  
+  # Rename
+  names(dat)[names(dat) == "Deaths2"] <- "Deaths"
+  names(dat)[names(dat) == "Rate2"] <- "Rate"
+  
+  if(!REGIONAL){
+    # Merge on regions
+    dat <- merge(dat, KEY_REGION, by = "ISO3")
+    
+    # Merge on country class
+    dat <- merge(dat, KEY_CTRYCLASS[,c("ISO3", "Group2010", "FragileState")])
+    names(dat)[names(dat) == "Group2010"] <- "Model"
   }
 
-  # Merge on regions
-  DAT <- merge(DAT, KEY_REGION, by = "ISO3")
-
-  # Merge on country class
-  DAT <- merge(DAT, KEY_CTRYCLASS[,c("ISO3", "Group2010", "FragileState")])
-  names(DAT)[names(DAT) == "Group2010"] <- "Model"
-
-  # Order columns
   if(UNCERTAINTY == FALSE){
-    DAT <- DAT[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
-                   "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
-                    "Deaths", "Rate", v_cod)]
-    DAT <- DAT[order(DAT$ISO3, DAT$Year, DAT$Sex), ]
+    # If creating point estimates sheet from pointInt (which contains "Variable" column with fractions/deaths/rates), 
+    # only keep point estimates for fractions and remove Variable and Quantile columns
+    if("Variable" %in% names(dat)){
+      dat <- subset(dat, Quantile == "Point" & Variable == "Fraction")
+      dat <- dat[, !names(dat) %in% c("Variable", "Quantile")]
+    }
   }else{
-    DAT <- DAT[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
-                   "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
-                   "Variable", "Quantile", v_cod)]
+    # If creating uncertainty sheet, remove all-cause deaths and rate columns
+    dat <- dat[, !names(dat) %in% c("Deaths", "Rate")]
   }
   
-  # Tidy up
-  rownames(DAT) <- NULL
-  
-  return(DAT)
-}
-
-fn_combine_point_unc <- function(CSMF, UNC_CSMF, CODALL){
-  
-  #' @title Combine formatted data frames for point estimates and uncertainty
-  # 
-  #' @description Combines data frames, adds identifying columns, orders rows and columns.
-  #
-  #' @param CSMF Data frame with formatted CSMFs.
-  #' @param UNC_CSMF Data frame with formatted uncertainty values.
-  #' @param CODALL Vector with CODs for all age groups in correct order.
-  #' @return Data frame with all identifying columns and formatted point and uncertainty estimates.
-  
-  v_cod <- CODALL[CODALL %in% names(CSMF)]
-  
-  df_frac  <- CSMF
-  df_rates <- CSMF[,v_cod] * CSMF[,"Rate"]
-  df_deaths <- CSMF[,v_cod] * CSMF[,"Deaths"]
-  
-  # Merge id columns back onto df_rates and df_deaths
-  df_idcols <- CSMF[, !names(CSMF) %in% c("Deaths", "Rate", paste(v_cod))]
-  df_rates <- cbind(df_idcols, df_rates)
-  df_deaths <- cbind(df_idcols, df_deaths)
-  
-  # Delete Deaths and Rate column from df_frac
-  df_frac <- df_frac[, names(df_frac)[!names(df_frac) %in% c("Deaths", "Rate")]]
-  
-  # Add columns identifying point estimates
-  df_frac$Variable <- "Fraction"
-  df_rates$Variable <- "Rate"
-  df_deaths$Variable <- "Deaths"
-  df_frac$Quantile <- "Point"
-  df_rates$Quantile <- "Point"
-  df_deaths$Quantile <- "Point"
-  
-  # Combine and tidy
-  df_res <- rbind(df_frac, df_rates, df_deaths, UNC_CSMF)
-  df_res <- df_res[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
-                 "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
-                 "Variable", "Quantile", v_cod)]
-  df_res <- df_res[order(df_res$ISO3, df_res$Year, df_res$Sex, df_res$Variable, df_res$Quantile),]
-  
-  return(df_res)
-  
-}
-
-fn_calc_region <- function(dat, codAll){
-  
-  #' @title Calculate deaths, rates, CSMFs for global regions
-  # 
-  #' @description Converts CSMFs to deaths, back calculates denominator, aggregates deaths and population counts by region, recalculates cSMFs and mortality rates.
-  #
-  #' @param DAT Data frame with formatted CSMFs.
-  #' @param CODALL Vector with CODs for all age groups in correct order.
-  #' @return Data frame with all identifying columns and formatted regional point estimates.
-  
-  # Create unified variable for region
-  dat$Region <- dat$UNICEFReportRegion1
-  # If report region 2 is not missing, use it instead
-  dat$Region[which(dat$UNICEFReportRegion2 != "")] <- dat$UNICEFReportRegion2[which(dat$UNICEFReportRegion2 != "")]
-  
-  # Causes of death for this age group
-  v_cod <- codAll[codAll %in% names(dat)]
-
-  # Manually add extra regions
-  df_world <- dat
-  df_world$Region <- "World"
-  df_eca <- subset(dat, UNICEFReportRegion1 == "Europe and central Asia")
-  df_eca$Region <- "Europe and central Asia"
-  df_ssa <- subset(dat, UNICEFReportRegion1 == "Sub-Saharan Africa")
-  df_ssa$Region <- "Sub-Saharan Africa"
-  dat <- rbind(dat, df_world, df_eca, df_ssa)
-  
-  # Create list of regions, move world to front
-  v_regions <- sort(unique(dat$Region))
-  v_regions <- v_regions[c(which(v_regions == "World"), which(v_regions != "World"))]
-  
-  # Convert CSMFs to deaths
-  dat[, paste(v_cod)] <- dat[, paste(v_cod)] * dat$Deaths
-  
-  # Back calculate denominator from deaths and mortality rate
-  dat$Px <- dat$Deaths/dat$Rate
-  
-  # Aggregate countries for each region
-  dat <- ddply(dat, ~Region, function(x){aggregate(x[, c("Deaths", "Px", paste(v_cod))], 
-                                                   by = list(x$Year, x$Sex, x$AgeLow, x$AgeUp), sum, na.rm = T)})
-  names(dat)[1:5] <- c("Region", "Year", "Sex", "AgeLow", "AgeUp")
-  
-  # Re-calculate CSMFs
-  dat[, paste(v_cod)] <- dat[, paste(v_cod)] / dat$Deaths
-  dat[, paste(v_cod)] <- dat[, paste(v_cod)] / rowSums(dat[, paste(v_cod)])
-  
-  # Re-calculate mortality rate
-  dat$Rate <- dat$Deaths / dat$Px
-  # Remove denominator
-  dat <- dat[, names(dat) != "Px"]
-  
   # Order columns
-  dat <- dat[, c("Region", "Year", "AgeLow", "AgeUp", "Sex", "Deaths", "Rate", paste(codAll[codAll %in% v_cod]))]
+  v_col_order <- c("Region", "ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Model", "FragileState",
+                   "WHOname", "SDGregion", "UNICEFReportRegion1", "UNICEFReportRegion2",
+                   "Variable", "Quantile", "Deaths", "Rate", v_cod)
+  v_cols <- v_col_order[v_col_order %in% names(dat)]
+  dat <- dat[, v_cols]
   
   # Tidy up
-  dat$Region <- factor(dat$Region, levels = v_regions, ordered = TRUE)
-  dat <- dat[order(dat$Region, dat$Year, dat$Sex), ]
-  dat$Region <- as.character(dat$Region)
   rownames(dat) <- NULL
-  
   return(dat)
   
 }
 
 
-fn_calc_agg_rate <- function(ageLow, ageUp, env, dat05to09, dat10to14, dat15to19f, dat15to19m){
+AGELB <- 5
+AGEUB <- 14
+CODALL <- codAll
+ENV <- env_crisisincl_u20
+CSMF05TO09 <- nat05to09
+CSMF10TO14 <- nat10to14
+  
+
+fn_calc_agg_rate <- function(AGELB, AGEUB, CODALL, ENV, CSMF05TO09, CSMF10TO14, CSMF15TO19F, CSMF15TO19M){
   
   #' @title Calculate deaths, rates, CSMFs for non-standard age intervals
   # 
-  #' @description ...
+  #' @description Calculates point estimates for aggregate age groups.
   #
-  #' @param ageLow
-  #' @param ageUp
-  #' @param env        Data frame IGME envelopes for crisis-free and crisis-included deaths and rates for all ages.
-  #' @param dat05to09  Data frame with formatted CSMFs for ages 5-9y
-  #' @param dat10to14  Data frame with formatted CSMFs for ages 10-14y
-  #' @param dat15to19f Data frame with formatted CSMFs for ages 15-19yF
-  #' @param dat15to19m Data frame with formatted CSMFs for ages 15-19yM
-  #' @return Data frame...
+  #' @param AGELB Integer denoting lower bound of age group (possible values: 5, 10, 15)
+  #' @param AGEUB Integer denoting upper bound of age group  (possible values: 9, 14, 19)
+  #' @param CODALL Vector with CODs for all age groups in correct order.
+  #' @param ENV   Data frame IGME envelopes for crisis-included deaths and rates for all ages.
+  #' @param CSMF[age-group]  Data frame of age-specific CSMFs in final format for sharing (published).
+  #' @return Data frame with all identifying columns and point estimates for aggregate age groups.
   
   
-  v_keepcols <- c(idVars, codAll, "Rate", "Region")
+  v_keepcols <- c(idVars, CODALL, "Rate2", "Region")
+  env <- ENV
   
   # Transform fractions into deaths
-  if(ageLow == 5){
-    #dat05to09 <- read.csv(paste("./gen/results/output/PointEstimates_National_05to09_", resDate, ".csv", sep =""))
-    dat05to09[, codAll[codAll %in% names(dat05to09)]] <- dat05to09[, codAll[codAll %in% names(dat05to09)]] * dat05to09$Deaths
-    dat05to09 <- dat05to09[,names(dat05to09) %in% v_keepcols]
-    #dat10to14 <- read.csv(paste("./gen/results/output/PointEstimates_National_10to14_", resDate, ".csv", sep =""))
-    dat10to14[, codAll[codAll %in% names(dat10to14)]] <- dat10to14[, codAll[codAll %in% names(dat10to14)]] * dat10to14$Deaths
-    dat10to14 <- dat10to14[,names(dat10to14) %in% v_keepcols]
+  if(AGELB == 5){
+    CSMF05TO09[, CODALL[CODALL %in% names(CSMF05TO09)]] <- CSMF05TO09[, CODALL[CODALL %in% names(CSMF05TO09)]] * CSMF05TO09$Deaths2
+    CSMF05TO09 <- CSMF05TO09[,names(CSMF05TO09) %in% v_keepcols]
+    CSMF10TO14[, CODALL[CODALL %in% names(CSMF10TO14)]] <- CSMF10TO14[, CODALL[CODALL %in% names(CSMF10TO14)]] * CSMF10TO14$Deaths2
+    CSMF10TO14 <- CSMF10TO14[,names(CSMF10TO14) %in% v_keepcols]
   }
-  if(ageLow == 10){
-    #dat10to14 <- read.csv(paste("./gen/results/output/PointEstimates_National_10to14_", resDate, ".csv", sep =""))
-    dat10to14[, codAll[codAll %in% names(dat10to14)]] <- dat10to14[, codAll[codAll %in% names(dat10to14)]] * dat10to14$Deaths
-    dat10to14 <- dat10to14[,names(dat10to14) %in% v_keepcols]
+  if(AGELB == 10){
+    #CSMF10TO14 <- read.csv(paste("./gen/results/output/PointEstimates_National_10to14_", resDate, ".csv", sep =""))
+    CSMF10TO14[, CODALL[CODALL %in% names(CSMF10TO14)]] <- CSMF10TO14[, CODALL[CODALL %in% names(CSMF10TO14)]] * CSMF10TO14$Deaths2
+    CSMF10TO14 <- CSMF10TO14[,names(CSMF10TO14) %in% v_keepcols]
   }
-  if(ageUp == 19){
-    #dat15to19f <- read.csv(paste("./gen/results/output/PointEstimates_National_15to19f_", resDate, ".csv", sep =""))
-    dat15to19f[, codAll[codAll %in% names(dat15to19f)]] <- dat15to19f[, codAll[codAll %in% names(dat15to19f)]] * dat15to19f$Deaths
-    #dat15to19m <- read.csv(paste("./gen/results/output/PointEstimates_National_15to19m_", resDate, ".csv", sep =""))
-    dat15to19m[, codAll[codAll %in% names(dat15to19m)]] <- dat15to19m[, codAll[codAll %in% names(dat15to19m)]] * dat15to19m$Deaths
+  if(AGEUB == 19){
+    #CSMF15TO19F <- read.csv(paste("./gen/results/output/PointEstimates_National_15to19f_", resDate, ".csv", sep =""))
+    CSMF15TO19F[, CODALL[CODALL %in% names(CSMF15TO19F)]] <- CSMF15TO19F[, CODALL[CODALL %in% names(CSMF15TO19F)]] * CSMF15TO19F$Deaths2
+    #CSMF15TO19M <- read.csv(paste("./gen/results/output/PointEstimates_National_15to19m_", resDate, ".csv", sep =""))
+    CSMF15TO19M[, CODALL[CODALL %in% names(CSMF15TO19M)]] <- CSMF15TO19M[, CODALL[CODALL %in% names(CSMF15TO19M)]] * CSMF15TO19M$Deaths2
     # Combine sexes
-    dat15to19 <- dat15to19f
-    dat15to19[, codAll[codAll %in% names(dat15to19)]] <- dat15to19[, codAll[codAll %in% names(dat15to19)]] + dat15to19m[, codAll[codAll %in% names(dat15to19m)]]
+    dat15to19 <- CSMF15TO19F
+    dat15to19[, CODALL[CODALL %in% names(dat15to19)]] <- dat15to19[, CODALL[CODALL %in% names(dat15to19)]] + CSMF15TO19M[, CODALL[CODALL %in% names(CSMF15TO19M)]]
     dat15to19$Sex[dat15to19$Sex == sexLabels[2]] <- sexLabels[1]
     dat15to19 <- dat15to19[,names(dat15to19) %in% v_keepcols]
     # Get sex-combined rate from IGME crisis-included envelope
-    #env <- read.csv("./gen/data-prep/output/env_crisisincl_u20.csv")
-    env <- subset(env, Sex == sexLabels[1] & AgeLow == 15 & AgeUp == 19)[,c("ISO3", "Year", "Rate2")]
+    env <- subset(env, Sex == sexLabels[1] & AGELB == 15 & AGEUB == 19)[,c("ISO3", "Year", "Rate2")]
     names(env)[names(env) == "Rate2"] <- "Rate"
   }
   
   # Merge rates for different age groups
-  if(ageLow == 5 & ageUp == 19){
-    l_df <- list(dat05to09[, c("ISO3","Year","Rate")], dat10to14[, c("ISO3","Year","Rate")], env[, c("ISO3","Year","Rate")])
+  if(AGELB == 5 & AGEUB == 19){
+    l_df <- list(CSMF05TO09[, c("ISO3","Year","Rate2")], CSMF10TO14[, c("ISO3","Year","Rate2")], env[, c("ISO3","Year","Rate2")])
   }
-  if(ageLow == 5 & ageUp == 14){
-    l_df <- list(dat05to09[, c("ISO3","Year","Rate")], dat10to14[, c("ISO3","Year","Rate")])
+  if(AGELB == 5 & AGEUB == 14){
+    l_df <- list(CSMF05TO09[, c("ISO3","Year","Rate2")], CSMF10TO14[, c("ISO3","Year","Rate2")])
   }
-  if(ageLow == 10 & ageUp == 19){
-    l_df <- list(dat10to14[, c("ISO3","Year","Rate")], env[, c("ISO3","Year","Rate")])
+  if(AGELB == 10 & AGEUB == 19){
+    l_df <- list(CSMF10TO14[, c("ISO3","Year","Rate")], env[, c("ISO3","Year","Rate")])
   }
-  if(ageLow == 15 & ageUp == 19){
+  if(AGELB == 15 & AGEUB == 19){
     l_df <- list(env)
   }
   if(length(l_df)>1){ 
@@ -231,64 +163,61 @@ fn_calc_agg_rate <- function(ageLow, ageUp, env, dat05to09, dat10to14, dat15to19
   }else{
     df_rate <- l_df[[1]]
   }
-  names(df_rate)[names(df_rate) == "Rate.x"] <- "Rate1" 
-  names(df_rate)[names(df_rate) == "Rate.y"] <- "Rate2"
-  names(df_rate)[names(df_rate) == "Rate"] <- "Rate3"
+  names(df_rate)[names(df_rate) == "Rate2.x"] <- "Rate_df1" 
+  names(df_rate)[names(df_rate) == "Rate2.y"] <- "Rate_df2"
+  names(df_rate)[names(df_rate) == "Rate2"] <- "Rate_df3"
   
-  # Calculate aggregate rate
-  if(ageUp - ageLow == 4){names(df_rate)[names(df_rate) == "Rate3"] <- "Rate"}
-  if(ageUp - ageLow == 9){df_rate$Rate <- 1000 - (1000 - df_rate$Rate1)*(1 - df_rate$Rate2 / 1000)}
-  if(ageUp - ageLow == 14){df_rate$Rate <- 1000 - (1000 - df_rate$Rate1)*(1 - df_rate$Rate2 / 1000)*(1 - df_rate$Rate3 / 1000)}
-  df_rate <- df_rate[, c("ISO3", "Year", "Rate")]
+  # Calculate aggregate deaths and rate
+  if(AGEUB - AGELB == 4){names(df_rate)[names(df_rate) == "Rate_df3"] <- "Rate2"}
+  if(AGEUB - AGELB == 9){df_rate$Rate2 <- 1000 - (1000 - df_rate$Rate_df1)*(1 - df_rate$Rate_df2 / 1000)}
+  if(AGEUB - AGELB == 14){df_rate$Rate2 <- 1000 - (1000 - df_rate$Rate_df1)*(1 - df_rate$Rate_df2 / 1000)*(1 - df_rate$Rate_df3 / 1000)}
+  df_rate <- df_rate[, c("ISO3", "Year", "Rate2")]
   
   # Remove old Rate columns, add missing COD, rbind
-  if(ageLow == 5 & ageUp == 19){
-    dat05to09 <- dat05to09[, !names(dat05to09) %in% c("Rate")]
-    dat10to14 <- dat10to14[, !names(dat10to14) %in% c("Rate")]
-    dat15to19 <- dat15to19[, !names(dat15to19) %in% c("Rate")]
-    addCOD <- codAll[which(!codAll %in% names(dat05to09))]
-    dat05to09[, paste(addCOD)] <- 0
-    addCOD <- codAll[which(!codAll %in% names(dat10to14))]
-    dat10to14[, paste(addCOD)] <- 0
-    addCOD <- codAll[which(!codAll %in% names(dat15to19))]
+  if(AGELB == 5 & AGEUB == 19){
+    CSMF05TO09 <- CSMF05TO09[, !names(CSMF05TO09) %in% c("Rate2")]
+    CSMF10TO14 <- CSMF10TO14[, !names(CSMF10TO14) %in% c("Rate2")]
+    dat15to19 <- dat15to19[, !names(dat15to19) %in% c("Rate2")]
+    addCOD <- CODALL[which(!CODALL %in% names(CSMF05TO09))]
+    CSMF05TO09[, paste(addCOD)] <- 0
+    addCOD <- CODALL[which(!CODALL %in% names(CSMF10TO14))]
+    CSMF10TO14[, paste(addCOD)] <- 0
+    addCOD <- CODALL[which(!CODALL %in% names(dat15to19))]
     dat15to19[, paste(addCOD)] <- 0
-    dat <- rbind(dat05to09, dat10to14, dat15to19)
+    dat <- rbind(CSMF05TO09, CSMF10TO14, dat15to19)
   }
-  if(ageLow == 5 & ageUp == 14){
-    dat05to09 <- dat05to09[, !names(dat05to09) %in% c("Rate")]
-    dat10to14 <- dat10to14[, !names(dat10to14) %in% c("Rate")]
-    addCOD <- names(dat10to14)[!(names(dat10to14) %in% names(dat05to09))]
-    dat05to09[, paste(addCOD)] <- 0
-    addCOD <- names(dat05to09)[!(names(dat05to09) %in% names(dat10to14))]
-    dat10to14[, paste(addCOD)] <- 0
-    dat <- rbind(dat05to09, dat10to14)
+  if(AGELB == 5 & AGEUB == 14){
+    CSMF05TO09 <- CSMF05TO09[, !names(CSMF05TO09) %in% c("Rate2")]
+    CSMF10TO14 <- CSMF10TO14[, !names(CSMF10TO14) %in% c("Rate2")]
+    addCOD <- names(CSMF10TO14)[!(names(CSMF10TO14) %in% names(CSMF05TO09))]
+    CSMF05TO09[, paste(addCOD)] <- 0
+    addCOD <- names(CSMF05TO09)[!(names(CSMF05TO09) %in% names(CSMF10TO14))]
+    CSMF10TO14[, paste(addCOD)] <- 0
+    dat <- rbind(CSMF05TO09, CSMF10TO14)
   }
-  if(ageLow == 10 & ageUp == 19){
-    dat10to14 <- dat10to14[, !names(dat10to14) %in% c("Rate")]
-    dat15to19 <- dat15to19[, !names(dat15to19) %in% c("Rate")]
-    addCOD <- names(dat15to19)[!(names(dat15to19) %in% names(dat10to14))]
-    dat10to14[, paste(addCOD)] <- 0
-    addCOD <- names(dat10to14)[!(names(dat10to14) %in% names(dat15to19))]
+  if(AGELB == 10 & AGEUB == 19){
+    CSMF10TO14 <- CSMF10TO14[, !names(CSMF10TO14) %in% c("Rate2")]
+    dat15to19 <- dat15to19[, !names(dat15to19) %in% c("Rate2")]
+    addCOD <- names(dat15to19)[!(names(dat15to19) %in% names(CSMF10TO14))]
+    CSMF10TO14[, paste(addCOD)] <- 0
+    addCOD <- names(CSMF10TO14)[!(names(CSMF10TO14) %in% names(dat15to19))]
     dat15to19[, paste(addCOD)] <- 0
-    dat <- rbind(dat10to14, dat15to19)
+    dat <- rbind(CSMF10TO14, dat15to19)
   }
-  if(ageLow == 15 & ageUp == 19){
+  if(AGELB == 15 & AGEUB == 19){
     dat15to19 <- dat15to19[, !names(dat15to19) %in% c("Rate")]
     dat <- dat15to19
   }
   
   # Aggregate ages
-  dat <- aggregate(dat[, codAll[codAll %in% names(dat)]], by = list(dat$ISO3, dat$Year, dat$Sex), sum)
+  dat <- aggregate(dat[, CODALL[CODALL %in% names(dat)]], by = list(dat$ISO3, dat$Year, dat$Sex), sum)
   names(dat)[1:3] <- idVars
   
-  # Add missing variables
-  dat$AgeLow <- ageLow
-  dat$AgeUp <- ageUp
-  dat$Deaths <- round(rowSums(dat[, codAll[codAll %in% names(dat)]]))
+  # Add rate2
   dat <- merge(dat, df_rate, by = c("ISO3", "Year"), all.x = T, all.y = F)
   
   # Back transform into fractions
-  dat[, codAll[codAll %in% names(dat)]] <- round(dat[, codAll[codAll %in% names(dat)]] / rowSums(dat[, codAll[codAll %in% names(dat)]]), 5)
+  dat[, CODALL[CODALL %in% names(dat)]] <- round(dat[, CODALL[CODALL %in% names(dat)]] / rowSums(dat[, CODALL[CODALL %in% names(dat)]]), 5)
   
   # Tidy up
   dat <- dat[order(dat$ISO3, dat$Year), ]
@@ -296,5 +225,3 @@ fn_calc_agg_rate <- function(ageLow, ageUp, env, dat05to09, dat10to14, dat15to19
   
   return(dat)
 }
-
-

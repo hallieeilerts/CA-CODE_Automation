@@ -6,8 +6,10 @@
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dat <- read.dta13("./data/vr/20210331-GoodVR-5to19.dta", nonint.factors = T)
+dat_vr_5to19_WHO <- read.dta13("./data/vr/20210331-GoodVR-5to19.dta", nonint.factors = T)
 ################################################################################
+
+dat <- dat_vr_5to19_WHO
 
 # Add code to create 20210331-GoodVR-5to19.dta
 # db_vr_5to19_who <- read.csv() # need to get raw WHO data
@@ -37,4 +39,6 @@ dat <- dat[, !names(dat) %in% c("post_source", "post_source2",  "igmedeaths", "t
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, "./gen/data-management/output/db_vr_5to19GOODVR.csv", row.names = FALSE)
+dat_vr_5to19GOODVR <- dat
+
+write.csv(dat_vr_5to19GOODVR, "./gen/data-management/output/dat_vr_5to19GOODVR.csv", row.names = FALSE)

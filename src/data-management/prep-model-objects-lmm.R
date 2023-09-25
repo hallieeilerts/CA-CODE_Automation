@@ -23,7 +23,4 @@ vxf <- out$param$VXF
 # Save output(s) ----------------------------------------------------------
 
 saveRDS(out, file = paste("./gen/estimation/output/mod_fit_", ageGroup, "LMM.rds",sep=""))
-saveRDS(vxf, file = paste("./gen/estimation/output/mod_covList_", ageGroup, "LMM.rds",sep=""))
-
-# Remove unnecessary objects
-rm(out, fileName, model, rateTrans, refCat, sex, test, Time, vers, vxf)
+saveRDS(vxf, file = paste("./gen/estimation/output/mod_covNames_", ageGroup, "LMM.rds",sep=""))

@@ -6,9 +6,9 @@
 
 
 # Minimum fraction of LRI
-if(ageGroup == "05to09"){minLRI <- 0.0269}
-if(ageGroup == "10to14"){minLRI <- 0.0197}
-if(ageGroup %in% c("15to19f","15to19m")){minLRI <- NULL}
+if(ageGroup == "05to09"){frac_lri <- 0.0269}
+if(ageGroup == "10to14"){frac_lri <- 0.0197}
+if(ageGroup %in% c("15to19f","15to19m")){frac_lri <- NULL}
 
 # !!! can this be coded up?
 
@@ -17,8 +17,8 @@ if(ageGroup %in% c("15to19f","15to19m")){minLRI <- NULL}
 ###################################################################
 
 # Save output(s)
-saveRDS(minLRI, file = paste("./gen/squeezing/input/minfrac_lri_", ageGroup, ".rds", sep=""))
-#save(minLRI, file = paste("./gen/squeezing/input/minfrac_lri_", ageGroup, ".RData", sep=""))
+saveRDS(frac_lri, file = paste("./gen/squeezing/input/frac_lri_", ageGroup, ".rds", sep=""))
+#save(frac_lri, file = paste("./gen/squeezing/input/frac_lri_", ageGroup, ".RData", sep=""))
 
 ###################################################################
 ######################### END-OUTPUTS #############################

@@ -7,8 +7,8 @@ require(readstata13)
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dth_meas_5to19_who <- read.dta13("./data/single-causes/measles/measles_2000-2021_adol.dta")
-unc_meas_5to19_who <- read.dta13("./data/single-causes/measles/measles_2000-2021_adolunc.dta") 
+dat_meas_5to19_WHO <- read.dta13("./data/single-causes/measles/measles_2000-2021_adol.dta")
+ui_meas_5to19_WHO  <- read.dta13("./data/single-causes/measles/measles_2000-2021_adolunc.dta") 
 key_ctryclass      <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
@@ -19,7 +19,7 @@ key_ctryclass      <- read.csv("./gen/data-management/output/key_ctryclass_u20.c
 # and use the updated name for this object (dth_meas_ageGroup)
 
 # Measles deaths
-dat1 <- dth_meas_5to19_who
+dat1 <- dat_meas_5to19_WHO
 
 names(dat1)[names(dat1) == "iso3"] <- idVars[1]
 names(dat1)[names(dat1) == "year"] <- idVars[2]
@@ -38,7 +38,7 @@ dat1 <- dat1[which(dat1$age_lb == ageLow & dat1$age_ub == ageUp & dat1$Sex %in% 
 
 ## Measles uncertainty
 
-dat2 <- unc_meas_5to19_who
+dat2 <- ui_meas_5to19_WHO
 
 names(dat2)[names(dat2) == "iso3"] <- idVars[1]
 names(dat2)[names(dat2) == "year"] <- idVars[2]
@@ -74,7 +74,6 @@ rownames(dat) <- NULL
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, paste("./gen/squeezing/input/dth_meas_", ageGroup, ".csv", sep=""), row.names = FALSE)
+dat_meas <- dat
 
-# Remove unnecessary objects
-rm(dth_meas_5to19_who, unc_meas_5to19_who, key_ctryclass, dat1, dat2, df_ctryyears)
+write.csv(dat, paste("./gen/squeezing/input/dat_meas_", ageGroup, ".csv", sep=""), row.names = FALSE)

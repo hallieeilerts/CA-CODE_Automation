@@ -6,8 +6,10 @@
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dat <- read.dta13("./data/china/20210330-ChinaDSP.dta", nonint.factors = T)
+dat_srs_5to19CHN_DSP <- read.dta13("./data/china/20210330-ChinaDSP.dta", nonint.factors = T)
 ################################################################################
+
+dat <- dat_srs_5to19CHN_DSP
 
 # Add code to create 20210330-ChinaDSP.dta
 # db_china_5to19_dsp <- read.csv() # need to get raw China data
@@ -53,4 +55,6 @@ names(dat)[names(dat) == "csdf28"] <- "otherinj"
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, paste("./gen/data-management/output/db_china_5to19.csv", sep=""), row.names = FALSE)
+dat_srs_5to19CHN <- dat
+
+write.csv(dat_srs_5to19CHN, paste("./gen/data-management/output/dat_srs_5to19CHN.csv", sep=""), row.names = FALSE)

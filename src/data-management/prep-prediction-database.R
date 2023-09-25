@@ -6,9 +6,12 @@
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dat <- read.csv("./data/prediction-database/PredicationDatabase_2022series_2023-02-21.csv")
-env <- read.csv("./gen/data-management/output/env_crisisincl_u20.csv")
+dat_pred_u20_WHO <- read.csv("./data/prediction-database/PredicationDatabase_2022series_2023-02-21.csv")
+env_crisisIncl_u20 <- read.csv("./gen/data-management/output/env_crisisIncl_u20.csv")
 ################################################################################
+
+dat <- dat_pred_u20_WHO
+env <- env_crisisIncl_u20
 
 names(dat)[names(dat) == "iso3"] <- "ISO3"
 names(dat)[names(dat) == "year"] <- "Year"
@@ -49,12 +52,14 @@ names(dat)[grep("sex_age", names(dat))] <- v_sex_ageAdj
 
 # For the 5-19y models, we use some death rates as covariates that are not included in the prediction database.
 # These need to be retrieved from the latest IGME envelopes.
-df_q5to19 <- env[env$AgeLow == 5 & env$AgeUp == 19, c("ISO3", "Year", "Rate2")]
+
+# q5to19 both sexes mortality rate used in some HMM models
+df_q5to19 <- env[env$AgeLow == 5 & env$AgeUp == 19 & env$Sex == "Both", c("ISO3", "Year", "Rate2")]
 names(df_q5to19)[names(df_q5to19) == "Rate2"] <- "q5to19"
 dat <- merge(dat, df_q5to19, by = c("ISO3", "Year"), all.x = TRUE)
 
-# 5q15 both sexes mortality rate used in LMM 15-19 males model
-df_q15to19 <- env[env$AgeLow == 15 & env$AgeUp == 19 & env$Sex == "B", c("ISO3", "Year", "Rate2")]
+# q15to19 both sexes mortality rate used in LMM 15-19 males model
+df_q15to19 <- env[env$AgeLow == 15 & env$AgeUp == 19 & env$Sex == "Both", c("ISO3", "Year", "Rate2")]
 names(df_q15to19)[names(df_q15to19) == "Rate2"] <- "q15to19"
 dat <- merge(dat, df_q15to19, by = c("ISO3", "Year"), all.x = TRUE)
 
@@ -66,10 +71,6 @@ dat <- dat[, c(idVars[1:2], sort(names(dat)[which(!names(dat) %in% idVars[1:2])]
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, "./gen/data-management/output/db_pred_u20.csv", row.names = FALSE)
+dat_pred_u20 <- dat
 
-# Remove unnecessary objects
-rm(env, 
-   v_contraception_met, df_contraception_met, df_contraception_unmet,
-   v_sex_age, v_sex_ageAdj, s_sexSuffix, s_ageSuffix, s_typeSuffix,
-   df_q5to19, df_q15to19)
+write.csv(dat_pred_u20, "./gen/data-management/output/dat_pred_u20.csv", row.names = FALSE)

@@ -4,7 +4,7 @@
 ################################################################################
 #' Libraries
 #' Inputs
-dat <- read.csv("./data/classification-keys/20201001-CountryModelClass.csv")
+key_ctryclass_u20 <- read.csv("./data/classification-keys/20201001-CountryModelClass.csv")
 ################################################################################
 
 # Add code that assigns countries to GOODVR, LMM or HMM
@@ -17,4 +17,4 @@ dat <- read.csv("./data/classification-keys/20201001-CountryModelClass.csv")
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, "./gen/data-management/output/key_ctryclass_u20.csv", row.names = FALSE)
+write.csv(key_ctryclass_u20, "./gen/data-management/output/key_ctryclass_u20.csv", row.names = FALSE)

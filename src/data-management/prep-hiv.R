@@ -7,8 +7,8 @@ require(readstata13)
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dth_hiv_u20_un   <- read.csv('./data/single-causes/hiv/HIV2022Estimates_UNAIDS_11Nov2022.csv')
-dth_hiv_u20_spec <- read.dta13("./data/single-causes/hiv/hiv_wppfractions_adol_5Jun2023.dta") 
+dat_hiv_u20_UN   <- read.csv('./data/single-causes/hiv/HIV2022Estimates_UNAIDS_11Nov2022.csv')
+dat_hiv_u20_SPEC <- read.dta13("./data/single-causes/hiv/hiv_wppfractions_adol_5Jun2023.dta") 
 key_ctryclass    <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 env              <- read.csv(paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""))
 ################################################################################
@@ -21,7 +21,7 @@ env              <- read.csv(paste("./gen/data-management/output/env_",ageGroup,
 
 ## HIV data
 
-dat1 <- dth_hiv_u20_un
+dat1 <- dat_hiv_u20_UN
 
 dat1 <- dat1[, c('ISO3', 'E_Ind', 'Time', 'Value', 'lower.bound', 'upper.bound')]
 
@@ -46,7 +46,7 @@ dat1 <- dat1[which(dat1$age_lb == ageLow & dat1$Sex %in% sexLabel), ]
 
 ## HIV data from spectrum
 
-dat2 <- dth_hiv_u20_spec
+dat2 <- dat_hiv_u20_SPEC
 
 names(dat2)[names(dat2) == "iso3"] <- "ISO3"
 names(dat2)[names(dat2) == "year"] <- "Year"
@@ -108,8 +108,6 @@ rownames(dat) <- NULL
 
 # Save output(s) ----------------------------------------------------------
 
-write.csv(dat, paste("./gen/squeezing/input/dth_hiv_", ageGroup, ".csv", sep=""), row.names = FALSE)
+dat_hiv <- dat
 
-# Remove unnecessary objects
-rm(dth_hiv_u20_un, dth_hiv_u20_spec, key_ctryclass, env, dat1, dat2, df_ctryyears)
-
+write.csv(dat_hiv, paste("./gen/squeezing/input/dat_hiv_", ageGroup, ".csv", sep=""), row.names = FALSE)

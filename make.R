@@ -24,6 +24,11 @@ source("./src/data-management/set-cod-list.R")
 source("./src/data-management/set-regions.R")
 source("./src/data-management/set-country-class.R")
 
+# Envelopes
+source("./src/data-management/prep-envelopes.R")
+#source("./src/data-management/prep-envelopes-draws.R")
+source("./src/data-management/prep-envelopes-draws2.R") # For 15-19f or 15-19m, creates draws for males, females, and both sexes combined
+
 # Exposure data
 source("./src/data-management/prep-prediction-database.R")
 
@@ -31,10 +36,6 @@ source("./src/data-management/prep-prediction-database.R")
 source("./src/data-management/prep-goodvr.R")
 if(ageGroup %in% c("00to28","01to04")){source("./src/data-management/prep-chinanmch.R")}
 if(ageGroup %in% c("05to09","10to14","15to19f", "15to19m")){source("./src/data-management/prep-chinadsp.R")}
-
-# Envelopes
-source("./src/data-management/prep-envelopes.R")
-source("./src/data-management/prep-envelopes-draws.R")
 
 # Single-cause data
 source("./src/data-management/prep-crisis.R")
@@ -49,6 +50,11 @@ if(simpleUpdate){
   source("./src/data-management/prep-model-objects-lmm.R")
 }
 
+# Set fractions for capping malaria, and mminimum fractions for squeezing
+source("./src/data-management/set-frac-cap-malaria.R")
+source("./src/data-management/set-frac-min-cd.R")
+source("./src/data-management/set-frac-min-lri.R")
+
 # Clear environment
 rm(list = ls())
 
@@ -56,7 +62,12 @@ rm(list = ls())
 # Estimation
 ################################################
 
+# Load inputs and functions
+source("./src/estimation/estimation_inputs.R")
+source("./src/estimation/estimation_functions.R")
+
 if(!simpleUpdate){
+  # Note: Need to update header of all these scripts.
   source("src/estimation/prep-model-input-hmm.R")
   source("src/estimation/prep-model-input-lmm.R")
   source("src/estimation/create-parameter-grid-hmm.R")
@@ -70,6 +81,9 @@ if(!simpleUpdate){
   source("src/estimation/run-bayesian-lasso-lmm.R")
 }
 
+# Clear environment
+rm(list = ls())
+
 ################################################
 # Prediction
 ################################################
@@ -79,24 +93,24 @@ source("./src/prediction/prediction_inputs.R")
 source("./src/prediction/prediction_functions.R")
 
 # Calculate CSMFs for goodvr and China, save
-csmf_GOODVR <- fn_calc_csmf(db_VR, key_ctryclass, key_cod,  CTRYGRP = "GOODVR", env)
-csmf_CHN    <- fn_calc_csmf(db_CHN, key_ctryclass, key_cod, CTRYGRP  = "CHN")
+csmf_GOODVR <- fn_calc_csmf(dat_VR,  key_ctryclass, key_cod,  CTRYGRP = "GOODVR")
+csmf_CHN    <- fn_calc_csmf(dat_CHN, key_ctryclass, key_cod,  CTRYGRP  = "CHN")
 write.csv(csmf_GOODVR, paste("./gen/prediction/output/csmf_", ageGroup, "GOODVR.csv", sep=""), row.names = FALSE)
 write.csv(csmf_CHN,    paste("./gen/prediction/output/csmf_", ageGroup, "CHN.csv", sep=""), row.names = FALSE)
 
 # Extract covariate values from prediction database, save
-db_pred_HMM <- fn_extract_cov(vxf_HMM, db_pred, key_ctryclass, CTRYGRP = "HMM")
-db_pred_LMM <- fn_extract_cov(vxf_LMM, db_pred, key_ctryclass, CTRYGRP = "LMM")
-write.csv(db_pred_HMM, paste("./gen/prediction/temp/db_pred_", ageGroup, "HMM.csv",sep=""), row.names = FALSE)
-write.csv(db_pred_LMM, paste("./gen/prediction/temp/db_pred_", ageGroup, "LMM.csv",sep=""), row.names = FALSE)
+dat_pred_HMM <- fn_extract_cov(mod_covNames_HMM, dat_pred, key_ctryclass, CTRYGRP = "HMM")
+dat_pred_LMM <- fn_extract_cov(mod_covNames_LMM, dat_pred, key_ctryclass, CTRYGRP = "LMM")
+write.csv(dat_pred_HMM, paste("./gen/prediction/temp/dat_pred_", ageGroup, "HMM.csv",sep=""), row.names = FALSE)
+write.csv(dat_pred_LMM, paste("./gen/prediction/temp/dat_pred_", ageGroup, "LMM.csv",sep=""), row.names = FALSE)
 
 # Run prediction function for each year, format
-l_csmf_HMM  <- lapply(Years, function(x){fn_call_p1New(x, fit_HMM, db_pred_HMM)})
-l_csmf_LMM  <- lapply(Years, function(x){fn_call_p1New(x, fit_LMM, db_pred_LMM)})
+l_csmf_HMM  <- lapply(Years, function(x){fn_call_p1New(x, mod_fit_HMM, dat_pred_HMM)})
+l_csmf_LMM  <- lapply(Years, function(x){fn_call_p1New(x, mod_fit_LMM, dat_pred_LMM)})
 
 # Set malaria fractions
 if(ageGroup %in% c("05to09", "10to14")){
-  l_csmf_HMM <- lapply(l_csmf_HMM, function(x){fn_cap_mal_frac(x, dth_malaria_5to19, csmf_malaria_01to04HMM)})
+  l_csmf_HMM <- lapply(l_csmf_HMM, function(x){fn_cap_mal_frac(x, dat_malaria_5to19, frac_malaria_01to04)})
   l_csmf_LMM <- lapply(l_csmf_LMM, function(x){fn_set_mal_frac(x)})
 }
 
@@ -115,49 +129,64 @@ rm(list = ls())
 source("./src/squeezing/squeezing_inputs.R")
 source("./src/squeezing/squeezing_functions.R")
 
-# Set minimum fractions
-source("./src/squeezing/set-min-frac-cd.R")
-source("./src/squeezing/set-min-frac-lri.R")
+# Merge on envelopes
+csmf_envADD        <- fn_merge_env(csmf, env)
+csmf_envADD_CHN    <- fn_merge_env(csmf_CHN, env)
+csmf_envADD_GOODVR <- fn_merge_env(csmf_GOODVR, env)
 
 # Prepare modeled countries and China for squeezing
-csmf_AddSinglecause <- fn_prepare_sqz(csmf, env, dth_tb, dth_hiv, dth_crisis, dth_meas, minCD, minLRI)
-csmf_AddSinglecause_CHN <- fn_prepare_sqz_china(csmf_CHN, env, dth_hiv, dth_crisis, minCD)
+csmf_singlecauseADD <- fn_prepare_sqz(csmf_envADD, dat_tb, dat_hiv, dat_crisis, dat_meas, frac_cd, frac_lri)
+csmf_singlecauseADD_CHN <- fn_prepare_sqz_china(csmf_envADD_CHN, dat_hiv, dat_crisis, frac_cd)
 
 # Perform squeezing
 if(ageGroup == "05to09"){
-  csmf_SqzOthercmpn     <- fn_sqz_othercmpn(csmf_AddSinglecause)
-  csmf_SqzOthercmpn_CHN <- fn_sqz_othercmpn_china(csmf_AddSinglecause_CHN)
-  csmf_SqzLri           <- fn_sqz_lri(csmf_SqzOthercmpn)
-  csmf_SqzCrisisend     <- fn_sqz_crisisend(csmf_SqzLri)
-  dth_SqzCrisisepi      <- fn_sqz_crisisepi(csmf_SqzCrisisend)
-  dth_SqzCrisisepi_CHN  <- fn_sqz_crisisepi(csmf_SqzOthercmpn_CHN)
-  dth_AddMeasepi        <- fn_add_measepi(dth_SqzCrisisepi)
-  dth_Sqz <- dth_AddMeasepi
+  csmf_othercmpnSQZ     <- fn_sqz_othercmpn(csmf_singlecauseADD)
+  csmf_lriSQZ           <- fn_sqz_lri(csmf_othercmpnSQZ)
+  csmf_crisisEndSQZ     <- fn_sqz_crisisend(csmf_lriSQZ, key_cod)
+  dth_crisisEpiSQZ      <- fn_sqz_crisisepi(csmf_crisisEndSQZ, key_cod)
+  dth_measEpiADD        <- fn_add_measepi(dth_crisisEpiSQZ)
+  dth_SQZ <- dth_measEpiADD
+  csmf_othercmpnSQZ_CHN <- fn_sqz_othercmpn_china(csmf_singlecauseADD_CHN)
+  dth_crisisEpiSQZ_CHN  <- fn_sqz_crisisepi(csmf_othercmpnSQZ_CHN, key_cod)
+  dth_SQZ_CHN <- dth_crisisEpiSQZ_CHN
 }
 if(ageGroup == "10to14"){
-  csmf_SqzOthercmpn     <- fn_sqz_othercmpn(csmf_AddSinglecause)
-  csmf_SqzOthercmpn_CHN <- fn_sqz_othercmpn_china(csmf_AddSinglecause_CHN)
-  csmf_SqzLri           <- fn_sqz_lri(csmf_SqzOthercmpn)
-  csmf_SqzCrisisend     <- fn_sqz_crisisend(csmf_SqzLri)
-  dth_SqzCrisisepi      <- fn_sqz_crisisepi(csmf_SqzCrisisend)
-  dth_SqzCrisisepi_CHN  <- fn_sqz_crisisepi(csmf_SqzOthercmpn_CHN)
-  dth_Sqz <- dth_SqzCrisisepi
+  csmf_othercmpnSQZ     <- fn_sqz_othercmpn(csmf_singlecauseADD)
+  csmf_lriSQZ           <- fn_sqz_lri(csmf_othercmpnSQZ)
+  csmf_crisisEndSQZ     <- fn_sqz_crisisend(csmf_lriSQZ, key_cod)
+  dth_crisisEpiSQZ      <- fn_sqz_crisisepi(csmf_crisisEndSQZ, key_cod)
+  dth_SQZ <- dth_crisisEpiSQZ
+  csmf_othercmpnSQZ_CHN <- fn_sqz_othercmpn_china(csmf_singlecauseADD_CHN)
+  dth_crisisEpiSQZ_CHN  <- fn_sqz_crisisepi(csmf_othercmpnSQZ_CHN, key_cod)
+  dth_SQZ_CHN <- dth_crisisEpiSQZ_CHN
 }
 if(ageGroup %in% c("15to19f", "15to19m")){
-  csmf_SqzOthercmpn     <- fn_sqz_othercmpn(csmf_AddSinglecause)
-  csmf_SqzOthercmpn_CHN <- fn_sqz_othercmpn_china(csmf_AddSinglecause_CHN)
-  csmf_SqzCrisisend     <- fn_sqz_crisisend(csmf_SqzLri)
-  dth_SqzCrisisepi      <- fn_sqz_crisisepi(csmf_SqzCrisisend)
-  dth_SqzCrisisepi_CHN  <- fn_sqz_crisisepi(csmf_SqzOthercmpn_CHN)
-  dth_Sqz <- dth_SqzCrisisepi
+  csmf_othercmpnSQZ     <- fn_sqz_othercmpn(csmf_singlecauseADD)
+  csmf_crisisEndSQZ     <- fn_sqz_crisisend(csmf_othercmpnSQZ, key_cod)
+  dth_crisisEpiSQZ      <- fn_sqz_crisisepi(csmf_crisisEndSQZ, key_cod)
+  dth_SQZ <- dth_crisisEpiSQZ
+  csmf_othercmpnSQZ_CHN <- fn_sqz_othercmpn_china(csmf_singlecauseADD_CHN)
+  dth_crisisEpiSQZ_CHN  <- fn_sqz_crisisepi(csmf_othercmpnSQZ_CHN, key_cod)
+  dth_SQZ_CHN <- dth_crisisEpiSQZ_CHN
 }
 
 # Format squeezed output
-csmf_Sqz <- fn_format_sqz_output(dth_Sqz, dth_SqzCrisisepi_CHN, csmf)
+csmf_SQZ <- fn_format_sqz_output(dth_SQZ, dth_SQZ_CHN, csmf_envADD, key_cod)
 
-# Combine squeezed output with VR, save
-csmf_ALL <- fn_combine_csmf(csmf_Sqz, csmf_GOODVR)
-write.csv(csmf_Sqz, paste("./gen/squeezing/output/csmf_", ageGroup, ".csv", sep=""), row.names = FALSE)
+# Audit: check if squeezed CSMFs add up to 1 or contain NA
+csmf_SQZ_AUD <- fn_check_csmf_sqz(csmf_SQZ, key_cod)
+if(nrow(csmf_SQZ_AUD) > 0){
+  write.csv(csmf_SQZ_AUD, paste("./gen/squeezing/audit/csmf_SQZ_AUD_", ageGroup,".csv", sep=""), row.names = FALSE)
+}
+
+# Combine squeezed output from modeled countries (HMM and LMM) and China with GOODVR, format, save
+csmfSqz <- rbind(csmf_SQZ, csmf_envADD_GOODVR)
+csmfSqz <- fn_format_all_output(csmfSqz, key_cod)
+write.csv(csmfSqz, paste("./gen/squeezing/output/csmfSqz_", ageGroup, ".csv", sep=""), row.names = FALSE)
+
+# Calculate regional CSMFs
+csmfSqz_REG <- fn_calc_region(csmfSqz, key_cod, key_region)
+write.csv(csmfSqz_REG, paste("./gen/squeezing/output/csmfSqz_", ageGroup, "REG.csv", sep=""), row.names = FALSE)
 
 # Clear environment
 rm(list = ls())
@@ -174,95 +203,160 @@ source("./src/squeezing/squeezing_functions.R")
 
 ## Prediction
 
-# Run prediction function with uncertainty for each year, format
-draws_csmf_HMM <- lapply(Years, function(x){fn_call_p1New(x, fit_HMM, db_pred_HMM, UNCERTAINTY = TRUE) })
-draws_csmf_LMM <- lapply(Years, function(x){fn_call_p1New(x, fit_LMM, db_pred_LMM, UNCERTAINTY = TRUE) })
+# Run prediction function with uncertainty, format
+csmfDraws_HMM <- lapply(Years, function(x){fn_call_p1New(x, mod_fit_HMM, dat_pred_HMM, UNCERTAINTY = TRUE) })
+csmfDraws_LMM <- lapply(Years, function(x){fn_call_p1New(x, mod_fit_LMM, dat_pred_LMM, UNCERTAINTY = TRUE) })
 
 # Set malaria fractions
 if(ageGroup %in% c("05to09", "10to14")){
-  draws_csmf_HMM <- fn_nested_lapply(draws_csmf_HMM, function(x){fn_cap_mal_frac(x, dth_malaria_5to19, csmf_malaria_01to04HMM) })
-  draws_csmf_LMM <- fn_nested_lapply(draws_csmf_LMM, function(x){fn_set_mal_frac(x) })
+  csmfDraws_HMM <- fn_nested_lapply(csmfDraws_HMM, function(x){fn_cap_mal_frac(x, dat_malaria_5to19, frac_malaria_01to04HMM) })
+  csmfDraws_LMM <- fn_nested_lapply(csmfDraws_LMM, function(x){fn_set_mal_frac(x) })
 }
 
 ## Draws
 
 # Rearrange predicted fraction draws
-draws_csmf_Rearranged_HMM <- fn_rearrange_draws(draws_csmf_HMM)
-draws_csmf_Rearranged_LMM <- fn_rearrange_draws(draws_csmf_LMM)
+csmfDraws_FRMT_HMM <- fn_rearrange_draws(csmfDraws_HMM)
+csmfDraws_FRMT_LMM <- fn_rearrange_draws(csmfDraws_LMM)
 
 # Create sampling vectors for IGME envelope draws based on number of HMM/LMM draws
 # This will ensure that there are the same number of draws from each source
-v_sample <- fn_create_sample_vectors(draws_csmf_Rearranged_HMM, draws_csmf_Rearranged_LMM, draws_env)
+v_sample <- fn_create_sample_vectors(csmfDraws_FRMT_HMM, csmfDraws_FRMT_LMM, envDraws)
+# Save temporary file for use in calculating aggregate age groups
+saveRDS(v_sample, file = paste("./gen/uncertainty/temp/sampleDraws.rds", sep=""))
 
 # Sample from all draws
-draws_env_Sampled <- fn_rand_draw_env(draws_env,  v_sample$env)
-draws_csmf_Sampled_HMM <- lapply(v_sample$HMM, function(x){ draws_csmf_Rearranged_HMM[[x]] })
-draws_csmf_Sampled_LMM <- lapply(v_sample$LMM, function(x){ draws_csmf_Rearranged_LMM[[x]] })
+envDraws_SAMP <- fn_rand_draw_env(envDraws,  v_sample$env)
+csmfDraws_SAMP_HMM <- lapply(v_sample$HMM, function(x){ csmfDraws_FRMT_HMM[[x]] })
+csmfDraws_SAMP_LMM <- lapply(v_sample$LMM, function(x){ csmfDraws_FRMT_LMM[[x]] })
 
 # Combine predicted draws for HMM and LMM
-draws_csmf_Sampled <- fn_format_draws(draws_csmf_Sampled_HMM, draws_csmf_Sampled_LMM)
+csmfDraws_SAMP <- fn_format_draws(csmfDraws_SAMP_HMM, csmfDraws_SAMP_LMM)
 
-# Randomly assign CSMFs for goodvr for each draw, save
-draws_csmf_GOODVR <- lapply(draws_env_Sampled, function(x){ fn_rand_assign_vr(csmf_GOODVR, x, key_cod, CTRYGRP = "GOODVR")})
-saveRDS(draws_csmf_GOODVR, file = paste("./gen/uncertainty/temp/draws_csmf_", ageGroup, "GOODVR.rds",sep=""))
-
-# Randomly assign CSMFs for China for each draw, squeeze
-draws_csmf_CHN    <- lapply(draws_env_Sampled, function(x){ fn_rand_assign_vr(csmf_CHN, x, key_cod, CTRYGRP = "CHN")})
+# Remove unnecessary objects
+rm(csmfDraws_HMM, csmfDraws_LMM, csmfDraws_FRMT_HMM, csmfDraws_FRMT_LMM, envDraws)
 
 ## Squeezing
 
+# Merge on envelopes
+csmfDraws_envADD        <- mapply(function(x,y) fn_merge_env(x,y), csmfDraws_SAMP, envDraws_SAMP, SIMPLIFY = FALSE)
+csmfList_envADD_GOODVR  <- lapply(envDraws_SAMP, function(x){ fn_merge_env(csmf_GOODVR, x)})
+csmfList_envADD_CHN     <- lapply(envDraws_SAMP, function(x){ fn_merge_env(csmf_CHN, x)})
+
+# Randomly assign CSMFs for VR/China for each draw
+csmfDraws_GOODVR <- lapply(csmfList_envADD_GOODVR, function(x){ fn_rand_assign_vr(x, key_cod, CTRYGRP = "GOODVR")})
+csmfDraws_CHN    <- lapply(csmfList_envADD_CHN, function(x){ fn_rand_assign_vr(x, key_cod, CTRYGRP = "CHN")})
+
 # Prepare modeled countries and China for squeezing
-draws_csmf_AddSinglecause     <- lapply(draws_csmf_Sampled, function(x) fn_prepare_sqz(x, env, dth_tb, dth_hiv, dth_crisis, dth_meas, minCD, minLRI))
-draws_csmf_AddSinglecause_CHN <- lapply(draws_csmf_CHN, function(x) fn_prepare_sqz_china(x, env, dth_hiv, dth_crisis, minCD))
+csmfDraws_singlecauseADD <- lapply(csmfDraws_envADD, function(x) fn_prepare_sqz(x, dat_tb, dat_hiv, dat_crisis, dat_meas, frac_cd, frac_lri))
+csmfDraws_singlecauseADD_CHN <- lapply(csmfDraws_CHN, function(x) fn_prepare_sqz_china(x, dat_hiv, dat_crisis, frac_cd))
 
 # Randomly assign single causes for each draw
 if(ageGroup == "05to09"){
-  draws_csmf_AddSinglecause <- lapply(draws_csmf_AddSinglecause, function(x){ fn_rand_assign_meas(x) })
+  csmfDraws_singlecauseADD <- lapply(csmfDraws_singlecauseADD, function(x){ fn_rand_assign_meas(x) })
 }
-draws_csmf_AddSinglecause <- lapply(draws_csmf_AddSinglecause, function(x){ fn_rand_assign_tb(x) })
-draws_csmf_AddSinglecause <- lapply(draws_csmf_AddSinglecause, function(x){ fn_rand_assign_hiv(x) })
-draws_csmf_AddSinglecause_CHN <- lapply(draws_csmf_AddSinglecause_CHN, function(x){ fn_rand_assign_hiv(x) })
+csmfDraws_singlecauseADD <- lapply(csmfDraws_singlecauseADD, function(x){ fn_rand_assign_tb(x) })
+csmfDraws_singlecauseADD <- lapply(csmfDraws_singlecauseADD, function(x){ fn_rand_assign_hiv(x) })
+csmfDraws_singlecauseADD <- lapply(csmfDraws_singlecauseADD, function(x){ fn_rand_assign_crisisend(x) })
+csmfDraws_singlecauseADD_CHN <- lapply(csmfDraws_singlecauseADD_CHN, function(x){ fn_rand_assign_hiv(x) })
 
 # Perform squeezing
 if(ageGroup == "05to09"){
-  draws_csmf_SqzOthercmpn     <- lapply(draws_csmf_AddSinglecause,     function(x){ fn_sqz_othercmpn(x) })
-  draws_csmf_SqzLri           <- lapply(draws_csmf_SqzOthercmpn,       function(x){ fn_sqz_lri(x) })
-  draws_csmf_SqzCrisisend     <- lapply(draws_csmf_SqzLri,             function(x){ fn_sqz_crisisend(x) })
-  draws_csmf_SqzCrisisepi     <- lapply(draws_csmf_SqzCrisisend,       function(x){ fn_sqz_crisisepi(x) })
-  draws_dth_AddMeasepi        <- lapply(draws_csmf_SqzCrisisepi,       function(x){ fn_add_measepi(x) })
-  draws_csmf_SqzOthercmpn_CHN <- lapply(draws_csmf_AddSinglecause_CHN, function(x){ fn_sqz_othercmpn_china(x) })
-  draws_dth_SqzCrisisepi_CHN  <- lapply(draws_csmf_SqzOthercmpn_CHN,   function(x){ fn_sqz_crisisepi(x) })
-  draws_dth_Sqz <- draws_dth_AddMeasepi
+  csmfDraws_othercmpnSQZ     <- lapply(csmfDraws_singlecauseADD,     function(x){ fn_sqz_othercmpn(x) })
+  csmfDraws_lriSQZ           <- lapply(csmfDraws_othercmpnSQZ,       function(x){ fn_sqz_lri(x) })
+  csmfDraws_crisisEndSQZ     <- lapply(csmfDraws_lriSQZ,             function(x){ fn_sqz_crisisend(x, key_cod, UNCERTAINTY = TRUE) })
+  dthDraws_crisisEpiSQZ      <- lapply(csmfDraws_crisisEndSQZ,       function(x){ fn_sqz_crisisepi(x, key_cod) })
+  dthDraws_measEpiADD        <- lapply(dthDraws_crisisEpiSQZ,        function(x){ fn_add_measepi(x) })
+  dthDraws_SQZ               <- dthDraws_measEpiADD
+  csmfDraws_othercmpnSQZ_CHN <- lapply(csmfDraws_singlecauseADD_CHN, function(x){ fn_sqz_othercmpn_china(x) })
+  dthDraws_crisisEpiSQZ_CHN  <- lapply(csmfDraws_othercmpnSQZ_CHN,   function(x){ fn_sqz_crisisepi(x, key_cod) })
+  dthDraws_SQZ_CHN <- dthDraws_crisisEpiSQZ_CHN
 }
 if(ageGroup == "10to14"){
-  draws_csmf_SqzOthercmpn     <- lapply(draws_csmf_AddSinglecause,     function(x){ fn_sqz_othercmpn(x) })
-  draws_csmf_SqzLri           <- lapply(draws_csmf_SqzOthercmpn,       function(x){ fn_sqz_lri(x) })
-  draws_csmf_SqzCrisisend     <- lapply(draws_csmf_SqzLri,             function(x){ fn_sqz_crisisend(x) })
-  draws_csmf_SqzCrisisepi     <- lapply(draws_csmf_SqzCrisisend,       function(x){ fn_sqz_crisisepi(x) })
-  draws_csmf_SqzOthercmpn_CHN <- lapply(draws_csmf_AddSinglecause_CHN, function(x){ fn_sqz_othercmpn_china(x) })
-  draws_dth_SqzCrisisepi_CHN  <- lapply(draws_csmf_SqzOthercmpn_CHN,   function(x){ fn_sqz_crisisepi(x) })
-  draws_dth_Sqz <- draws_csmf_SqzCrisisepi
+  csmfDraws_othercmpnSQZ     <- lapply(csmfDraws_singlecauseADD,     function(x){ fn_sqz_othercmpn(x) })
+  csmfDraws_lriSQZ           <- lapply(csmfDraws_othercmpnSQZ,       function(x){ fn_sqz_lri(x) })
+  csmfDraws_crisisEndSQZ     <- lapply(csmfDraws_lriSQZ,             function(x){ fn_sqz_crisisend(x, key_cod, UNCERTAINTY = TRUE) })
+  dthDraws_crisisEpiSQZ      <- lapply(csmfDraws_crisisEndSQZ,       function(x){ fn_sqz_crisisepi(x, key_cod) })
+  dthDraws_SQZ               <- dthDraws_crisisEpiSQZ
+  csmfDraws_othercmpnSQZ_CHN <- lapply(csmfDraws_singlecauseADD_CHN, function(x){ fn_sqz_othercmpn_china(x) })
+  dthDraws_crisisEpiSQZ_CHN  <- lapply(csmfDraws_othercmpnSQZ_CHN,   function(x){ fn_sqz_crisisepi(x, key_cod) })
+  dthDraws_SQZ_CHN <- dthDraws_crisisEpiSQZ_CHN
 }
 if(ageGroup %in% c("15to19f", "15to19m")){
-  draws_csmf_SqzOthercmpn     <- lapply(draws_csmf_AddSinglecause,     function(x){ fn_sqz_othercmpn(x) })
-  draws_csmf_SqzCrisisend     <- lapply(draws_csmf_SqzOthercmpn,       function(x){ fn_sqz_crisisend(x) })
-  draws_csmf_SqzCrisisepi     <- lapply(draws_csmf_SqzCrisisend,       function(x){ fn_sqz_crisisepi(x) })
-  draws_csmf_SqzOthercmpn_CHN <- lapply(draws_csmf_AddSinglecause_CHN, function(x){ fn_sqz_othercmpn_china(x) })
-  draws_dth_SqzCrisisepi_CHN  <- lapply(draws_csmf_SqzOthercmpn_CHN,   function(x){ fn_sqz_crisisepi(x) })
-  draws_dth_Sqz <- draws_csmf_SqzCrisisepi
+  csmfDraws_othercmpnSQZ     <- lapply(csmfDraws_singlecauseADD,     function(x){ fn_sqz_othercmpn(x) })
+  csmfDraws_crisisEndSQZ     <- lapply(csmfDraws_othercmpnSQZ,       function(x){ fn_sqz_crisisend(x, key_cod, UNCERTAINTY = TRUE) })
+  dthDraws_crisisEpiSQZ      <- lapply(csmfDraws_crisisEndSQZ,       function(x){ fn_sqz_crisisepi(x, key_cod) })
+  dthDraws_SQZ               <- dthDraws_crisisEpiSQZ
+  csmfDraws_othercmpnSQZ_CHN <- lapply(csmfDraws_singlecauseADD_CHN, function(x){ fn_sqz_othercmpn_china(x) })
+  dthDraws_crisisEpiSQZ_CHN  <- lapply(csmfDraws_othercmpnSQZ_CHN,   function(x){ fn_sqz_crisisepi(x, key_cod) })
+  dthDraws_SQZ_CHN <- dthDraws_crisisEpiSQZ_CHN
 }
+# Remove unnecessary objects
+suppressWarnings(rm(csmfDraws_SAMP, envDraws_SAMP,
+                    csmfDraws_othercmpnSQZ, csmfDraws_lriSQZ, csmfDraws_crisisEndSQZ, 
+                    dthDraws_crisisEpiSQZ, dthDraws_measEpiADD, 
+                    csmfDraws_othercmpnSQZ_CHN, dthDraws_crisisEpiSQZ_CHN))
 
 # Format squeezed output
-draws_csmf_Sqz <- mapply(function(x,y,z) fn_format_sqz_output(x,y,z), 
-                         draws_dth_Sqz, draws_dth_SqzCrisisepi_CHN, draws_csmf_Sampled, SIMPLIFY = FALSE)
+csmfDraws_SQZ <- mapply(function(x,y,z) fn_format_sqz_output(x,y, z, key_cod), 
+                        dthDraws_SQZ, dthDraws_SQZ_CHN, csmfDraws_envADD, SIMPLIFY = FALSE)
 
-# Combine squeezed draws with randomly sampled VR
-draws_csmf_ALL <- mapply(function(x,y) fn_combine_csmf(x,y), 
-                         draws_csmf_Sqz, draws_csmf_GOODVR, SIMPLIFY = FALSE)
+# Audit: check if squeezed CSMFs add up to 1 or contain NA
+csmfDraws_SQZ_AUD  <- lapply(csmfDraws_SQZ, function(x){ fn_check_csmf_sqz(x, key_cod) })
+names(csmfDraws_SQZ_AUD) <- 1:length(csmfDraws_SQZ_AUD)
+df_csmfDraws_SQZ_AUD <- ldply(csmfDraws_SQZ_AUD, .id = "Draw")
+if(nrow(df_csmfDraws_SQZ_AUD) > 0){
+  write.csv(df_csmfDraws_SQZ_AUD, paste("./gen/uncertainty/audit/csmfDraws_SQZ_AUD_", ageGroup,".csv", sep=""), row.names = FALSE)
+}
 
-# Calculate uncertainty intervals, save
-unc_csmf <- fn_calc_ui(draws_csmf_ALL, UI = 0.95, codAll)
-write.csv(unc_csmf, paste("./gen/uncertainty/output/unc_csmf_", ageGroup,".csv", sep=""), row.names = FALSE)
+# Combine squeezed output from modeled countries (HMM and LMM) and China with GOODVR, format, save
+csmfSqzDraws <- mapply(rbind, csmfDraws_SQZ, csmfDraws_GOODVR, SIMPLIFY = FALSE)
+csmfSqzDraws <- lapply(csmfSqzDraws, function(x){ fn_format_all_output(x, key_cod) })
+# Save temporary file for use in calculating aggregate age groups
+saveRDS(csmfSqzDraws, file = paste("./gen/uncertainty/temp/csmfSqzDraws_", ageGroup, ".rds", sep=""))
+
+# Calculate regional CSMFs
+csmfSqzDraws_REG <- lapply(csmfSqzDraws, function(x){ fn_calc_region(x, key_cod, key_region) })
+
+# Remove unnecessary objects
+rm(dthDraws_SQZ, dthDraws_SQZ_CHN, csmfDraws_envADD)
+
+## Uncertainty
+
+# Calculate uncertainty intervals
+ui <- fn_calc_ui(csmfSqzDraws, UI = 0.95, KEY_COD = key_cod, ENV = env)
+ui_REG <- fn_calc_ui(csmfSqzDraws_REG, UI = 0.95, KEY_COD = key_cod, REGIONAL = TRUE)
+
+# Combine point estimates with uncertainty intervals
+pointInt <- fn_combine_ui_point(ui, csmfSqz, key_cod)
+pointInt_REG <- fn_combine_ui_point(ui_REG, csmfSqz_REG, key_cod, REGIONAL = TRUE)
+
+# Round point estimates with uncertainty intervals
+pointInt_FRMT <- fn_round_pointint(pointInt, key_cod)
+pointInt_FRMT_REG <- fn_round_pointint(pointInt_REG, key_cod, REGIONAL = TRUE)
+
+# Audit: check if point estimates fall in uncertainty bounds
+pointInt_AUD <- fn_check_ui(pointInt_FRMT, key_cod)
+pointInt_AUD_REG <- fn_check_ui(pointInt_FRMT_REG, key_cod, REGIONAL = TRUE)
+if(nrow(pointInt_AUD) > 0){
+  write.csv(pointInt_AUD, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+}
+if(nrow(pointInt_AUD_REG) > 0){
+  write.csv(pointInt_AUD_REG, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"REG_", resDate, ".csv", sep=""), row.names = FALSE)
+}
+
+# Adjust point estimates and uncertainty intervals
+pointInt_ADJ <- fn_adjust_pointint(pointInt_FRMT, key_cod)
+
+# Audit: check if point estimates fall in uncertainty bounds
+pointIntAdj_AUD <- fn_check_ui(pointInt_ADJ, key_cod)
+if(nrow(pointIntAdj_AUD) > 0){
+  write.csv(pointIntAdj_AUD, paste("./gen/uncertainty/audit/pointIntAdj_AUD_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+}
+
+# Save final version
+write.csv(pointInt_ADJ, paste("./gen/uncertainty/output/pointInt_", ageGroup,".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_FRMT_REG, paste("./gen/uncertainty/output/pointInt_", ageGroup,"REG.csv", sep=""), row.names = FALSE)
 
 # Clear environment
 rm(list = ls())
@@ -275,30 +369,41 @@ rm(list = ls())
 source("./src/results/results_inputs.R")
 source("./src/results/results_functions.R")
 
-# Format and save point estimates
-csmf_Formatted <- fn_format_point_estimates(csmf, key_region, key_ctryclass, codAll)
-write.csv(csmf_Formatted, paste("./gen/results/output/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+# Finalize estimates from squeezing pipeline (intermediate results)
+csmfSqz_FRMT <- fn_round_csmfsqz(csmfSqz, key_cod)
+csmfSqz_PUB  <- fn_publish_estimates(csmfSqz_FRMT, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+write.csv(csmfSqz_PUB, paste("./gen/results/temp/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 
-# Format uncertainty
-unc_csmf_Formatted       <- fn_format_point_estimates(unc_csmf, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE)
-# Combine with point estimates with uncertainty and save
-point_unc_csmf_Formatted <- fn_combine_point_unc(csmf_Formatted, unc_csmf_Formatted, codAll)
-write.csv(point_unc_csmf_Formatted, paste("./gen/results/output/Uncertainty_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+# Finalize estimates from uncertainty pipeline (final results)
+point_PUB        <- fn_publish_estimates(pointInt, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+pointInt_PUB     <- fn_publish_estimates(pointInt, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE)
+point_PUB_REG    <- fn_publish_estimates(pointInt_REG, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
+pointInt_PUB_REG <- fn_publish_estimates(pointInt_REG, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
 
-# Calculate regional point estimates, format and save results
-csmf_Formatted_REGIONAL <- fn_calc_region(csmf_Formatted, codAll)
-write.csv(csmf_Formatted_REGIONAL, paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
-
-# Calculate regional uncertainty
-
-# Calculate annual rate of reduction
-
-# Calculate aggregate age groups, format and save results
-# (Need to have already produced results for all standard age groups)
-source("./src/results/calculate-agg-agegrp.R")
+write.csv(point_PUB, paste("./gen/results/output/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB, paste("./gen/results/output/Uncertainty_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(point_PUB_REG, paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_REG, paste("./gen/results/output/Uncertainty_Regional_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 
 # Clear environment
 rm(list = ls())
+
+################################################
+# Aggregation
+################################################
+
+if(aggregateAges){
+  # Load inputs and functions
+  source("./src/aggregation/aggregation_inputs.R")
+  source("./src/aggregation/aggregation_functions.R")
+  source("./src/uncertainty/uncertainty_functions.R")
+  source("./src/results/results_functions.R")
+  
+  # Run script
+  source("./src/aggregation/calc-agg-agegroups.R")
+}
+
+
 
 
 
@@ -317,17 +422,3 @@ rm(list = ls())
 #' --things that don't take long to do
 #' --can't be run independently
 
-
-v_ageGroup <- c("05to09", "10to14", "15to19f", "15to19m")
-for(i in 1:length(v_ageGroup)){
-  ## Choose age/sex group
-  ageGroup <- v_ageGroup[i]
-  print(ageGroup)
-  ## Years for update
-  Years <- 2000:2021
-  ## Prepare session
-  source("./src/prepare-session.R")
-  source("./src/create-session-variables.R")
-  ## Testing functions
-  source("./src/data-prep/prep-hiv.R")
-}
