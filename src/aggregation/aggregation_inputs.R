@@ -3,8 +3,10 @@
 #' @return Inputs loaded below
 ################################################################################
 #' Libraries
-require(plyr)  # ldply()
+require(plyr)  # ldply(), dlply
 require(data.table) # melt(), dcast()
+require(ggplot2)
+library(gridExtra)
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
@@ -12,6 +14,7 @@ source("./src/prepare-session/create-session-variables.R")
 # Classification keys
 key_cod    <- read.csv(paste("./gen/data-management/output/key_cod_", ageGroup, ".csv", sep=""))
 key_region <- read.csv("./gen/data-management/output/key_region_u20.csv")
+key_ctryclass <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 
 # Envelopes
 env_u20 <- read.csv("./gen/data-management/output/env_u20.csv")

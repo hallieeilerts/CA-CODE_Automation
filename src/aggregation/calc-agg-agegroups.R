@@ -3,47 +3,117 @@
 #' @return Aggregate age group results
 ################################################################################
 
+## Aggregate from squeezed CSMFs
+
 # Calculate CSMFs for aggregate age group (need to have already produced CSMFs for all standard age groups)
-csmfSqz_AGG_05to14 <- fn_calc_agg_ages(AGELB = 5, AGEUB = 14, CODALL = codAll, CSMF_5TO9 = csmfSqz_05to09,  CSMF_10TO14 = csmfSqz_10to14)
-csmfSqz_AGG_05to19 <- fn_calc_agg_ages(AGELB = 5, AGEUB = 19, CODALL = codAll, CSMF_5TO9 = csmfSqz_05to09,  CSMF_10TO14 = csmfSqz_10to14, CSMF_15TO19F = csmfSqz_15to19f, CSMF_15TO19M = csmfSqz_15to19m, ENV = env_u20)
-csmfSqz_AGG_10to19 <- fn_calc_agg_ages(AGELB = 10, AGEUB = 19, CODALL = codAll, CSMF_10TO14 = csmfSqz_10to14, CSMF_15TO19F = csmfSqz_15to19f, CSMF_15TO19M = csmfSqz_15to19m, ENV = env_u20)
-write.csv(csmfSqz_AGG_05to14, paste("./gen/aggregation/output/csmfSqz_AGG_05to14.csv", sep = ""))
-write.csv(csmfSqz_AGG_05to19, paste("./gen/aggregation/output/csmfSqz_AGG_05to19.csv", sep = ""))
-write.csv(csmfSqz_AGG_10to19, paste("./gen/aggregation/output/csmfSqz_AGG_10to19.csv", sep = ""))
+csmfSqz_05to14 <- fn_calc_agg_ages(AGELB = 5, AGEUB = 14, CODALL = codAll, CSMF_5TO9 = csmfSqz_05to09,  CSMF_10TO14 = csmfSqz_10to14)
+csmfSqz_05to19 <- fn_calc_agg_ages(AGELB = 5, AGEUB = 19, CODALL = codAll, CSMF_5TO9 = csmfSqz_05to09,  CSMF_10TO14 = csmfSqz_10to14, CSMF_15TO19F = csmfSqz_15to19f, CSMF_15TO19M = csmfSqz_15to19m, ENV = env_u20)
+csmfSqz_10to19 <- fn_calc_agg_ages(AGELB = 10, AGEUB = 19, CODALL = codAll, CSMF_10TO14 = csmfSqz_10to14, CSMF_15TO19F = csmfSqz_15to19f, CSMF_15TO19M = csmfSqz_15to19m, ENV = env_u20)
+
+# Save
+write.csv(csmfSqz_05to14, paste("./gen/aggregation/temp/csmfSqz_05to14.csv", sep = ""))
+write.csv(csmfSqz_05to19, paste("./gen/aggregation/temp/csmfSqz_05to19.csv", sep = ""))
+write.csv(csmfSqz_10to19, paste("./gen/aggregation/temp/csmfSqz_10to19.csv", sep = ""))
 
 # Sample from envelope draws for 15-19 sexes combined
 envDraws_SAMP_15to19 <- fn_rand_draw_env(envDraws_15to19, v_sample$env)
 rm(envDraws_15to19)
 
 # Calculate CSMF draws for aggregate age groups
-#test <- fn_calc_agg_ages(5, 14, codAll, csmfSqzDraws_05to09[[1]], csmfSqzDraws_10to14[[1]], UNCERTAINTY = TRUE)
-#csmfSqzDraws_AGG_05to14 <- mapply(function(a,b,c,d,e){ fn_calc_agg_ages(5, 14, codAll, csmfSqzDraws_05to09, csmfSqzDraws_10to14, SIMPLIFY = FALSE)})
-#csmfSqzDraws_AGG_05to19 <- mapply(function(a,b,c,d,e){ fn_calc_agg_ages(5, 19, codAll, csmfSqzDraws_05to09, csmfSqzDraws_10to14, csmfSqzDraws_15to19f, csmfSqzDraws_15to19m,  envDraws_SAMP_15to19, SIMPLIFY = FALSE)})
-#csmfSqzDraws_AGG_10to19 <- mapply(function(a,b,c,d,e){ fn_calc_agg_ages(10, 19, codAll, csmfSqzDraws_10to14, csmfSqzDraws_15to19f, csmfSqzDraws_15to19m, envDraws_SAMP_15to19, SIMPLIFY = FALSE)})
-csmfSqzDraws_AGG_05to14 <- fn_call_agg_ages(AGELB=5, AGEUB= 14, CODALL= codAll, CSMF_5TO9 = csmfSqzDraws_05to09, CSMF_10TO14 = csmfSqzDraws_10to14, UNCERTAINTY = TRUE)
-csmfSqzDraws_AGG_05to19 <- fn_call_agg_ages(AGELB=5, AGEUB= 19, CODALL= codAll, CSMF_5TO9 = csmfSqzDraws_05to09, CSMF_10TO14 = csmfSqzDraws_10to14,
-                                            CSMF_15TO19F = csmfSqzDraws_15to19f, CSMF_15TO19M = csmfSqzDraws_15to19m,  ENV = envDraws_SAMP_15to19,
-                                            UNCERTAINTY = TRUE)
-csmfSqzDraws_AGG_10to19 <- fn_call_agg_ages(AGELB=10, AGEUB= 19, CODALL= codAll, CSMF_10TO14 = csmfSqzDraws_10to14,
-                                            CSMF_15TO19F = csmfSqzDraws_15to19f, CSMF_15TO19M = csmfSqzDraws_15to19m,  ENV = envDraws_SAMP_15to19,
-                                            UNCERTAINTY = TRUE)
+csmfSqzDraws_05to14 <- fn_call_calc_agg_ages(AGELB=5, AGEUB=14, CODALL=codAll, 
+                                             CSMF_5TO9 = csmfSqzDraws_05to09, 
+                                             CSMF_10TO14 = csmfSqzDraws_10to14, 
+                                             CSMF_15TO19F = csmfSqzDraws_15to19f, CSMF_15TO19M = csmfSqzDraws_15to19m, 
+                                             ENV = envDraws_SAMP_15to19, UNCERTAINTY = TRUE)
+csmfSqzDraws_05to19 <- fn_call_calc_agg_ages(AGELB=5, AGEUB=19, CODALL=codAll, 
+                                             CSMF_5TO9 = csmfSqzDraws_05to09, 
+                                             CSMF_10TO14 = csmfSqzDraws_10to14, 
+                                             CSMF_15TO19F = csmfSqzDraws_15to19f, CSMF_15TO19M = csmfSqzDraws_15to19m, 
+                                             ENV = envDraws_SAMP_15to19, UNCERTAINTY = TRUE)
+csmfSqzDraws_10to19 <- fn_call_calc_agg_ages(AGELB=10, AGEUB=19, CODALL=codAll,
+                                             CSMF_5TO9 = csmfSqzDraws_05to09, 
+                                             CSMF_10TO14 = csmfSqzDraws_10to14, 
+                                             CSMF_15TO19F = csmfSqzDraws_15to19f, CSMF_15TO19M = csmfSqzDraws_15to19m, 
+                                             ENV = envDraws_SAMP_15to19, UNCERTAINTY = TRUE)
+
+# Calculate regional CSMFs
+csmfSqzDraws_05to14REG <- lapply(csmfSqzDraws_05to14, function(x){ fn_calc_region(x, codAll, key_region) })
+csmfSqzDraws_05to19REG <- lapply(csmfSqzDraws_05to14, function(x){ fn_calc_region(x, codAll, key_region) })
+csmfSqzDraws_10to19REG <- lapply(csmfSqzDraws_05to14, function(x){ fn_calc_region(x, codAll, key_region) })
+
+## Uncertainty
 
 # Calculate uncertainty intervals
-ui_05to14 <- fn_calc_ui(csmfSqzDraws_AGG_05to14, UI = 0.95, CODALL = codAll)
-ui_05to19 <- fn_calc_ui(csmfSqzDraws_AGG_05to19, UI = 0.95, CODALL = codAll)
-ui_10to19 <- fn_calc_ui(csmfSqzDraws_AGG_10to19, UI = 0.95, CODALL = codAll)
+ui_05to14 <- fn_calc_ui(csmfSqzDraws_05to14, UI = 0.95, CODALL = codAll)
+ui_05to19 <- fn_calc_ui(csmfSqzDraws_05to19, UI = 0.95, CODALL = codAll)
+ui_10to19 <- fn_calc_ui(csmfSqzDraws_10to19, UI = 0.95, CODALL = codAll)
+ui_05to14REG <- fn_calc_ui(csmfSqzDraws_05to14REG, UI = 0.95, CODALL = codAll, REGIONAL = TRUE)
+ui_05to19REG <- fn_calc_ui(csmfSqzDraws_05to19REG, UI = 0.95, CODALL = codAll, REGIONAL = TRUE)
+ui_10to19REG <- fn_calc_ui(csmfSqzDraws_10to19REG, UI = 0.95, CODALL = codAll, REGIONAL = TRUE)
 
-# Combine point estimates with uncertainty intervals
-pointInt_05to14 <- fn_combine_ui_point(ui_05to14, csmfSqz_AGG_05to14, codAll)
-pointInt_05to19 <- fn_combine_ui_point(ui_05to19, csmfSqz_AGG_05to19, codAll)
-pointInt_10to19 <- fn_combine_ui_point(ui_10to19, smfSqz_AGG_10to19, codAll)
+# Round median estimates with uncertainty intervals
+pointInt_FRMT_05to14 <- fn_round_pointint(ui_05to14, codAll)
+pointInt_FRMT_05to19 <- fn_round_pointint(ui_05to19, codAll)
+pointInt_FRMT_10to19 <- fn_round_pointint(ui_10to19, codAll)
+pointInt_FRMT_05to14REG <- fn_round_pointint(ui_05to14REG, codAll, REGIONAL = TRUE)
+pointInt_FRMT_05to19REG <- fn_round_pointint(ui_05to19REG, codAll, REGIONAL = TRUE)
+pointInt_FRMT_10to19REG <- fn_round_pointint(ui_10to19REG, codAll, REGIONAL = TRUE)
 
-# Round point estimates with uncertainty intervals
-pointInt_FRMT_05to14 <- fn_round_pointint(pointInt_05to14, codAll)
-pointInt_FRMT_05to19 <- fn_round_pointint(pointInt_05to19, codAll)
-pointInt_FRMT_10to19 <- fn_round_pointint(pointInt_10to19, codAll)
+# Audit: confirm that median estimates fall in uncertainty bounds
+pointInt_AUD_05to14 <- fn_check_ui(pointInt_FRMT_05to14, codAll, QUANTILE = "median")
+pointInt_AUD_05to19 <- fn_check_ui(pointInt_FRMT_05to19, codAll, QUANTILE = "median")
+pointInt_AUD_10to19 <- fn_check_ui(pointInt_FRMT_10to19, codAll, QUANTILE = "median")
+pointInt_AUD_05to14REG <- fn_check_ui(pointInt_FRMT_05to14REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
+pointInt_AUD_05to19REG <- fn_check_ui(pointInt_FRMT_05to19REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
+pointInt_AUD_10to19REG <- fn_check_ui(pointInt_FRMT_10to19REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
+sum(unlist(lapply(list(pointInt_AUD_05to14, pointInt_AUD_05to19, pointInt_AUD_10to19, pointInt_AUD_05to14REG, pointInt_AUD_05to19REG, pointInt_AUD_10to19REG), nrow)))
 
-# Audit: check if point estimates fall in uncertainty bounds
-pointInt_AUD_05to14 <- fn_check_ui(pointInt_FRMT_05to14, codAll)
-pointInt_AUD_05to19 <- fn_check_ui(pointInt_FRMT_05to19, codAll)
-pointInt_AUD_10to19 <- fn_check_ui(pointInt_FRMT_10to19, codAll)
+# Add age columns
+pointInt_FRMT_05to14 <- fn_add_age_col(pointInt_FRMT_05to14, 5, 14)
+pointInt_FRMT_05to19 <- fn_add_age_col(pointInt_FRMT_05to19, 5, 19)
+pointInt_FRMT_10to19 <- fn_add_age_col(pointInt_FRMT_05to14, 10, 19)
+pointInt_FRMT_05to14REG <- fn_add_age_col(pointInt_FRMT_05to14REG, 5, 14)
+pointInt_FRMT_05to19REG <- fn_add_age_col(pointInt_FRMT_05to19REG, 5, 19)
+pointInt_FRMT_10to19REG <- fn_add_age_col(pointInt_FRMT_05to14REG, 10, 19)
+
+# Save
+write.csv(pointInt_FRMT_05to14, paste("./gen/aggregation/temp/pointInt_05to14.csv", sep=""), row.names = FALSE)
+write.csv(pointInt_FRMT_05to19, paste("./gen/aggregation/temp/pointInt_05to19.csv", sep=""), row.names = FALSE)
+write.csv(pointInt_FRMT_10to19, paste("./gen/aggregation/temp/pointInt_10to19.csv", sep=""), row.names = FALSE)
+write.csv(pointInt_FRMT_05to14REG, paste("./gen/aggregation/temp/pointInt_05to14REG.csv", sep=""), row.names = FALSE)
+write.csv(pointInt_FRMT_05to19REG, paste("./gen/aggregation/temp/pointInt_05to19REG.csv", sep=""), row.names = FALSE)
+write.csv(pointInt_FRMT_10to19REG, paste("./gen/aggregation/temp/pointInt_10to19REG.csv", sep=""), row.names = FALSE)
+
+## Results
+
+# Finalize estimates from uncertainty pipeline (final results)
+point_PUB_05to14 <- fn_publish_estimates(pointInt_FRMT_05to14, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+point_PUB_05to19 <- fn_publish_estimates(pointInt_FRMT_05to19, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+point_PUB_10to19 <- fn_publish_estimates(pointInt_FRMT_10to19, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+point_PUB_05to14REG <- fn_publish_estimates(pointInt_FRMT_05to14REG, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
+point_PUB_05to19REG <- fn_publish_estimates(pointInt_FRMT_05to19REG, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
+point_PUB_10to19REG <- fn_publish_estimates(pointInt_FRMT_10to19REG, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
+pointInt_PUB_05to14 <- fn_publish_estimates(pointInt_FRMT_05to14, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE)
+pointInt_PUB_05to19 <- fn_publish_estimates(pointInt_FRMT_05to19, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE)
+pointInt_PUB_10to19 <- fn_publish_estimates(pointInt_FRMT_10to19, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE)
+pointInt_PUB_05to14REG <- fn_publish_estimates(pointInt_FRMT_05to14REG, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
+pointInt_PUB_05to19REG <- fn_publish_estimates(pointInt_FRMT_05to19REG, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
+pointInt_PUB_10to19REG <- fn_publish_estimates(pointInt_FRMT_10to19REG, key_region, key_ctryclass, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
+
+# Save final versions
+write.csv(point_PUB_05to14, paste("./gen/aggregation/output/PointEstimates_National_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(point_PUB_05to19, paste("./gen/aggregation/output/PointEstimates_National_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(point_PUB_10to19, paste("./gen/aggregation/output/PointEstimates_National_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(point_PUB_05to14REG, paste("./gen/aggregation/output/PointEstimates_Regional_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(point_PUB_05to19REG, paste("./gen/aggregation/output/PointEstimates_Regional_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(point_PUB_10to19REG, paste("./gen/aggregation/output/PointEstimates_Regional_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_05to14, paste("./gen/aggregation/output/Uncertainty_National_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_05to19, paste("./gen/aggregation/output/Uncertainty_National_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_10to19, paste("./gen/aggregation/output/Uncertainty_National_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_05to14REG, paste("./gen/aggregation/output/Uncertainty_Regional_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_05to19REG, paste("./gen/aggregation/output/Uncertainty_Regional_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(pointInt_PUB_10to19REG, paste("./gen/aggregation/output/Uncertainty_Regional_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
+
+
+
+

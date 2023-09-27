@@ -324,20 +324,20 @@ rm(dthDraws_SQZ, dthDraws_SQZ_CHN, csmfDraws_envADD)
 ## Uncertainty
 
 # Calculate uncertainty intervals
-ui <- fn_calc_ui(csmfSqzDraws, UI = 0.95, KEY_COD = key_cod, ENV = env)
-ui_REG <- fn_calc_ui(csmfSqzDraws_REG, UI = 0.95, KEY_COD = key_cod, REGIONAL = TRUE)
+ui <- fn_calc_ui(csmfSqzDraws, UI = 0.95, CODALL = codAll, ENV = env)
+ui_REG <- fn_calc_ui(csmfSqzDraws_REG, UI = 0.95, CODALL = codAll, REGIONAL = TRUE)
 
 # Combine point estimates with uncertainty intervals
-pointInt <- fn_combine_ui_point(ui, csmfSqz, key_cod)
-pointInt_REG <- fn_combine_ui_point(ui_REG, csmfSqz_REG, key_cod, REGIONAL = TRUE)
+pointInt <- fn_combine_ui_point(ui, csmfSqz, codAll)
+pointInt_REG <- fn_combine_ui_point(ui_REG, csmfSqz_REG, codAll, REGIONAL = TRUE)
 
 # Round point estimates with uncertainty intervals
-pointInt_FRMT <- fn_round_pointint(pointInt, key_cod)
-pointInt_FRMT_REG <- fn_round_pointint(pointInt_REG, key_cod, REGIONAL = TRUE)
+pointInt_FRMT <- fn_round_pointint(pointInt, codAll)
+pointInt_FRMT_REG <- fn_round_pointint(pointInt_REG, codAll, REGIONAL = TRUE)
 
 # Audit: check if point estimates fall in uncertainty bounds
-pointInt_AUD <- fn_check_ui(pointInt_FRMT, key_cod)
-pointInt_AUD_REG <- fn_check_ui(pointInt_FRMT_REG, key_cod, REGIONAL = TRUE)
+pointInt_AUD <- fn_check_ui(pointInt_FRMT, codAll)
+pointInt_AUD_REG <- fn_check_ui(pointInt_FRMT_REG, codAll, REGIONAL = TRUE)
 if(nrow(pointInt_AUD) > 0){
   write.csv(pointInt_AUD, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 }
@@ -346,15 +346,15 @@ if(nrow(pointInt_AUD_REG) > 0){
 }
 
 # Adjust point estimates and uncertainty intervals
-pointInt_ADJ <- fn_adjust_pointint(pointInt_FRMT, key_cod)
+pointInt_ADJ <- fn_adjust_pointint(pointInt_FRMT, codAll)
 
 # Audit: check if point estimates fall in uncertainty bounds
-pointIntAdj_AUD <- fn_check_ui(pointInt_ADJ, key_cod)
+pointIntAdj_AUD <- fn_check_ui(pointInt_ADJ, codAll)
 if(nrow(pointIntAdj_AUD) > 0){
   write.csv(pointIntAdj_AUD, paste("./gen/uncertainty/audit/pointIntAdj_AUD_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 }
 
-# Save final version
+# Save
 write.csv(pointInt_ADJ, paste("./gen/uncertainty/output/pointInt_", ageGroup,".csv", sep=""), row.names = FALSE)
 write.csv(pointInt_FRMT_REG, paste("./gen/uncertainty/output/pointInt_", ageGroup,"REG.csv", sep=""), row.names = FALSE)
 
@@ -396,19 +396,15 @@ if(aggregateAges){
   # Load inputs and functions
   source("./src/aggregation/aggregation_inputs.R")
   source("./src/aggregation/aggregation_functions.R")
+  source("./src/squeezing/squeezing_functions.R")
   source("./src/uncertainty/uncertainty_functions.R")
   source("./src/results/results_functions.R")
+  source("./src/visualizations/visualizations_functions.R")
   
-  # Run script
+  # Run scripts
   source("./src/aggregation/calc-agg-agegroups.R")
+  source("./src/aggregation/create-agg-plots.R")
 }
-
-
-
-
-
-
-
 
 
 ################################################################################

@@ -20,7 +20,7 @@ point_REG <- read.csv(paste("./gen/results/output/PointEstimates_Regional_", age
 pointInt <- read.csv(paste("./gen/results/output/Uncertainty_National_", ageGroup, "_", resDate, ".csv", sep = ""))
 pointInt_REG <- read.csv(paste("./gen/results/output/Uncertainty_Regional_", ageGroup, "_", resDate, ".csv", sep = ""))
 
-# Point estimates from previous estimation round
+# Pancho's point estimates from previous estimation round
 if(ageGroup == "05to09"){point_PrevResults <- read.csv("./data/previous-results/PointEstimates_2000-2019_National_05to09.csv")
                          point_PrevResults_REG <- read.csv("./data/previous-results/PointEstimates_2000-2019_Regional_05to09.csv")}
 if(ageGroup == "10to14"){point_PrevResults <- read.csv("./data/previous-results/PointEstimates_2000-2019_National_10to14.csv")

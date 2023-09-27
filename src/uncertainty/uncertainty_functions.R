@@ -427,10 +427,13 @@ fn_calc_ui <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
   # Calculate quantiles for each cell across matrices of the array
   m_frac_lb <- apply(simplify2array(l_frac), c(1,2), quantile, UI[1], na.rm = T)
   m_frac_ub <- apply(simplify2array(l_frac), c(1,2), quantile, UI[2], na.rm = T)
+  m_frac_med <- apply(simplify2array(l_frac), c(1,2), quantile, .5, na.rm = T)
   m_deaths_lb <- apply(simplify2array(l_deaths), c(1,2), quantile, UI[1], na.rm = T)
   m_deaths_ub <- apply(simplify2array(l_deaths), c(1,2), quantile, UI[2], na.rm = T)
+  m_deaths_med <- apply(simplify2array(l_deaths), c(1,2), quantile, .5, na.rm = T)
   m_rates_lb <- apply(simplify2array(l_rates), c(1,2), quantile, UI[1], na.rm = T)
   m_rates_ub <- apply(simplify2array(l_rates), c(1,2), quantile, UI[2], na.rm = T)
+  m_rates_med <- apply(simplify2array(l_rates), c(1,2), quantile, .5, na.rm = T)
   
   if(!is.null(ENV)){
     #------------------------#
@@ -487,6 +490,10 @@ fn_calc_ui <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
                                     Variable = rep("Fraction", nrow(df_idcols)),
                                     Quantile = rep("Lower", nrow(df_idcols)), 
                                     m_frac_lb))
+  df_frac_med <- as.data.frame(cbind(df_idcols, 
+                                    Variable = rep("Fraction", nrow(df_idcols)),
+                                    Quantile = rep("Median", nrow(df_idcols)), 
+                                    m_frac_med))
   df_frac_ub <- as.data.frame(cbind(df_idcols, 
                                     Variable = rep("Fraction", nrow(df_idcols)),
                                     Quantile = rep("Upper", nrow(df_idcols)), 
@@ -495,6 +502,10 @@ fn_calc_ui <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
                                       Variable = rep("Deaths", nrow(df_idcols)),
                                       Quantile = rep("Lower", nrow(df_idcols)), 
                                       m_deaths_lb))
+  df_deaths_med <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep("Deaths", nrow(df_idcols)),
+                                     Quantile = rep("Median", nrow(df_idcols)), 
+                                     m_deaths_med))
   df_deaths_ub <- as.data.frame(cbind(df_idcols, 
                                       Variable = rep("Deaths", nrow(df_idcols)),
                                       Quantile = rep("Upper", nrow(df_idcols)), 
@@ -503,13 +514,17 @@ fn_calc_ui <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
                                      Variable = rep("Rate", nrow(df_idcols)),
                                      Quantile = rep("Lower", nrow(df_idcols)), 
                                      m_rates_lb))
+  df_rates_med <- as.data.frame(cbind(df_idcols, 
+                                     Variable = rep("Rate", nrow(df_idcols)),
+                                     Quantile = rep("Median", nrow(df_idcols)), 
+                                     m_rates_med))
   df_rates_ub <- as.data.frame(cbind(df_idcols, 
                                      Variable = rep("Rate", nrow(df_idcols)),
                                      Quantile = rep("Upper", nrow(df_idcols)), 
                                      m_rates_ub))
   
   # Combine and tidy
-  df_res <- rbind(df_frac_lb, df_frac_ub, df_deaths_lb, df_deaths_ub, df_rates_lb, df_rates_ub)
+  df_res <- rbind(df_frac_lb, df_frac_med, df_frac_ub, df_deaths_lb, df_deaths_ub, df_deaths_med, df_rates_lb, df_rates_ub, df_rates_med)
   if(!REGIONAL){
     df_res <- df_res[order(df_res$ISO3, df_res$Year, df_res$Sex, df_res$Variable, df_res$Quantile),]
   }else{
@@ -527,10 +542,6 @@ fn_calc_ui <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
   
   return(df_res)
 }
-
-#CSMFSQZ <- csmfSqz_AGG_05to19
-#UI <- ui_05to19
-#CODALL <- codAll
 
 fn_combine_ui_point <- function(UI, CSMFSQZ, CODALL, REGIONAL = FALSE){
   
@@ -575,6 +586,8 @@ fn_combine_ui_point <- function(UI, CSMFSQZ, CODALL, REGIONAL = FALSE){
   # Keep same columns in UI
   v_col <- names(df_frac)[names(df_frac) %in% names(UI)]
   ui <- UI[,paste(v_col)]
+  # Only keep upper and lower bounds (not median)
+  ui <- subset(ui, Quantile %in% c("Lower", "Upper"))
   
   # Combine and tidy
   df_res <- rbind(df_frac, df_rates, df_deaths, ui)
@@ -612,11 +625,14 @@ fn_round_pointint <- function(POINTINT, CODALL, REGIONAL = FALSE){
   ## Deaths
   
   # Round quantiles for all-cause deaths
+  dat$Deaths2[dat$Quantile == "Median"] <- round(dat$Deaths2[dat$Quantile == "Median"])
   dat$Deaths2[dat$Quantile == "Point"] <- round(dat$Deaths2[dat$Quantile == "Point"])
   dat$Deaths2[dat$Quantile == "Lower"] <- floor(dat$Deaths2[dat$Quantile == "Lower"])
   dat$Deaths2[dat$Quantile == "Upper"] <- ceiling(dat$Deaths2[dat$Quantile == "Upper"])
   
   # Round quantiles for cause-specific deaths
+  dat[dat$Variable == "Deaths" & dat$Quantile == "Median", v_cod] <- 
+    round(dat[dat$Variable == "Deaths" & dat$Quantile == "Median", v_cod])
   dat[dat$Variable == "Deaths" & dat$Quantile == "Point", v_cod] <- 
     round(dat[dat$Variable == "Deaths" & dat$Quantile == "Point", v_cod])
   dat[dat$Variable == "Deaths" & dat$Quantile == "Lower", v_cod] <- 
@@ -627,11 +643,14 @@ fn_round_pointint <- function(POINTINT, CODALL, REGIONAL = FALSE){
   ## Rates
   
   # Round all-cause rates
+  dat$Rate2[dat$Quantile == "Median"] <- round(dat$Rate2[dat$Quantile == "Median"], 5)
   dat$Rate2[dat$Quantile == "Point"] <- round(dat$Rate2[dat$Quantile == "Point"], 5)
   dat$Rate2[dat$Quantile == "Lower"] <- floor(dat$Rate2[dat$Quantile == "Lower"]*10^5) / 10^5
   dat$Rate2[dat$Quantile == "Upper"] <- ceiling(dat$Rate2[dat$Quantile == "Upper"]*10^5) / 10^5
   
   # Round cause-specific rates
+  dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod] <- 
+    round(dat[dat$Variable == "Rate" & dat$Quantile == "Median", v_cod], 5)
   dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod] <- 
     round(dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod], 5)
   dat[dat$Variable == "Rate" & dat$Quantile == "Lower", v_cod] <- 
@@ -642,6 +661,8 @@ fn_round_pointint <- function(POINTINT, CODALL, REGIONAL = FALSE){
   ## Fractions
   
   # Round cause-specific fractions
+  dat[dat$Variable == "Fraction" & dat$Quantile == "Median", v_cod] <- 
+    round(dat[dat$Variable == "Fraction" & dat$Quantile == "Median", v_cod], 5)
   dat[dat$Variable == "Fraction" & dat$Quantile == "Point", v_cod] <- 
     round(dat[dat$Variable == "Fraction" & dat$Quantile == "Point", v_cod], 5)
   dat[dat$Variable == "Fraction" & dat$Quantile == "Lower", v_cod] <- 
@@ -661,7 +682,7 @@ fn_round_pointint <- function(POINTINT, CODALL, REGIONAL = FALSE){
   
 }
 
-fn_check_ui <- function(POINTINT, CODALL, REGIONAL = FALSE){
+fn_check_ui <- function(POINTINT, CODALL, REGIONAL = FALSE, QUANTILE = "point"){
   
   #' @title Check if point estimates fall inside uncertainty intervals
   # 
@@ -669,6 +690,7 @@ fn_check_ui <- function(POINTINT, CODALL, REGIONAL = FALSE){
   #
   #' @param POINTINT Data frame with rounded point estimates, lower, and upper bounds for fractions/deaths/rates
   #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @param QUANTILE String of either "point" or "median" to determine which should be checked
   #' @return Data frame with rows where death/fraction/rate point estimates are outside of uncertainty intervals.
   
   dat <- POINTINT
@@ -695,10 +717,18 @@ fn_check_ui <- function(POINTINT, CODALL, REGIONAL = FALSE){
     datWide <- dcast(datLong,  Region+Year+Sex+cod ~ Variable+Quantile, value.var = "value")
   }
   
-  # Check that point estimate is inside uncertainty interval
-  datWide$Deaths_Check   <- ifelse(datWide$Deaths_Lower > datWide$Deaths_Point | datWide$Deaths_Upper < datWide$Deaths_Point, 1, 0)
-  datWide$Fraction_Check <- ifelse(datWide$Fraction_Lower > datWide$Fraction_Point | datWide$Fraction_Upper < datWide$Fraction_Point, 1, 0)
-  datWide$Rate_Check     <- ifelse(datWide$Rate_Lower > datWide$Rate_Point | datWide$Rate_Upper < datWide$Rate_Point, 1, 0)
+  if(QUANTILE == "point"){
+    # Check that point estimate is inside uncertainty interval
+    datWide$Deaths_Check   <- ifelse(datWide$Deaths_Lower > datWide$Deaths_Point | datWide$Deaths_Upper < datWide$Deaths_Point, 1, 0)
+    datWide$Fraction_Check <- ifelse(datWide$Fraction_Lower > datWide$Fraction_Point | datWide$Fraction_Upper < datWide$Fraction_Point, 1, 0)
+    datWide$Rate_Check     <- ifelse(datWide$Rate_Lower > datWide$Rate_Point | datWide$Rate_Upper < datWide$Rate_Point, 1, 0)
+  }
+  if(QUANTILE == "median"){
+    # Check that median is inside uncertainty interval
+    datWide$Deaths_Check   <- ifelse(datWide$Deaths_Lower > datWide$Deaths_Median | datWide$Deaths_Upper < datWide$Deaths_Median, 1, 0)
+    datWide$Fraction_Check <- ifelse(datWide$Fraction_Lower > datWide$Fraction_Median | datWide$Fraction_Upper < datWide$Fraction_Median, 1, 0)
+    datWide$Rate_Check     <- ifelse(datWide$Rate_Lower > datWide$Rate_Median | datWide$Rate_Upper < datWide$Rate_Median, 1, 0)
+  }
   
   # Reshape to long
   datLong2 <- melt(datWide, id.vars = c(idVarsAux, "cod", "Deaths_Check", "Fraction_Check", "Rate_Check"))
@@ -725,7 +755,7 @@ fn_check_ui <- function(POINTINT, CODALL, REGIONAL = FALSE){
   return(df_prob)
 }
 
-fn_adjust_pointint <- function(POINTINT, KEY_COD, REGIONAL = FALSE){
+fn_adjust_pointint <- function(POINTINT, CODALL, REGIONAL = FALSE){
   
   #' @title Adjust point estimates, lower, and upper bounds for consistency
   # 
@@ -743,9 +773,9 @@ fn_adjust_pointint <- function(POINTINT, KEY_COD, REGIONAL = FALSE){
   
   dat <- POINTINT
   # Causes of death for this age group
-  # v_cod <- CODALL[CODALL %in% names(dat)]
-  v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
-  v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
+  v_cod <- CODALL[CODALL %in% names(dat)]
+  #v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
+  #v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
   v_other <- names(dat)[!(names(dat) %in% v_cod)]
   
   ## Adjustments to cause-specific fractions/rates/deaths due to cause-specific deaths between 0 and 1
@@ -769,7 +799,7 @@ fn_adjust_pointint <- function(POINTINT, KEY_COD, REGIONAL = FALSE){
   datWide <- dcast(setDT(datLong),  id ~ Variable+Quantile, value.var = "value")
   
   # When cause-specific deaths point estimate is between 0 and 1 and also larger than the upper bound, change the upper bound to 1
-  # Note: this one commented out  in Pancho"s function AdjustUncert()
+  # Note: this one commented out  in Pancho's function AdjustUncert()
   #id_ubDeathsADJ <- unique(subset(datWide, Deaths_Point > 0 & Deaths_Point < 1 & Deaths_Point > Deaths_Upper)$id)
   #datLong$value[datLong$id %in% id_ubDeathsADJ & datLong$Quantile == "Upper" & datLong$Variable == "Deaths"] <- 1
   

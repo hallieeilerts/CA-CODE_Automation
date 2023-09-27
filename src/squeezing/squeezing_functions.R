@@ -510,7 +510,7 @@ fn_format_all_output <- function(CSMF_ALL, KEY_COD){
   
 }
 
-fn_calc_region <- function(CSMF, KEY_COD, KEY_REGION){
+fn_calc_region <- function(CSMF, CODALL, KEY_REGION){
   
   #' @title Calculate CSMFs for global regions
   # 
@@ -525,9 +525,9 @@ fn_calc_region <- function(CSMF, KEY_COD, KEY_REGION){
   dat <- merge(CSMF, KEY_REGION, by = "ISO3")
   
   # Causes of death for this age group
-  #v_cod <- CODALL[CODALL %in% names(dat)]
-  v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
-  v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
+  v_cod <- CODALL[CODALL %in% names(dat)]
+  #v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
+  #v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
   
   # Create unified variable for region
   dat$Region <- dat$UNICEFReportRegion1
