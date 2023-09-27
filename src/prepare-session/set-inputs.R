@@ -14,9 +14,6 @@ ageGroup <- "10to14"
 # ageGroup <- "15to19f"
 # ageGroup <- "15to19m"
 
-## Calculate aggregate age groups as well
-aggregateAges <- TRUE
-
 ## Set years for update
 Years <- 2000:2021
 
