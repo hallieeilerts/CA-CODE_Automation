@@ -1,3 +1,6 @@
+
+#CSMF <- csmfList_envADD_CHN[[1179]]
+
 fn_randAssignVR <- function(CSMF, KEY_COD, CTRYGRP){
   
   #' @title Randomly assign CSMF values for goodvr/China for current draw
@@ -32,6 +35,21 @@ fn_randAssignVR <- function(CSMF, KEY_COD, CTRYGRP){
   
   # Transform into fractions
   dat[, paste(v_cod)] <- dat[, paste(v_cod)] / rowSums(dat[, paste(v_cod)])
+  
+  # Adjust for when there are zero crisis-included deaths which results in NAs in CSMFs
+  # A similar step is done in prediction/fn_calcCSMF
+  idAdjust <- which(is.na(dat$OtherCMPN))
+  if (length(idAdjust) > 0) {
+    for (i in idAdjust) {
+      if (dat$Year[i] == min(Years)) {
+        dat[i, !names(dat) %in% c(idVars, "Deaths1", "Rate1", "Deaths2", "Rate2")] <-
+          dat[i+1, !names(dat) %in% c(idVars, "Deaths1", "Rate1", "Deaths2", "Rate2")]  
+      } else {
+        dat[i, !names(dat) %in% c(idVars, "Deaths1", "Rate1", "Deaths2", "Rate2")] <-
+          dat[i-1, !names(dat) %in% c(idVars, "Deaths1", "Rate1", "Deaths2", "Rate2")]
+      }
+    }
+  }
   
   # Return random draw for GOODVR or CHN
   return(dat)

@@ -26,10 +26,13 @@ fn_roundPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
   dat$Deaths2[dat$Quantile == "Upper"] <- ceiling(dat$Deaths2[dat$Quantile == "Upper"])
   
   # Round quantiles for cause-specific deaths
-  dat[dat$Variable == "Deaths" & dat$Quantile == "Median", v_cod] <- 
-    round(dat[dat$Variable == "Deaths" & dat$Quantile == "Median", v_cod])
-  dat[dat$Variable == "Deaths" & dat$Quantile == "Point", v_cod] <- 
-    round(dat[dat$Variable == "Deaths" & dat$Quantile == "Point", v_cod])
+  if("Median" %in% unique(dat$Quantile)){
+    dat[dat$Variable == "Deaths" & dat$Quantile == "Median", v_cod] <- 
+      round(dat[dat$Variable == "Deaths" & dat$Quantile == "Median", v_cod])
+  }else{
+    dat[dat$Variable == "Deaths" & dat$Quantile == "Point", v_cod] <- 
+      round(dat[dat$Variable == "Deaths" & dat$Quantile == "Point", v_cod])
+  }
   dat[dat$Variable == "Deaths" & dat$Quantile == "Lower", v_cod] <- 
     floor(dat[dat$Variable == "Deaths" & dat$Quantile == "Lower", v_cod])
   dat[dat$Variable == "Deaths" & dat$Quantile == "Upper", v_cod] <- 
@@ -44,10 +47,13 @@ fn_roundPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
   dat$Rate2[dat$Quantile == "Upper"] <- ceiling(dat$Rate2[dat$Quantile == "Upper"]*10^5) / 10^5
   
   # Round cause-specific rates
-  dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod] <- 
-    round(dat[dat$Variable == "Rate" & dat$Quantile == "Median", v_cod], 5)
-  dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod] <- 
-    round(dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod], 5)
+  if("Median" %in% unique(dat$Quantile)){
+    dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod] <- 
+      round(dat[dat$Variable == "Rate" & dat$Quantile == "Median", v_cod], 5)
+  }else{
+    dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod] <- 
+      round(dat[dat$Variable == "Rate" & dat$Quantile == "Point", v_cod], 5)
+  }
   dat[dat$Variable == "Rate" & dat$Quantile == "Lower", v_cod] <- 
     floor(dat[dat$Variable == "Rate" & dat$Quantile == "Lower", v_cod]*10^5) / 10^5
   dat[dat$Variable == "Rate" & dat$Quantile == "Upper", v_cod] <- 
@@ -56,10 +62,13 @@ fn_roundPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
   ## Fractions
   
   # Round cause-specific fractions
-  dat[dat$Variable == "Fraction" & dat$Quantile == "Median", v_cod] <- 
+  if("Median" %in% unique(dat$Quantile)){
+    dat[dat$Variable == "Fraction" & dat$Quantile == "Median", v_cod] <- 
     round(dat[dat$Variable == "Fraction" & dat$Quantile == "Median", v_cod], 5)
-  dat[dat$Variable == "Fraction" & dat$Quantile == "Point", v_cod] <- 
-    round(dat[dat$Variable == "Fraction" & dat$Quantile == "Point", v_cod], 5)
+  }else{
+    dat[dat$Variable == "Fraction" & dat$Quantile == "Point", v_cod] <- 
+      round(dat[dat$Variable == "Fraction" & dat$Quantile == "Point", v_cod], 5)
+  }
   dat[dat$Variable == "Fraction" & dat$Quantile == "Lower", v_cod] <- 
     floor(dat[dat$Variable == "Fraction" & dat$Quantile == "Lower", v_cod]*10^5) / 10^5
   dat[dat$Variable == "Fraction" & dat$Quantile == "Upper", v_cod] <- 

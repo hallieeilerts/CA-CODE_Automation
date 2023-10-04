@@ -3,6 +3,7 @@
 #' @return Functions loaded below
 ################################################################################
 source("./src/prediction/fn_calcCSMF.R")
+source("./src/prediction/fn_extractCov.R")
 source("./src/prediction/fn_callP1New.R")
 source("./src/prediction/fn_p1New.R")
 source("./src/prediction/fn_capMalFrac.R")

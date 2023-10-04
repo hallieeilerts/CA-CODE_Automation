@@ -26,6 +26,7 @@ source("./src/data-management/set-country-class.R")
 
 # Envelopes
 source("./src/data-management/prep-envelopes.R")
+source("./src/data-management/prep-envelopes-regional.R")
 source("./src/data-management/prep-envelopes-draws.R") # For 15-19f or 15-19m, creates draws for males, females, and both sexes combined
 
 # Exposure data
@@ -49,7 +50,7 @@ if(simpleUpdate){
   source("./src/data-management/prep-model-objects-lmm.R")
 }
 
-# Set fractions for capping malaria, and mminimum fractions for squeezing
+# Set fractions for capping malaria, and minimum fractions for squeezing
 source("./src/data-management/set-frac-cap-malaria.R")
 source("./src/data-management/set-frac-min-cd.R")
 source("./src/data-management/set-frac-min-lri.R")
@@ -170,7 +171,7 @@ if(ageGroup %in% c("15to19f", "15to19m")){
 }
 
 # Format squeezed output
-csmf_SQZ <- fn_formatSqzOutput(dth_SQZ, dth_SQZ_CHN, csmf_envADD, key_cod)
+csmf_SQZ <- fn_formatSqzOutput(dth_SQZ, dth_SQZ_CHN, csmf_envADD, csmf_envADD_CHN, key_cod)
 
 # Audit: check if squeezed CSMFs add up to 1 or contain NA
 csmf_SQZ_AUD <- fn_checkCSMFsqz(csmf_SQZ, key_cod)
@@ -184,7 +185,7 @@ csmfSqz <- fn_formatAllOutput(csmfSqz, key_cod)
 write.csv(csmfSqz, paste("./gen/squeezing/output/csmfSqz_", ageGroup, ".csv", sep=""), row.names = FALSE)
 
 # Calculate regional CSMFs
-csmfSqz_REG <- fn_calcRegion(csmfSqz, key_cod, key_region)
+csmfSqz_REG <- fn_calcRegion(csmfSqz, env_REG, codAll, key_region)
 write.csv(csmfSqz_REG, paste("./gen/squeezing/output/csmfSqz_", ageGroup, "REG.csv", sep=""), row.names = FALSE)
 
 # Clear environment
@@ -292,13 +293,13 @@ if(ageGroup %in% c("15to19f", "15to19m")){
 }
 # Remove unnecessary objects
 suppressWarnings(rm(csmfDraws_SAMP, envDraws_SAMP,
-                    csmfDraws_othercmpnSQZ, csmfDraws_lriSQZ, csmfDraws_crisisEndSQZ, 
-                    dthDraws_crisisEpiSQZ, dthDraws_measEpiADD, 
+                    csmfDraws_othercmpnSQZ, csmfDraws_lriSQZ, csmfDraws_crisisEndSQZ,
+                    dthDraws_crisisEpiSQZ, dthDraws_measEpiADD,
                     csmfDraws_othercmpnSQZ_CHN, dthDraws_crisisEpiSQZ_CHN))
 
 # Format squeezed output
-csmfDraws_SQZ <- mapply(function(x,y,z) fn_formatSqzOutput(x,y, z, key_cod), 
-                        dthDraws_SQZ, dthDraws_SQZ_CHN, csmfDraws_envADD, SIMPLIFY = FALSE)
+csmfDraws_SQZ <- mapply(function(w,x,y,z) fn_formatSqzOutput(w,x,y,z, key_cod), 
+                        dthDraws_SQZ, dthDraws_SQZ_CHN, csmfDraws_envADD, csmfDraws_CHN, SIMPLIFY = FALSE)
 
 # Audit: check if squeezed CSMFs add up to 1 or contain NA
 csmfDraws_SQZ_AUD  <- lapply(csmfDraws_SQZ, function(x){ fn_checkCSMFsqz(x, key_cod) })
@@ -315,7 +316,7 @@ csmfSqzDraws <- lapply(csmfSqzDraws, function(x){ fn_formatAllOutput(x, key_cod)
 saveRDS(csmfSqzDraws, file = paste("./gen/uncertainty/temp/csmfSqzDraws_", ageGroup, ".rds", sep=""))
 
 # Calculate regional CSMFs
-csmfSqzDraws_REG <- lapply(csmfSqzDraws, function(x){ fn_calcRegion(x, key_cod, key_region) })
+csmfSqzDraws_REG <- lapply(csmfSqzDraws, function(x){ fn_calcRegion(x,  env_REG, codAll, key_region) })
 
 # Remove unnecessary objects
 rm(dthDraws_SQZ, dthDraws_SQZ_CHN, csmfDraws_envADD)
@@ -337,15 +338,12 @@ pointInt_FRMT_REG <- fn_roundPointInt(pointInt_REG, codAll, REGIONAL = TRUE)
 # Audit: check if point estimates fall in uncertainty bounds
 pointInt_AUD <- fn_checkUI(pointInt_FRMT, codAll)
 pointInt_AUD_REG <- fn_checkUI(pointInt_FRMT_REG, codAll, REGIONAL = TRUE)
-if(nrow(pointInt_AUD) > 0){
-  write.csv(pointInt_AUD, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
-}
-if(nrow(pointInt_AUD_REG) > 0){
-  write.csv(pointInt_AUD_REG, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"REG_", resDate, ".csv", sep=""), row.names = FALSE)
-}
+if(nrow(pointInt_AUD) > 0){write.csv(pointInt_AUD, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)}
+if(nrow(pointInt_AUD_REG) > 0){write.csv(pointInt_AUD_REG, paste("./gen/uncertainty/audit/pointInt_AUD_", ageGroup,"REG_", resDate, ".csv", sep=""), row.names = FALSE)}
 
 # Adjust point estimates and uncertainty intervals
-pointInt_ADJ <- fn_adjustPointInt(pointInt_FRMT, codAll)
+pointInt_ADJ <- fn_adjustPointIntZeroDeaths(pointInt_FRMT, codAll)
+pointInt_ADJ <- fn_manuallyAdjustBounds(pointInt_ADJ)
 
 # Audit: check if point estimates fall in uncertainty bounds
 pointIntAdj_AUD <- fn_checkUI(pointInt_ADJ, codAll)
@@ -369,9 +367,14 @@ source("./src/results/results_inputs.R")
 source("./src/results/results_functions.R")
 
 # Finalize estimates from squeezing pipeline (intermediate results)
-csmfSqz_FRMT <- fn_roundCSMFsqz(csmfSqz, key_cod)
-csmfSqz_PUB  <- fn_publishEstimates(csmfSqz_FRMT, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+csmfSqz_ADJ <- fn_adjustForZeroDeaths(csmfSqz, codAll)
+csmfSqz_FRMT <- fn_roundCSMFsqz(csmfSqz_ADJ, codAll)
+csmfSqz_ADJ_REG <- fn_adjustForZeroDeaths(csmfSqz_REG, codAll)
+csmfSqz_FRMT_REG <- fn_roundCSMFsqz(csmfSqz_ADJ_REG, codAll)
+csmfSqz_PUB      <- fn_publishEstimates(csmfSqz_FRMT, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)
+csmfSqz_PUB_REG  <- fn_publishEstimates(csmfSqz_FRMT_REG, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
 write.csv(csmfSqz_PUB, paste("./gen/results/temp/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(csmfSqz_PUB_REG, paste("./gen/results/temp/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""), row.names = FALSE)
 
 # Finalize estimates from uncertainty pipeline (final results)
 point_PUB        <- fn_publishEstimates(pointInt, key_region, key_ctryclass, codAll, UNCERTAINTY = FALSE)

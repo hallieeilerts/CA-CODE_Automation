@@ -47,6 +47,14 @@ fn_compareCSMF <- function(DAT1, DAT2, REGIONAL = FALSE, SAMPLE = NULL){
     dat <- subset(dat, name %in% SAMPLE)
   }
   
+  # PATCH ----------#
+  # 2023-09-29
+  # To match regions on data portal
+  if(REGIONAL == TRUE){
+    dat <- subset(dat, !(name %in% c("Europe and central Asia","Sub-Saharan Africa")))
+  }
+  # ---------------#
+  
   # Order plots alphabetically by world region and then nation
   
   plots <- dlply(dat, ~name,

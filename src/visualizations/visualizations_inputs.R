@@ -12,7 +12,13 @@ library(data.table) # melt, dcast
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 
-# Point estimates that have been processed in uncertainty pipeline
+# Point estimates that have been processed in squeezing and formatted in results (intermediate results)
+#point <- read.csv(paste("./gen/results/temp/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""))
+#point_REG <- read.csv(paste("./gen/results/temp/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""))
+# Note that some of the point estimates get altered in uncertainty pipeline-- set to zero when the all-cause rates are 0.
+# So there will be some small differences here.
+
+# Point estimates that have been processed in uncertainty pipeline and formatted in results (final results)
 # (some point estimates for fractions are slightly different from csmfSqz because they were adjusted in fn_adjust_pointint() [Pancho's AdjustUncert() function])
 point <- read.csv(paste("./gen/results/output/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""))
 point_REG <- read.csv(paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""))

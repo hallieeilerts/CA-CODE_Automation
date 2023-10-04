@@ -1,24 +1,20 @@
-fn_adjusPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
+fn_adjustPointIntZeroDeaths <- function(POINTINT, CODALL, REGIONAL = FALSE){
   
-  #' @title Adjust point estimates, lower, and upper bounds for consistency
+  #' @title Adjust point estimates, lower, and upper bounds when cause-specific or all-cause deaths are close to zero
   # 
   #' @description When cause-specific deaths point estimate is between 0 and 1, change LB of fractions/rates/deaths to 0.
   #' When cause-specific deaths point estimate = 0 and UB of cause-specific rate < cause-specific rate point estimate, change point estimate of rate to 0.
   #' When cause-specific deaths point estimate = 0 and UB of cause-specific fraction < cause-specific fraction point estimate, change point estimate of fraction to 0.
   #' When IGME all-cause deaths = 0, change cause-specific fractions/deaths/rates LB and point estimates to 0, change cause-specific UB for fractions/deaths to 1, change cause-specific UB for rates to same as all-cause UB, change cause-specific UB for fractions/rates/deaths Measles, Malaria, Natural Disasters, Collective Violence to 0.
   #' Adjust LB and UB of cause-specific fractions that fall on wrong side of point estimate.
-  #' 2023.06.08 PATCH that manually adjusts some confidence intervals.
   #
   #' @param POINTINT Data frame with rounded point estimates, lower, and upper bounds for fractions/deaths/rates
-  #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
   #' @param REGIONAL Boolean with true/false value if regional estimates.
   #' @return Data frame with rounded point estimates, lower, and upper bounds for fractions/deaths/rates that have been adjusted for inconsistencies.
   
   dat <- POINTINT
-  # Causes of death for this age group
   v_cod <- CODALL[CODALL %in% names(dat)]
-  #v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
-  #v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
   v_other <- names(dat)[!(names(dat) %in% v_cod)]
   
   ## Adjustments to cause-specific fractions/rates/deaths due to cause-specific deaths between 0 and 1
@@ -117,90 +113,6 @@ fn_adjusPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
     df_res <- df_res[order(df_res$Region, df_res$Year, df_res$Sex, df_res$Variable, df_res$Quantile),]
   }
   rownames(df_res) <- NULL
-  
-  if(!REGIONAL){
-    #------------------------#
-    # 2023.06.08 PATCH
-    # For rates, multiply by 100, floor() to remove decimals, divide by 100
-    # if(ageGroup == "05to09"){
-    #   # PANCHO's adjustments commented out
-    #   # Measles in Turkey
-    #   df_res$Measles[which(df_res$ISO3 == "TUR" & df_res$Year %in% c(2003, 2008, 2009) &
-    #                       df_res$Variable == "Rate" & df_res$Quantile == "Upper")] <-
-    #     df_res$Measles[which(df_res$ISO3 == "TUR" & df_res$Year %in% c(2003, 2008, 2009) &
-    #                         df_res$Variable == "Rate" & df_res$Quantile == "Upper")] + 0.00002
-    #   # HIV in Bangladesh
-    #   df_res$HIV[which(df_res$ISO3 == "BGD" & df_res$Year %in% c(2007) &
-    #                   df_res$Variable == "Rate" & df_res$Quantile == "Upper")] <-
-    #     df_res$HIV[which(df_res$ISO3 == "BGD" & df_res$Year %in% c(2007) &
-    #                     df_res$Variable == "Rate" & df_res$Quantile == "Upper")] + 0.00003
-    # }
-    if(ageGroup == "10to14"){
-      # Somalia Nat Disasters in 2011
-      # df_res$NatDis[which(df_res$ISO3 == "SOM" & df_res$Year == 2011 &
-      #                    df_res$Variable == "Rate" & df_res$Quantile == "Lower")] <-
-      #   floor(100*df_res$NatDis[which(df_res$ISO3 == "SOM" & df_res$Year == 2011 &
-      #                       df_res$Variable == "Rate" & df_res$Quantile == "Lower")]) / 100
-      # Micronesia (FSM) OtherCMPN in 2002
-      df_res$OtherCMPN[which(df_res$ISO3 == "FSM" & df_res$Year == 2002 &
-                               df_res$Variable == "Deaths" & df_res$Quantile == "Upper")] <-
-        df_res$OtherCMPN[which(df_res$ISO3 == "FSM" & df_res$Year == 2002 &
-                                 df_res$Variable == "Deaths" & df_res$Quantile == "Upper")] + 1
-      # Somalia HIV in 2010
-      df_res$HIV[which(df_res$ISO3 == "SOM" & df_res$Year == 2010 &
-                         df_res$Variable == "Rate" & df_res$Quantile == "Lower")] <-
-        floor(100*df_res$HIV[which(df_res$ISO3 == "SOM" & df_res$Year == 2010 &
-                                     df_res$Variable == "Rate" & df_res$Quantile == "Lower")]) / 100
-    }
-    if(ageGroup == "15to19f"){
-      # Ukrainian females CollectVio in 2014 (both Pancho's and mine)
-      df_res[which(df_res$ISO3 == "UKR" & df_res$Year == 2014 &
-                     df_res$Variable == "Fraction" & df_res$Quantile == "Upper"), "CollectVio"] <-
-        df_res[which(df_res$ISO3 == "UKR" & df_res$Year == 2014 &
-                       df_res$Variable == "Fraction" & df_res$Quantile == "Upper"), "CollectVio"] + 0.0001
-      # Jamaica females HIV in 2012
-      df_res$HIV[which(df_res$ISO3 == "JAM" & df_res$Year == 2012 &
-                         df_res$Variable == "Rate" & df_res$Quantile == "Upper")] <-
-        df_res$HIV[which(df_res$ISO3 == "JAM" & df_res$Year == 2012 &
-                           df_res$Variable == "Rate" & df_res$Quantile == "Upper")] + 0.0001
-      
-    }
-    if(ageGroup == "15to19m"){
-      #   # Syrian males 2014
-      #   df_res[which(df_res$ISO3 == "SYR" & df_res$Year == 2014 &
-      #               df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "InterpVio"] <-
-      #     df_res[which(df_res$ISO3 == "SYR" & df_res$Year == 2014 &
-      #                 df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "InterpVio"] + .05
-      #   
-      #   # Syrian males 2019
-      #   df_res[which(df_res$ISO3 == "SYR" & df_res$Year == 2019 &
-      #               df_res$Variable == "Rate" & df_res$Quantile == "Upper"), c("OtherNCD", "RTI", "OtherInj")] <-
-      #     df_res[which(df_res$ISO3 == "SYR" & df_res$Year == 2019 &
-      #                 df_res$Variable == "Rate" & df_res$Quantile == "Upper"), c("OtherNCD", "RTI", "OtherInj")] + 0.005
-      #   
-      #   # Somoan males 2009
-      #   df_res[which(df_res$ISO3 == "WSM" & df_res$Year == 2009 & 
-      #               df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "NatDis"] <-
-      #     df_res[which(df_res$ISO3 == "WSM" & df_res$Year == 2009 &
-      #                 df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "NatDis"] + .1
-      #   # Tajikistan males 2000
-      #   df_res[which(df_res$ISO3 == "TJK" & df_res$Year == 2000 &
-      #               df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "CollectVio"] <-
-      #     df_res[which(df_res$ISO3 == "TJK" & df_res$Year == 2000 &
-      #                 df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "CollectVio"] + 0.003
-      # Trinidad and Tobago males HIV 2008 and 2009
-      df_res[which(df_res$ISO3 == "TTO" & df_res$Year == 2008 &
-                     df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "HIV"] <-
-        df_res[which(df_res$ISO3 == "TTO" & df_res$Year == 2008 &
-                       df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "HIV"] + 0.0005
-      df_res[which(df_res$ISO3 == "TTO" & df_res$Year == 2009 &
-                     df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "HIV"] <-
-        df_res[which(df_res$ISO3 == "TTO" & df_res$Year == 2009 &
-                       df_res$Variable == "Rate" & df_res$Quantile == "Upper"), "HIV"] + 0.0005
-    }
-    # END PATCH
-    #------------------------#
-  }
   
   return(df_res)
   

@@ -12,8 +12,9 @@ source("./src/prepare-session/create-session-variables.R")
 key_cod <- read.csv(paste("./gen/data-management/output/key_cod_", ageGroup, ".csv", sep=""))
 key_region <- read.csv("./gen/data-management/output/key_region_u20.csv")
 
-# Envelope
+# Envelopes
 env <- read.csv(paste("./gen/data-management/output/env_", ageGroup, ".csv", sep=""))
+env_REG <- read.csv(paste("./gen/data-management/output/env_", ageGroup, "REG.csv", sep=""))
 
 # Predicted CSMFs for modelled countries (HMM and LMM)
 csmf <- read.csv(paste("./gen/prediction/output/csmf_", ageGroup, ".csv", sep=""))

@@ -1,8 +1,8 @@
-fn_compareUI <- function(DAT1, DAT2, CODALL, VARIABLE, REGIONAL = FALSE, SAMPLE = NULL){
+fn_compareUIfixY <- function(DAT1, DAT2, CODALL, VARIABLE, REGIONAL = FALSE, SAMPLE = NULL){
   
   #' @title Plot point estimates and uncertainty intervals
   # 
-  #' @description 
+  #' @description with fixed y axis instead of free
   #
   #' @param DAT1 Data frame 1 with all identifying columns and formatted point estimates, lower, and upper bounds for fractions/deaths/and rates
   #' @param DAT2 Data frame 2 with all identifying columns and formatted point estimates, lower, and upper bounds for fractions/deaths/and rates
@@ -120,12 +120,12 @@ fn_compareUI <- function(DAT1, DAT2, CODALL, VARIABLE, REGIONAL = FALSE, SAMPLE 
                    geom_ribbon(aes(x=Year, ymin=Value_Lower, ymax = Value_Upper, fill = update, col = update), alpha = .3) +
                    labs(title = paste(x$name, VARIABLE, sep = ", "), subtitle = paste(x$AgeLow,"-",x$AgeUp,", ", x$Sex, sep = "")) + 
                    xlab("") + ylab("") +
-                   coord_cartesian(xlim = c(2000,2020)) +
+                   coord_cartesian(xlim = c(2000,2020), ylim = c(0,.4)) +
                    scale_x_continuous(breaks = c(2000, 2010, 2020)) +
                    scale_color_manual(values = c("gray", "firebrick2")) +
                    scale_fill_manual(values = c("gray", "firebrick2")) +
                    scale_linetype_manual(values = c("solid", "longdash")) +
-                   facet_wrap(~COD, scales = "free") +
+                   facet_wrap(~COD) +
                    theme_classic() +
                    theme(panel.grid.major = element_blank(),
                          panel.grid.minor = element_blank(),
@@ -138,4 +138,3 @@ fn_compareUI <- function(DAT1, DAT2, CODALL, VARIABLE, REGIONAL = FALSE, SAMPLE 
   return(mg)
   
 }
-

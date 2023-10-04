@@ -25,8 +25,9 @@ frac_malaria_01to04HMM <-  read.csv("./gen/prediction/input/frac_malaria_01to04.
 # Classification keys
 key_cod     <- read.csv(paste("./gen/data-management/output/key_cod_", ageGroup, ".csv", sep=""))
 key_region  <- read.csv("./gen/data-management/output/key_region_u20.csv")
-# Envelope
+# Envelopes
 env         <- read.csv(paste("./gen/data-management/output/env_", ageGroup, ".csv", sep=""))
+env_REG     <- read.csv(paste("./gen/data-management/output/env_", ageGroup, "REG.csv", sep=""))
 # CSMFs
 csmf_GOODVR <- read.csv(paste("./gen/prediction/output/csmf_", ageGroup, "GOODVR.csv", sep=""))
 csmf_CHN    <- read.csv(paste("./gen/prediction/output/csmf_", ageGroup, "CHN.csv", sep=""))

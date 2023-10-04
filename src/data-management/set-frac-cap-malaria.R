@@ -5,7 +5,7 @@
 #' Libraries
 require(readstata13)
 #' Inputs
-csmf_01to04 <- read.dta13("./data/previous-results/child_cod_2000-2021.dta")
+csmf_01to04 <- read.dta13("./data/mortality-fractions/child_cod_2000-2021.dta")
 ################################################################################
 
 dat <- csmf_01to04
@@ -15,17 +15,26 @@ dat <- subset(dat, !is.na(iso3))
 dat <- subset(dat, iso3 != "NA")
 # Refer to "child_cod_2000-2021.xls" readme tab to identify column name for postneonatal malaria CSMF
 dat$csmf_malaria_01to04 <- dat$post8/dat$pnd
+dat$csmf_malaria_01to04[is.na(dat$csmf_malaria_01to04)] <- 0
 dat <- dat[,c("iso3", "year", "csmf_malaria_01to04")]
 
 # Rename variables of interest
 names(dat) <- c("ISO3", "Year", "csmf_malaria_01to04")
 rownames(dat) <- NULL
 
+# !!!!! institute check that all countries are present.
+
 #------------------------------------#
 ## **Note**
 ## In "PointEstimates001", the malaria fraction is calculated in the following way:
 # dat$pct_malaria_1to59 <- dat$post8 / rowSums(dat[, grep('post', names(dat))], na.rm = T)
 # dat <- dat[,c("iso3", "year", "pct_malaria_1to59")]
+# View(dat[,c("iso3","year","pnd","post8", 
+#             #"fpost2","fpost3","fpost5","fpost6","fpost7",
+#             #"fpost8","fpost9","fpost10","fpost11","fpost12",
+#             #"fpost13","fpost15","fpost16","fpost17","fpost18",
+#             "rpost2","rpost3","rpost5","rpost6", "rpost7", "rpost8","rpost9","rpost10","rpost11","rpost12","rpost13",
+#             "rpost15","rpost16","rpost17", "rpost18" )])
 ## This is a mistake, because it grep's all the "post" columns which includes fractions, rates, and deaths.
 ## (Though this is not evident from just looking at the file quickly in STATA, because it only previews the deaths columns)
 ## This could account for some differences with Pancho's results.

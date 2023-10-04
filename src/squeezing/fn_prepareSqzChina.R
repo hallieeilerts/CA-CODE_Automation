@@ -20,6 +20,10 @@ fn_prepareSqzChina <- function(CSMF, DAT_HIV, DAT_CRISIS, FRAC_CD){
   # Merge on minimum CD fraction and convert to deaths
   dat$minCD <- dat$Deaths1 * FRAC_CD
   
+  # Exclude country-years with no deaths
+  dat <- dat[which(dat$Deaths1 > 0), ]
+  # These will be added back in fn_format_sqz_output()
+  
   return(dat)
   
 }

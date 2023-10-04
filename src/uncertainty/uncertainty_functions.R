@@ -17,5 +17,6 @@ source("./src/uncertainty/fn_calcUI.R")
 source("./src/uncertainty/fn_combineUIpoint.R")
 source("./src/uncertainty/fn_roundPointInt.R")
 source("./src/uncertainty/fn_checkUI.R")
-source("./src/uncertainty/fn_adjustPointInt.R")
+source("./src/uncertainty/fn_adjustPointIntZeroDeaths.R")
+source("./src/uncertainty/fn_manuallyAdjustBounds.R")
 ################################################################################
