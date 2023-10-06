@@ -10,12 +10,6 @@ fn_calcRegion <- function(CSMF, ENV_REGION = NULL, CODALL, KEY_REGION){
   #' @param KEY_REGION Data frame with countries and different regional classifications.
   #' @return Data frame with regional CSMFs, all-cause crisis-included deaths and rates.
   
-  #fn_calcRegion(csmfSqz, env_REG, codAll, key_region)
-  #CSMF <- csmfSqz
-  #ENV_REGION <- env_REG
-  #CODALL <- codAll
-  #KEY_REGION <- key_region
-  
   env_region <- ENV_REGION
   idVarsAux <- idVars
   idVarsAux[1] <- "Region"
@@ -25,11 +19,7 @@ fn_calcRegion <- function(CSMF, ENV_REGION = NULL, CODALL, KEY_REGION){
   
   # Causes of death
   v_cod <- CODALL[CODALL %in% names(dat)]
-  
-  # Create unified variable for region
-  dat$Region <- dat$UNICEFReportRegion1
-  # If report region 2 is not missing, use it instead
-  dat$Region[which(dat$UNICEFReportRegion2 != "")] <- dat$UNICEFReportRegion2[which(dat$UNICEFReportRegion2 != "")]
+
   
   # Manually add extra regions
   df_world <- dat

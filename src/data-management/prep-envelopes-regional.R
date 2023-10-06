@@ -22,9 +22,11 @@ if(ageGroup == "10to14"){regDeaths   <- "10-14/UNICEFReportRegion_death1to4.all.
                          worldRates  <- "10-14/cmr.wtj.rda" }
 if(ageGroup == "15to19f"){regWom <- "15-19/female/Rates & Deaths(ADJUSTED)_UNICEFReportRegion-females.csv"}
 if(ageGroup == "15to19m"){regMen  <- "15-19/male/Rates & Deaths(ADJUSTED)_UNICEFReportRegion-males.csv"}
+# Classification keys
+key_region_u20    <- read.csv("./gen/data-management/output/key_region_u20.csv")
 ###############################################################################
 
-## Load region names
+## Load region names from info file provided by IGME
 v_regions <- unique(info$Region)
 v_regions <- v_regions[!(v_regions %in% "World")]
 
@@ -120,10 +122,20 @@ if(ageLow == 15){
   names(env_reg) <- c('Region', 'Year', 'Deaths2', 'Rate2')
 }  
 
-# Recode region names to match with key_region
-env_reg$Region[env_reg$Region == "Eastern Europe and Central Asia"] <- "Eastern Europe and central Asia"
-env_reg$Region[env_reg$Region == "Europe and Central Asia"] <- "Europe and central Asia" 
-env_reg$Region[env_reg$Region == "West and Central Africa"] <- "West and central Africa"
+# Recode region names to match with official IGME Region names in key_region
+key_region <- key_region_u20
+key_region$region_lower <- tolower(key_region$Region)
+env_reg$region_lower <- tolower(env_reg$Region)
+key_region <- key_region[, c("Region", "region_lower")]
+key_region <- key_region[!duplicated(key_region),]
+env_reg <- merge(env_reg, key_region, by = "region_lower", all.x = TRUE)
+env_reg$recode_region <- ifelse(env_reg$Region.x != "World" & env_reg$Region.x != env_reg$Region.y, 1, 0)
+# If the region name in the regional envelopes does not match the case of official region names, recode
+env_reg$Region.x[env_reg$recode_region == 1] <- env_reg$Region.y[env_reg$recode_region == 1]
+
+# Tidy up
+names(env_reg)[names(env_reg) == "Region.x"] <- "Region"
+env_reg <- env_reg[,c("Region", "Year", "Deaths2", "Rate2")]
 
 # Save output(s) ----------------------------------------------------------
 

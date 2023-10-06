@@ -45,9 +45,4 @@ if(ageGroup %in% c("15to19f", "15to19m")){
                          point_PanchoResults <- read.csv("./data/previous-results/PointEstimates15to19-National.csv")
                          point_PanchoResults_REG <- read.csv("./data/previous-results/PointEstimates15to19-Regional.csv")
                          pointInt_PanchoResults <- read.csv("./data/previous-results/Uncertainty15to19-National.csv")}
-
-# Classification keys
-key_cod <- read.csv(paste("./gen/data-management/output/key_cod_", ageGroup, ".csv", sep=""))
-key_region <- read.csv("./gen/data-management/output/key_region_u20.csv")
-key_ctryclass <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################

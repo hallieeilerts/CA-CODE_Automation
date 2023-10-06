@@ -24,12 +24,9 @@ if(ageGroup %in% c("15to19f","15to19m")){fileDeaths <- "15-19/both/death0.ctj.rd
                                          fileRatesMen  <- "15-19/male/imr.ctj.rda"
                                          envF <- read.csv(paste("./gen/data-management/output/env_15to19f.csv", sep=""))
                                          envM <- read.csv(paste("./gen/data-management/output/env_15to19m.csv", sep=""))}
-key_region_u20    <- read.csv("./gen/data-management/output/key_region_u20.csv")
+# Classification keys
 key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
-
-# Merge classification keys for region and country class
-key_regclass <- merge(key_region_u20, key_ctryclass_u20[, c("ISO3", "Group2010", "FragileState")])
 
 # This script selects columns from the draws which pertain to Years. 
 # via the code "- (length(Years)-1):0"
@@ -115,16 +112,16 @@ if(sexSplit){
 } 
 
 # Select countries
-deaths1 <- deaths1[which(info$iso.c %in% key_regclass$ISO3), , ]
-deaths2 <- deaths2[which(info$iso.c %in% key_regclass$ISO3), , ]
-rates2  <- rates2[which(info$iso.c %in% key_regclass$ISO3), , ]
+deaths1 <- deaths1[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
+deaths2 <- deaths2[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
+rates2  <- rates2[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
 if(sexSplit){
-  deaths1Men <- deaths1Men[which(info$iso.c %in% key_regclass$ISO3), , ]
-  deaths2Men <- deaths2Men[which(info$iso.c %in% key_regclass$ISO3), , ]
-  rates2Men <- rates2Men[which(info$iso.c %in% key_regclass$ISO3), , ]  
-  deaths1Wom <- deaths1Wom[which(info$iso.c %in% key_regclass$ISO3), , ]
-  deaths2Wom <- deaths2Wom[which(info$iso.c %in% key_regclass$ISO3), , ]
-  rates2Wom <- rates2Wom[which(info$iso.c %in% key_regclass$ISO3), , ]  
+  deaths1Men <- deaths1Men[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
+  deaths2Men <- deaths2Men[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
+  rates2Men <- rates2Men[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]  
+  deaths1Wom <- deaths1Wom[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
+  deaths2Wom <- deaths2Wom[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]
+  rates2Wom <- rates2Wom[which(info$iso.c %in% key_ctryclass_u20$ISO3), , ]  
 }
 
 # Patch: exclude draws with inconsistencies --------------------------------------

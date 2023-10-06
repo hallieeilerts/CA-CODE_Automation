@@ -35,11 +35,17 @@ head(dat1)
 
 dat2 <- key_region_u20_IGME
 dat2 <- dat2[, names(dat2) %in% c("ISO3Code", "UNICEFReportRegion1", "UNICEFReportRegion2")]
+names(dat2)[names(dat2) == "ISO3Code"] <- idVars[1]
 dat2$UNICEFReportRegion1[dat2$UNICEFReportRegion1 == "Europe and Central Asia"] <- "Europe and central Asia"
 dat2$UNICEFReportRegion2[dat2$UNICEFReportRegion2 == "West and Central Africa"] <- "West and central Africa"
 dat2$UNICEFReportRegion2[dat2$UNICEFReportRegion2 == "Eastern Europe and Central Asia"] <- "Eastern Europe and central Asia"
+dat2$Region <- dat$UNICEFReportRegion1
+# If report region 2 is not missing, use it instead
+dat2$Region[which(dat2$UNICEFReportRegion2 != "")] <- dat2$UNICEFReportRegion2[which(dat2$UNICEFReportRegion2 != "")]
 
-dat <- merge(dat1, dat2, by.x = "ISO3", by.y = 1)
+
+dat <- merge(dat1, dat2, by = "ISO3")
+
 
 # Save output(s) ----------------------------------------------------------
 
