@@ -9,7 +9,7 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dat_crisis_5to19_IGME <- read.dta13("./data/single-causes/crisis/crisis_2000-2021_adolsplit_16Jun23_squeezed.dta") 
 env                   <- read.csv(paste("./gen/data-management/output/env_", ageGroup,".csv", sep = ""))
-key_ctryclass         <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
+key_ctryclass_u20     <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 # Add code to create crisis_2000-2021_adolsplit_23Mar23.dta from csv
@@ -31,11 +31,17 @@ dat$Sex[dat$Sex == "M"] <- sexLabels[3]
 # Keep age/sex group of interest
 dat <- dat[which(dat$age_lb == ageLow & dat$Sex %in% sexLabel), ]
 
-## Fill in missing values
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)) > 0){
+  stop("Required countries missing from data input.")
+}
+
+# Fill in zeros for missing country-years, if necessary
 
 # Create data frame for countries/years of interest
 # For crisis data, HMM and LMM countries and China
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM", "China DSP"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(key_ctryclass_u20$ISO3, each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
@@ -47,9 +53,6 @@ dat$CollectVio[which(is.na(dat$CollectVio))] <- 0
 dat$NatDis[which(is.na(dat$NatDis))] <- 0
 dat$epi_colvio[which(is.na(dat$epi_colvio))] <- 0
 dat$epi_natdis[which(is.na(dat$epi_natdis))] <- 0
-
-# Tidy up
-dat <- dat[, c("ISO3","Year","Sex","epi_colvio", "epi_natdis", "CollectVio", "NatDis")]
 
 # Quality checks ----------------------------------------------------------
 
@@ -81,6 +84,12 @@ if(length(idEpi) > 0){
   dat$CollectVio[idEpi] <- 0
   dat$NatDis[idEpi] <- 0
 }
+
+# Tidy up
+dat <- dat[, c("ISO3","Year","Sex","epi_colvio", "epi_natdis", "CollectVio", "NatDis")]
+dat <- dat[order(dat$ISO3, dat$Year),]
+rownames(dat) <- NULL
+
 
 # Save output(s) ----------------------------------------------------------
 

@@ -7,10 +7,10 @@ require(readstata13)
 #' Inputs
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
-dat_hiv_u20_UN   <- read.csv('./data/single-causes/hiv/HIV2022Estimates_UNAIDS_11Nov2022.csv')
-dat_hiv_u20_SPEC <- read.dta13("./data/single-causes/hiv/hiv_wppfractions_adol_5Jun2023.dta") 
-key_ctryclass    <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
-env              <- read.csv(paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""))
+dat_hiv_u20_UN    <- read.csv('./data/single-causes/hiv/HIV2022Estimates_UNAIDS_11Nov2022.csv')
+dat_hiv_u20_SPEC  <- read.dta13("./data/single-causes/hiv/hiv_wppfractions_adol_5Jun2023.dta") 
+env               <- read.csv(paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""))
+key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 # dth_hiv_u20_un <- read.csv() # need to get raw hiv data
@@ -64,7 +64,7 @@ dat2 <- dat2[,c(idVars, "dth_wpp")]
 # Merge
 dat <- merge(dat1, dat2, by = c("ISO3", "Year", "Sex"), all.x = T, all.y = F)
 
-## Quality checks
+# Quality checks ----------------------------------------------------------
 
 # 1. Check that HIV deaths are inside lower and upper bounds
 if(length(which(dat$HIV < dat$hiv_lb)) > 0){
@@ -74,11 +74,19 @@ if(length(which(dat$HIV > dat$hiv_ub)) > 0){
   stop("HIV deaths outside of confidence bounds.")
 }
 
-## Fill in missing values
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)) > 0){
+  warning("Not all countries included in data input.")
+  write.table(sort(unique(key_ctryclass_u20$WHOname)[!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)]), 
+              "./gen/data-management/audit/missing_hiv.txt")
+}
+
+# Fill in zeros for missing country-years, if necessary
 
 # Create data frame for countries/years of interest
 # For HIV data, HMM and LMM countries and China
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM", "China DSP"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(key_ctryclass_u20$ISO3, each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
@@ -88,7 +96,8 @@ dat <- merge(dat, df_ctryyears, by = idVars, all = TRUE)
 # Recode missing HIV as 0
 dat$HIV[which(is.na(dat$HIV))] <- 0
 
-## Rescale dths to WPP envelope
+
+# Rescale dths to WPP envelope --------------------------------------------
 
 # Merge on IGME deaths
 dat <- merge(dat, env[,c("ISO3","Year","Deaths2")], by = c("ISO3", "Year"), all.x = TRUE)
@@ -104,6 +113,7 @@ dat$hiv_ub <- ifelse(!is.na(dat$dth_wpp), dat$hiv_ub * dat$Deaths2/dat$dth_wpp, 
 
 # Tidy up
 dat <- dat[, c("ISO3", "Year", "Sex", "HIV", "hiv_lb", "hiv_ub")]
+dat <- dat[order(dat$ISO3, dat$Year),]
 rownames(dat) <- NULL
 
 # Save output(s) ----------------------------------------------------------

@@ -8,6 +8,7 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dat_pred_u20_WHO <- read.csv("./data/prediction-database/PredicationDatabase_2022series_2023-02-21.csv")
 env_crisisIncl_u20 <- read.csv("./gen/data-management/output/env_crisisIncl_u20.csv")
+key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 dat <- dat_pred_u20_WHO
@@ -68,6 +69,12 @@ dat$year <- dat$Year
 
 # Tidy up
 dat <- dat[, c(idVars[1:2], sort(names(dat)[which(!names(dat) %in% idVars[1:2])]))]
+
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)) > 0){
+  stop("Required countries missing from data input.")
+}
 
 # Save output(s) ----------------------------------------------------------
 

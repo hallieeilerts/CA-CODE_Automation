@@ -8,7 +8,7 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dat_tb_u20_WHO    <- read.csv("./data/single-causes/tb/20201023-ProgramTB.csv") # TB Program estimates (WHO) (Updated 23 Oct 2020)
 dat_tbAux_u20_WHO <- read.csv("./data/single-causes/tb/20201214-ProgramTB-GMB-MOZ.csv") # Updated estimates for GMB and MOZ
-key_ctryclass     <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
+key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 env               <- read.csv(paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""))
 ################################################################################
 
@@ -34,7 +34,7 @@ dat$Sex[dat$Sex == "MF"] <- sexLabels[1]
 dat$Sex[dat$Sex == "F"] <- sexLabels[2]
 dat$Sex[dat$Sex == "M"] <- sexLabels[3]
 
-## Extend estimates from latest year
+# Extend estimates from latest year ---------------------------------------
 
 # APPLY ESTIMATES FROM 2019 TO 2020 AND 2021
 dat2020 <- dat[dat$Year == 2019, ]
@@ -46,7 +46,8 @@ dat <- dat[order(dat$ISO3, dat$Year, dat$Sex), ]
 rownames(dat) <- NULL
 rm(dat2020)
 
-## Keep age and sex group of interest
+
+# Keep age and sex group of interest --------------------------------------
 
 # Aggregate sexes for 5-14 years
 if(!sexSplit){
@@ -65,21 +66,28 @@ if(sexSplit){
   dat <- dat[, c("ISO3", "Year", "Sex", "age_group", "TB", "tb_lb", "tb_ub")]
 }
 
-
 # Keep age/sex group of interest
 dat <- dat[which(dat$age_group == paste(ageLow, ageUp, sep = "_") & dat$Sex %in% sexLabel), ]
 dat$age_group <- NULL
 
-## Impute missing values
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)) > 0){
+  warning("Not all countries included in data input.")
+  write.table(sort(unique(key_ctryclass_u20$WHOname)[!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)]), 
+              "./gen/data-management/audit/missing_tb.txt")
+}
 
 # Create data frame for countries/years of interest
 # For TB data, only HMM and LMM countries (not including China)
-df_ctryyears <- data.frame(ISO3 = rep(subset(key_ctryclass, Group2010 %in% c("HMM","LMM"))[,c("ISO3")], each = length(Years)),
+df_ctryyears <- data.frame(ISO3 = rep(key_ctryclass_u20$ISO3, each = length(Years)),
                            Year = rep(Years),
                            Sex = sexLabel)
 
 # Merge onto TB data, identifying missing countries/years
 dat <- merge(dat, df_ctryyears, by = idVars, all = TRUE)
+
+# Impute missing values ---------------------------------------------------
 
 # Exclude country-years with no deaths in IGME crisis-free envelope
 noDeathCountries <- env[which(env$Deaths1 == 0), c("ISO3", "Year")]
@@ -148,6 +156,8 @@ if(respTB) {
 dat <- rbind(hasDeaths, noDeathCountries)
 
 # Tidy up
+dat <- dat[, c("ISO3", "Year", "Sex", "TB", "tb_lb", "tb_ub", 
+               "TBre", "tbre_lb", "tbre_ub")]
 dat <- dat[order(dat$ISO3, dat$Year),]
 rownames(dat) <- NULL
 

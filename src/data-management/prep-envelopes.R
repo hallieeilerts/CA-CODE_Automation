@@ -11,7 +11,7 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 env_crisisFree_u20_IGME <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary (crisis free) 1980-2021 all ages.xlsx")
 env_crisisIncl_u20_IGME <- read_excel("./data/igme/envelopes/national/UN IGME 2022 Rates & Deaths_Country Summary 1980-2021 all ages.xlsx")
-key_ctryclass           <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
+key_ctryclass_u20       <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 # Function to tidy up UN IGME envelopes
@@ -184,7 +184,9 @@ dat <- merge(dat1, dat2, by = c("ISO3","Year","AgeLow", "AgeUp", "Sex"))
 dat <- dat[which(dat$AgeLow == ageLow & dat$AgeUp == ageUp & dat$Sex %in% sexLabel), ]
 
 # Select countries of interest
-dat <- dat[which(dat$ISO3 %in% unique(key_ctryclass$ISO3)), ]
+dat <- dat[which(dat$ISO3 %in% unique(key_ctryclass_u20$ISO3)), ]
+dat1 <- dat1[which(dat1$ISO3 %in% unique(key_ctryclass_u20$ISO3)), ]
+dat2 <- dat2[which(dat2$ISO3 %in% unique(key_ctryclass_u20$ISO3)), ]
 
 # Quality checks ----------------------------------------------------------
 
@@ -192,22 +194,31 @@ dat <- dat[which(dat$ISO3 %in% unique(key_ctryclass$ISO3)), ]
 df_check <- dat
 df_check$ind1 <- ifelse(df_check$Deaths1 > df_check$Deaths2, 1, 0)
 if(sum(df_check$ind1) > 0){
-  warning("Crisis-free envelopes larger than crisis-included.")
+  stop("Crisis-free envelopes larger than crisis-included.")
   dat$Rate2[which(dat$Deaths1 > dat$Deaths2)]   <- dat$Rate1[which(dat$Deaths1 > dat$Deaths2)]
   dat$Deaths2[which(dat$Deaths1 > dat$Deaths2)] <- dat$Deaths1[which(dat$Deaths1 > dat$Deaths2)]
-  
 }
+
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% dat$ISO3)) > 0){
+  stop("Required countries missing from data input.")
+}
+
+# Tidy up
+dat <- dat[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Deaths1", "Rate1", "Deaths2", "Rate2")]
+dat1 <- dat1[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Deaths1", "Rate1")]
+dat2 <- dat2[, c("ISO3", "Year", "AgeLow", "AgeUp", "Sex", "Deaths2", "Rate2")]
+rownames(dat) <- NULL
+rownames(dat1) <- NULL
+rownames(dat2) <- NULL
 
 # Save output(s) ----------------------------------------------------------
 
 env_u20 <- merge(dat1, dat2)
-env_crisisFree_u20 <- dat1
-env_crisisIncl_u20 <- dat2
 env <- dat
 
 # These envelopes used for prediction database
 write.csv(env_u20, paste("./gen/data-management/output/env_u20.csv", sep = ""), row.names = FALSE)
-#write.csv(env_crisisFree_u20, paste("./gen/data-management/output/env_crisisFree_u20.csv", sep = ""), row.names = FALSE)
-#write.csv(env_crisisIncl_u20, paste("./gen/data-management/output/env_crisisIncl_u20.csv", sep = ""), row.names = FALSE)
 # These envelopes are age/sex-specific and used in all other cases
 write.csv(env, paste("./gen/data-management/output/env_",ageGroup,".csv", sep = ""), row.names = FALSE)

@@ -7,6 +7,7 @@
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 dat_vr_5to19_WHO <- read.dta13("./data/vr/20210331-GoodVR-5to19.dta", nonint.factors = T)
+key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
 dat <- dat_vr_5to19_WHO
@@ -36,6 +37,12 @@ dat <- subset(dat, ISO3 != "CHN")
 
 # Delete unnecessary columns
 dat <- dat[, !names(dat) %in% c("post_source", "post_source2",  "igmedeaths", "total", "check")]
+
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(subset(key_ctryclass_u20, Group == "VR")$ISO3) %in% dat$ISO3)) > 0){
+  stop("Required countries missing from data input.")
+}
 
 # Save output(s) ----------------------------------------------------------
 

@@ -24,7 +24,6 @@ if(ageGroup %in% c("15to19f","15to19m")){fileDeaths <- "15-19/both/death0.ctj.rd
                                          fileRatesMen  <- "15-19/male/imr.ctj.rda"
                                          envF <- read.csv(paste("./gen/data-management/output/env_15to19f.csv", sep=""))
                                          envM <- read.csv(paste("./gen/data-management/output/env_15to19m.csv", sep=""))}
-# Classification keys
 key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 ################################################################################
 
@@ -415,6 +414,16 @@ if(sexSplit){
 suppressWarnings(rm(deaths1, deaths2, rates2, l_deaths1, l_deaths2, l_rates2,
                     deaths1Men, deaths2Men, rates2Men, l_deaths1Men, l_deaths2Men, l_rates2Men,
                     deaths1Wom, deaths2Wom, rates2Wom, l_deaths1Wom, l_deaths2Wom, l_rates2Wom))
+
+# Check that all expected countries are included --------------------------
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% info$iso.c)) > 0){
+  stop("Required countries missing from data input.")
+}
+
+if(sum(!(unique(key_ctryclass_u20$ISO3) %in% envDraws$deaths1[[1]]$ISO3)) > 0){
+  stop("Required countries missing from formatted envelopes.")
+}
 
 # Save output(s) ----------------------------------------------------------
 
