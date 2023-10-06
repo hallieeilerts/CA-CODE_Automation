@@ -9,9 +9,9 @@ source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 
 # Classification keys
-key_cod       <- read.csv(paste("./gen/data-management/output/key_cod_", ageGroup, ".csv", sep=""))
-key_region    <- read.csv("./gen/data-management/output/key_region_u20.csv")
-key_ctryclass <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
+key_cod           <- read.csv(paste("./gen/data-management/output/key_cod_", ageGroup, ".csv", sep=""))
+key_region_u20    <- read.csv("./gen/data-management/output/key_region_u20.csv")
+key_ctryclass_u20 <- read.csv("./gen/data-management/output/key_ctryclass_u20.csv")
 
 # CSMFs that have been processed in squeezing pipeline (contains all countries, even those not subject to squeezing)
 csmfSqz     <- read.csv(paste("./gen/squeezing/output/csmfSqz_", ageGroup, ".csv", sep = ""))
