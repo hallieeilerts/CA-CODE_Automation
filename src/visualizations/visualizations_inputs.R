@@ -20,19 +20,19 @@ source("./src/prepare-session/create-session-variables.R")
 
 # Point estimates that have been processed in uncertainty pipeline and formatted in results (final results)
 # (some point estimates for fractions are slightly different from csmfSqz because they were adjusted in fn_adjust_pointint() [Pancho's AdjustUncert() function])
-point <- read.csv(paste("./gen/results/output/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""))
-point_REG <- read.csv(paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""))
+point <- read.csv(paste("./gen/results/output/PointEstimates_National_", ageGroup,"_20231002.csv", sep=""))
+point_REG <- read.csv(paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_20231002.csv", sep=""))
 # Point estimates, lower, and upper bounds for fractions/deaths/rates that have been processed in uncertainty pipeline
-pointInt <- read.csv(paste("./gen/results/output/Uncertainty_National_", ageGroup, "_", resDate, ".csv", sep = ""))
-pointInt_REG <- read.csv(paste("./gen/results/output/Uncertainty_Regional_", ageGroup, "_", resDate, ".csv", sep = ""))
+pointInt <- read.csv(paste("./gen/results/output/Uncertainty_National_", ageGroup, "_20231002.csv", sep = ""))
+pointInt_REG <- read.csv(paste("./gen/results/output/Uncertainty_Regional_", ageGroup, "_20231002.csv", sep = ""))
 
 # Pancho's point estimates from previous estimation round
-if(ageGroup == "05to09"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_National_05to09.csv")
-                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_Regional_05to09.csv")}
-if(ageGroup == "10to14"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_National_10to14.csv")
-                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_Regional_10to14.csv")}
-if(ageGroup %in% c("15to19f", "15to19m")){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_National_15to19.csv")
-                                          point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_Regional_15to19.csv")}
+if(ageGroup == "05to09"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates5to9-National.csv")
+                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates5to9-Regional.csv")}
+if(ageGroup == "10to14"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates10to14-National.csv")
+                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates10to14-Regional.csv")}
+if(ageGroup %in% c("15to19f", "15to19m")){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates15to19-National.csv")
+                                          point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates15to19-Regional.csv")}
 
 # Pancho's point estimates from current estimation round
 if(ageGroup == "05to09"){point_PanchoResults <- read.csv("./data/previous-results/2000-2021/PointEstimates5to9-National.csv")
