@@ -1,6 +1,6 @@
 fn_combineUIpoint <- function(UI, CSMFSQZ, CODALL, REGIONAL = FALSE){
   
-  #' @title Combine raw data frames for CSMF point estimates and uncertainty intervals.
+  #' @title Combine raw data frames for CSMF point estimates, uncertainty lower and upper bounds (drop median).
   # 
   #' @description Transforms CSMF point estimates into rates and deaths as well, combines with uncertainty intervals for CSMFs, rates, and deaths, orders rows and columns.
   #
@@ -41,7 +41,7 @@ fn_combineUIpoint <- function(UI, CSMFSQZ, CODALL, REGIONAL = FALSE){
   # Keep same columns in UI
   v_col <- names(df_frac)[names(df_frac) %in% names(UI)]
   ui <- UI[,paste(v_col)]
-  # Only keep upper and lower bounds (not median)
+  # Only keep upper and lower bounds (drop median)
   ui <- subset(ui, Quantile %in% c("Lower", "Upper"))
   
   # Combine and tidy

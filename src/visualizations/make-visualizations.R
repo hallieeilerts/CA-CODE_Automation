@@ -10,8 +10,8 @@ v_sample <- c("AFG", "BRA", "BIH", "CHN",  "HTI", "IND", "IRN", "MEX", "NGA", "S
 
 ## Audit
 
-# Reshape Pancho's new regional results files, if need be
-point_PanchoResultsFRMT_REG <- fn_reshapePanchoRegional(point_PanchoResults_REG)
+# Reshape Pancho's regional results file
+point_PanchoResultsFRMT_REG <- fn_reshapePanchoRegAndAgg(point_PanchoResults_REG, codAll)
 
 # Compare point estimates for each cause between my and Pancho's estimates for this round
 plot <- fn_compareCSMF(point, point_PanchoResults, SAMPLE = NULL)

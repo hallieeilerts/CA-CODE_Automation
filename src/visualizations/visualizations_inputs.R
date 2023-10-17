@@ -27,22 +27,22 @@ pointInt <- read.csv(paste("./gen/results/output/Uncertainty_National_", ageGrou
 pointInt_REG <- read.csv(paste("./gen/results/output/Uncertainty_Regional_", ageGroup, "_", resDate, ".csv", sep = ""))
 
 # Pancho's point estimates from previous estimation round
-if(ageGroup == "05to09"){point_PrevResults <- read.csv("./data/previous-results/PointEstimates_2000-2019_National_05to09.csv")
-                         point_PrevResults_REG <- read.csv("./data/previous-results/PointEstimates_2000-2019_Regional_05to09.csv")}
-if(ageGroup == "10to14"){point_PrevResults <- read.csv("./data/previous-results/PointEstimates_2000-2019_National_10to14.csv")
-                         point_PrevResults_REG <- read.csv("./data/previous-results/PointEstimates_2000-2019_Regional_10to14.csv")}
-if(ageGroup %in% c("15to19f", "15to19m")){point_PrevResults <- read.csv("./data/previous-results/PointEstimates_2000-2019_National_15to19.csv")
-                                          point_PrevResults_REG <- read.csv("./data/previous-results/PointEstimates_2000-2019_Regional_15to19.csv")}
+if(ageGroup == "05to09"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_National_05to09.csv")
+                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_Regional_05to09.csv")}
+if(ageGroup == "10to14"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_National_10to14.csv")
+                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_Regional_10to14.csv")}
+if(ageGroup %in% c("15to19f", "15to19m")){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_National_15to19.csv")
+                                          point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates_2000-2019_Regional_15to19.csv")}
 
 # Pancho's point estimates from current estimation round
-if(ageGroup == "05to09"){point_PanchoResults <- read.csv("./data/previous-results/PointEstimates5to9-National.csv")
-                         point_PanchoResults_REG <- read.csv("./data/previous-results/PointEstimates5to9-Regional.csv")
-                         pointInt_PanchoResults <- read.csv("./data/previous-results/Uncertainty5to9-National.csv")}
-if(ageGroup == "10to14"){point_PanchoResults <- read.csv("./data/previous-results/PointEstimates10to14-National.csv")
-                         point_PanchoResults_REG <- read.csv("./data/previous-results/PointEstimates10to14-Regional.csv")
-                         pointInt_PanchoResults <- read.csv("./data/previous-results/Uncertainty10to14-National.csv")}
+if(ageGroup == "05to09"){point_PanchoResults <- read.csv("./data/previous-results/2000-2021/PointEstimates5to9-National.csv")
+                         point_PanchoResults_REG <- read.csv("./data/previous-results/2000-2021/PointEstimates5to9-Regional.csv")
+                         pointInt_PanchoResults <- read.csv("./data/previous-results/2000-2021/Uncertainty5to9-National.csv")}
+if(ageGroup == "10to14"){point_PanchoResults <- read.csv("./data/previous-results/2000-2021/PointEstimates10to14-National.csv")
+                         point_PanchoResults_REG <- read.csv("./data/previous-results/2000-2021/PointEstimates10to14-Regional.csv")
+                         pointInt_PanchoResults <- read.csv("./data/previous-results/2000-2021/Uncertainty10to14-National.csv")}
 if(ageGroup %in% c("15to19f", "15to19m")){
-                         point_PanchoResults <- read.csv("./data/previous-results/PointEstimates15to19-National.csv")
-                         point_PanchoResults_REG <- read.csv("./data/previous-results/PointEstimates15to19-Regional.csv")
-                         pointInt_PanchoResults <- read.csv("./data/previous-results/Uncertainty15to19-National.csv")}
+                         point_PanchoResults <- read.csv("./data/previous-results/2000-2021/PointEstimates15to19-National.csv")
+                         point_PanchoResults_REG <- read.csv("./data/previous-results/2000-2021/PointEstimates15to19-Regional.csv")
+                         pointInt_PanchoResults <- read.csv("./data/previous-results/2000-2021/Uncertainty15to19-National.csv")}
 ################################################################################

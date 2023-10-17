@@ -5,6 +5,16 @@
 source("./src/aggregation/fn_calcAggAges.R")
 source("./src/aggregation/fn_callCalcAggAges.R")
 source("./src/aggregation/fn_addAgeCol.R")
+source("./src/squeezing/fn_calcRegion.R")
+source("./src/uncertainty/fn_randDrawEnv.R")
+source("./src/uncertainty/fn_calcUI.R")
+source("./src/uncertainty/fn_roundPointInt.R")
+source("./src/uncertainty/fn_checkUI.R")
+source("./src/results/fn_adjustForZeroDeaths.R")
+source("./src/results/fn_roundCSMFsqz.R")
+source("./src/results/fn_publishEstimates.R")
+source("./src/visualizations/fn_reshapePanchoRegAndAgg.R")
+source("./src/visualizations/fn_compareCSMF.R")
 ################################################################################
 
 

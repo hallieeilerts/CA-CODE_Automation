@@ -1,4 +1,4 @@
-fn_compareCSMF <- function(DAT1, DAT2, REGIONAL = FALSE, SAMPLE = NULL){
+fn_compareCSMF <- function(DAT1, DAT2, REGIONAL = FALSE, SAMPLE = NULL, AGG = FALSE){
   
   #' @title Compare CSMFs
   # 
@@ -10,6 +10,12 @@ fn_compareCSMF <- function(DAT1, DAT2, REGIONAL = FALSE, SAMPLE = NULL){
   #' @param SAMPLE Vector of sample of ISO3 codes to plot
   #' @return PDF plots with one country/region per page and facets for COD. Each facet is a line graph for the CSMF over the years being estimated.
   
+  # DAT1 <- csmfSqz_PUB_10to19
+  # DAT2 <- csmfSqz_PanchoResultsFRMT_10to19
+  # REGIONAL = FALSE
+  # AGG = TRUE
+  # SAMPLE = v_sample
+  
   if(REGIONAL == FALSE){
     DAT2$name <- DAT2$ISO3
     DAT1$name <- DAT1$ISO3
@@ -19,16 +25,21 @@ fn_compareCSMF <- function(DAT1, DAT2, REGIONAL = FALSE, SAMPLE = NULL){
   }
   
   # Harmonize Sex names
+  DAT1$Sex[DAT1$Sex == "Total"] <- sexLabels[1]
   DAT1$Sex[DAT1$Sex == "T"] <- sexLabels[1]
   DAT1$Sex[DAT1$Sex == "B"] <- sexLabels[1]
   DAT1$Sex[DAT1$Sex == "F"] <- sexLabels[2]
   DAT1$Sex[DAT1$Sex == "M"] <- sexLabels[3]
-  DAT1 <- subset(DAT1, Sex == sexLabel)
+  DAT2$Sex[DAT2$Sex == "Total"] <- sexLabels[1]
   DAT2$Sex[DAT2$Sex == "T"] <- sexLabels[1]
   DAT2$Sex[DAT2$Sex == "B"] <- sexLabels[1]
   DAT2$Sex[DAT2$Sex == "F"] <- sexLabels[2]
   DAT2$Sex[DAT2$Sex == "M"] <- sexLabels[3]
-  DAT2 <- subset(DAT2, Sex == sexLabel)
+  
+  if(AGG == FALSE){
+    DAT1 <- subset(DAT1, Sex == sexLabel)
+    DAT2 <- subset(DAT2, Sex == sexLabel)
+  }
   
   DAT1$update <- "current"
   DAT2$update <- "other"
@@ -54,6 +65,26 @@ fn_compareCSMF <- function(DAT1, DAT2, REGIONAL = FALSE, SAMPLE = NULL){
     dat <- subset(dat, !(name %in% c("Europe and central Asia","Sub-Saharan Africa")))
   }
   # ---------------#
+  
+  # # To test single plot
+  # dattest <- subset(dat, name == "AFG")
+  # ggplot(data = dattest) +
+  #   geom_line(aes(x=Year, y=value, color = update, linetype = update), linewidth = 1) +
+  #   #labs(title = x$name, subtitle = paste(x$AgeLow,"-",x$AgeUp,", ", x$Sex, sep = "")) +
+  #   xlab("") + ylab("") +
+  #   coord_cartesian(xlim = c(2000,2020), ylim = c(0,.8)) +
+  #   scale_x_continuous(breaks = c(2000, 2010, 2020)) +
+  #   scale_color_manual(values = c("gray", "firebrick2")) +
+  #   scale_linetype_manual(values = c("solid", "longdash")) +
+  #   facet_wrap(~variable) +
+  #   theme_classic() +
+  #   theme(panel.grid.major = element_blank(),
+  #         panel.grid.minor = element_blank(),
+  #         strip.background = element_blank(),
+  #         panel.border = element_rect(colour = "black", fill = NA),
+  #         plot.subtitle = element_text(hjust = 0),
+  #         axis.text = element_text(size = 8))
+  
   
   # Order plots alphabetically by world region and then nation
   
