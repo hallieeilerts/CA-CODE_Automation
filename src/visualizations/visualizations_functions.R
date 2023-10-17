@@ -8,4 +8,5 @@ source("./src/visualizations/fn_compareUIfixY.R")
 source("./src/visualizations/fn_plotSingleCSMF.R")
 source("./src/visualizations/fn_plotSingleUI.R")
 source("./src/visualizations/fn_reshapePanchoRegAndAgg.R")
+source("./src/visualizations/fn_compareCSMFjamieStyle.R")
 ################################################################################
