@@ -2,13 +2,7 @@ fn_sqzOtherCMPN <- function(CSMF){
   
   #' @title Squeeze otherCMPN
   # 
-  #' @description Multiply predicted otherCMPN fraction by crisis-free deaths.
-  #' Subtract relevant single-cause deaths, calculate residual otherCMPN deaths.
-  #' If residual otherCMPN deaths are less than minimum otherCMPN deaths,
-  #' divide otherCMPN deaths by total of relevant single-cause deaths plus minimum otherCMPN deaths.
-  #' Use this proportion to scale down relevant single-cause and minimum otherCMPN deaths.
-  #' Calculate otherCMPN fraction from scaled down minimum otherCMPN deaths.
-  #' Convert scaled down single-cause deaths to fractions.
+  #' @description Multiply predicted otherCMPN fraction by crisis-free deaths. Subtract relevant single-cause deaths (TB, HIV, measles), calculate residual otherCMPN deaths. If residual otherCMPN deaths are less than minimum otherCMPN deaths, divide otherCMPN deaths by total of single-cause deaths plus minimum otherCMPN deaths. Use this proportion to scale down single-cause deaths and minimum otherCMPN deaths. Calculate fractions from scaled minimum otherCMPN deaths and single causes using crisis-free envelope.
   #' 
   #' @param CSMF Data frame with CSMFs that has been prepared for squeezing.
   #' @return Data frame where CSMFs have been adjusted for otherCMPN squeezing.
