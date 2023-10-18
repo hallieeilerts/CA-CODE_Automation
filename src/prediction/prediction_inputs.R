@@ -29,7 +29,7 @@ mod_fit_HMM <- readRDS(paste("./gen/estimation/output/mod_fit_", ageGroup, "HMM.
 mod_fit_LMM <- readRDS(paste("./gen/estimation/output/mod_fit_", ageGroup, "LMM.rds", sep=""))
 
 # For capping malaria fractions
-dat_malaria_5to19   <-  read.csv("./gen/prediction/input/dat_malaria_5to19.csv")
+dat_malaria_5to19   <-  read.csv("./gen/prediction/input/dat_malaria_05to19.csv")
 frac_malaria_01to04 <-  read.csv("./gen/prediction/input/frac_malaria_01to04.csv")
 ################################################################################
 

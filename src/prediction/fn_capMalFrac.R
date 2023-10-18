@@ -2,11 +2,11 @@ fn_capMalFrac <- function(CSMF, DAT_MALARIA_5TO19, FRAC_MALARIA_01to04){
   
   #' @title Cap malaria fractions
   # 
-  #' @description Caps malaria fractions at country-year-specific fraction level for 1-4y
+  #' @description Caps malaria fractions at country-year level for 1-4y.
   #
   #' @param CSMF Data frame with predicted CSMFs.
-  #' @param DAT_MALARIA_5TO19 Data frame with columns c("ISO3", "Year", "dth_malaria_5to19")
-  #' @param FRAC_MALARIA_01to04 Data frame with final estimated CSMF for malaria for 1-4y
+  #' @param DAT_MALARIA_5TO19 Data frame with malaria death counts for 5-19y ("dth_malaria_05to19")
+  #' @param FRAC_MALARIA_01to04 Data frame with final estimated CSMF for malaria for 1-4y ("csmf_malaria_01to04")
   #' @return Data frame where predicted CSMFs have been adjusted for capped malaria fractions.
   
   # Identify COD
@@ -18,7 +18,7 @@ fn_capMalFrac <- function(CSMF, DAT_MALARIA_5TO19, FRAC_MALARIA_01to04){
   dat <- merge(CSMF, DAT_MALARIA_5TO19, by = c("ISO3", "Year"), all.x = T)
   
   # Identify cases with 0 malaria
-  idMal <- which(dat$dth_malaria_5to19 == 0 | is.na(dat$dth_malaria_5to19))
+  idMal <- which(dat$dth_malaria_05to19 == 0 | is.na(dat$dth_malaria_05to19))
   
   # Force malaria to be 0
   if (length(idMal) > 0) {

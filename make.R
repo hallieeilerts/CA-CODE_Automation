@@ -110,7 +110,7 @@ l_csmf_LMM  <- lapply(Years, function(x){fn_callP1New(x, mod_fit_LMM, dat_pred_L
 
 # Set malaria fractions
 if(ageGroup %in% c("05to09", "10to14")){
-  l_csmf_HMM <- lapply(l_csmf_HMM, function(x){fn_capMalFrac(x, dat_malaria_5to19, frac_malaria_01to04)})
+  l_csmf_HMM <- lapply(l_csmf_HMM, function(x){fn_capMalFrac(x, dat_malaria_05to19, frac_malaria_01to04)})
   l_csmf_LMM <- lapply(l_csmf_LMM, function(x){fn_setMalFrac(x)})
 }
 

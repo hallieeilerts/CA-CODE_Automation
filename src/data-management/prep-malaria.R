@@ -1,6 +1,6 @@
 ################################################################################
 #' @description Rename columns
-#' @return Data frame with c("ISO3", "Year", "dth_malaria_5to19")
+#' @return Data frame with c("ISO3", "Year", "dth_malaria_05to19")
 ################################################################################
 #' Libraries
 require(readstata13)
@@ -15,11 +15,11 @@ dat <- dat_malaria_u20_MAP
 
 # Add code to create malaria_adol_2Nov2022.dta
 # As a place holder, I will just convert malaria_adol_2Nov2022.dta into a csv
-# and use the updated name for this object (dth_malaria_5to19)
+# and use the updated name for this object (dth_malaria_05to19)
 
 names(dat)[names(dat) == "iso"] <- "ISO3"
 names(dat)[names(dat) == "year"] <- "Year"
-names(dat)[names(dat) == "malcases"] <- "dth_malaria_5to19"
+names(dat)[names(dat) == "malcases"] <- "dth_malaria_05to19"
 
 # Check that all expected countries are included --------------------------
 
@@ -40,10 +40,10 @@ df_ctryyears <- data.frame(ISO3 = rep(key_ctryclass_u20$ISO3, each = length(Year
 dat <- merge(dat, df_ctryyears, by = idVars[1:2], all = TRUE)
 
 # Recode missing malaria as 0
-dat$dth_malaria_5to19[which(is.na(dat$dth_malaria_5to19))] <- 0
+dat$dth_malaria_05to19[which(is.na(dat$dth_malaria_05to19))] <- 0
 
 # Tidy up
-dat <- dat[, c("ISO3", "Year", "dth_malaria_5to19")]
+dat <- dat[, c("ISO3", "Year", "dth_malaria_05to19")]
 rownames(dat) <- NULL
 
 
@@ -54,7 +54,7 @@ rownames(dat) <- NULL
 dat_malaria_5to19 <- dat
 
 # Save output(s)
-write.csv(dat_malaria_5to19, paste("./gen/prediction/input/dth_malaria_5to19.csv", sep=""), row.names = FALSE)
+write.csv(dat_malaria_5to19, paste("./gen/prediction/input/dat_malaria_05to19.csv", sep=""), row.names = FALSE)
 
 ###################################################################
 ######################### END-OUTPUTS #############################
