@@ -2,15 +2,10 @@ fn_addMeasEpi <- function(DTH){
   
   #' @title Squeeze epidemic measles
   # 
-  #' @description If epidemic measles is negative and epidemic plus endemic measles is negative, 
-  #' recode epidemic measles as the negative of endemic measles.
-  #' For all country years with epidemic measles, add epidemic to endemic measles.
-  #' Recover population denominator from crisis-included mortality rate.
-  #' Add epidemic measles to crisis-included deaths.
-  #' Recalculate crisis-included mortality rate with new deaths and population denominators.
+  #' @description If epidemic measles is negative and epidemic plus endemic measles is negative, recode epidemic measles as the negative of endemic measles. For all country years with negative or positive epidemic measles, add epidemic to endemic measles. Back-calculate population denominator from crisis-included mortality rate and add epidemic measles to crisis-included deaths. Recalculate crisis-included mortality rate with new deaths and population denominators.
   #' 
   #' @param DTH Data frame with deaths that have been squeezed.
-  #' @return Data frame with deaths for all causes where measles deaths and all-cause crisis-included deaths and rates have been updated to include epidemic measles.
+  #' @return Data frame where epidemic measles deaths have been incorporated, and all-cause crisis-included deaths and rates have been updated to reflect new total number of deaths.
   
   dat <- DTH
   

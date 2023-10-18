@@ -2,16 +2,11 @@ fn_sqzCrisisEpi <- function(CSMF, KEY_COD){
   
   #' @title Squeeze epidemic crisis deaths
   # 
-  #' @description Transform fractions to deaths by multiplying by crisis-free deaths.
-  #' Convert single-cause epi_colvio and epi_natdis deaths into proportions.
-  #' Multiply epi_colvio and epi_natdis proportions by difference between crisis-free and crisis-included envelopes.
-  #' Add deaths to CollectVio and NatDis, respectively.
-  #' If there were no epi_colvio/epi_natdis deaths but there is a difference between crisis-free and crisis-included envelopes,
-  #' divide all deaths by crisis-included envelope, normalize (distributing epi_allcause pro-rata), and convert back to deaths.
+  #' @description Transform fractions to deaths by multiplying by crisis-free deaths. Calculate fractions for epidemic crisis single-cause deaths (epi_colvio, epi_natdis) from this sum. Multiply fractions by difference between crisis-free and crisis-included envelopes. Add epidemic crisis single-cause deaths to endemic crises (CollectVio, NatDis). If there were no epidemic crisis single-cause deaths but there is a difference between crisis-free and crisis-included envelopes, divide all deaths by crisis-included envelope, normalize (distributing epi_allcause pro-rata), and convert back to deaths.
   #' 
   #' @param CSMF Data frame with CSMFs that has been prepared for squeezing.
   #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
-  #' @return Data frame whith deaths for all causes have been adjusted for epidemic crisis squeezing.
+  #' @return Data frame where deaths have been adjusted for epidemic crisis squeezing.
   
   dat <- CSMF
   

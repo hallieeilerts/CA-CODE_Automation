@@ -2,10 +2,8 @@ fn_sqzCrisisEnd <- function(CSMF, KEY_COD, UNCERTAINTY = FALSE){
   
   #' @title Squeeze endemic crisis deaths
   # 
-  #' @description Sum crisis-free deaths with endemic crisis single cause deaths.
-  #' Calculate fractions for endemic crisis single cause deaths from this sum.
+  #' @description Add endemic crisis single cause deaths to all-cause crisis-free deaths. Calculate fractions for endemic crisis single causes from this sum. Subtract endemic crisis fractions from 1, squeeze other fractions into remaining space.
   #' 
-  #' Subtract endemic crisis fractions from 1, squeeze other fractions into remaining space.
   #' @param CSMF Data frame with CSMFs that has been prepared for squeezing.
   #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
   #' @param UNCERTAINTY A boolean that denotes whether this function is being run as part of the squeezing pipeline or uncertainty pipeline.

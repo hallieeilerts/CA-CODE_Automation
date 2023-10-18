@@ -2,14 +2,7 @@ fn_sqzLRI <- function(CSMF){
   
   #' @title Squeeze LRI
   # 
-  #' @description Multiply predicted LRI fraction by crisis-free deaths.
-  #' Subtract TBre single-cause deaths, calculate residual LRI deaths.
-  #' If residual LRI deaths are less than minimum LRI deaths,
-  #' divide LRI deaths by total of TBre single-cause deaths plus minimum LRI deaths.
-  #' Use this proportion to scale down TBre single-cause and minimum LRI deaths.
-  #' Calculate LRI fraction from scaled down minimum LRI deaths.
-  #' Convert scaled down TBre single-cause deaths to fractions.
-  #' Sum fractions for TB and TBre to get total TB fraction.
+  #' @description Multiply predicted LRI fraction by crisis-free deaths. Subtract respiratory TB single-cause deaths to get residual LRI deaths. If residual LRI deaths are less than minimum LRI deaths, divide total LRI deaths by the sum of respiratory TB single-cause deaths and minimum LRI deaths. Use this factor to scale down respiratory TB single-cause deaths and minimum LRI deaths. Calculate fractions from scaled respiratory TB and minimum LRI deaths using crisis-free envelope. Sum fractions for TB and respiratory TB to get total TB fraction.
   #' 
   #' @param CSMF Data frame with CSMFs that has been prepared for squeezing.
   #' @return Data frame where CSMFs have been adjusted for LRI squeezing.
