@@ -4,7 +4,7 @@ fn_adjustCSMFZeroDeaths <- function(CSMFSQZ, CODALL){
   # 
   #' @description When IGME all-cause deaths are equal to zero, recode CSMFs as 0. 
   #' This is an extra step for the intermediate results from the squeezing pipeline.
-  #' For the final results from the uncertainty pipeline, it happens within fn_adjustPointIntZeroDeaths (along with a number of other adjustments).
+  #' For the final results from the uncertainty pipeline, it happens within fn_adjustPointIntZeroDeaths (along with a number of other adjustments that are contingent on lower and upper bounds, and thus cannot be performed here).
   #
   #' @param CSMF Data frame with CSMFs that have been processed in squeezing pipeline (contains all countries, even those not subject to squeezing).
   #' @param CODALL Vector with CODs for all age groups in correct order.
