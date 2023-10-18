@@ -39,7 +39,7 @@ names(dat2)[names(dat2) == "ISO3Code"] <- idVars[1]
 dat2$UNICEFReportRegion1[dat2$UNICEFReportRegion1 == "Europe and Central Asia"] <- "Europe and central Asia"
 dat2$UNICEFReportRegion2[dat2$UNICEFReportRegion2 == "West and Central Africa"] <- "West and central Africa"
 dat2$UNICEFReportRegion2[dat2$UNICEFReportRegion2 == "Eastern Europe and Central Asia"] <- "Eastern Europe and central Asia"
-dat2$Region <- dat$UNICEFReportRegion1
+dat2$Region <- dat2$UNICEFReportRegion1
 # If report region 2 is not missing, use it instead
 dat2$Region[which(dat2$UNICEFReportRegion2 != "")] <- dat2$UNICEFReportRegion2[which(dat2$UNICEFReportRegion2 != "")]
 
