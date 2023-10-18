@@ -11,9 +11,9 @@ fn_calcUI <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
   #' @param L_CSMFDRAWS List of length number of draws of predicted fractions.
   #' Each list element is a data frame with CSMFs for every country-year for all CODs estimated.
   #' Also contains columns c("ISO3", "Year", "Sex", "Deaths", "Rate")
-  #' @param ENV
   #' @param UI Integer with the width of the uncertainty interval desired.
-  #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
+  #' @param ENV
   #' @return Data frame with lower and upper quantiles for each COD for deaths, fractions, rates.
   
   # Create interval
@@ -21,10 +21,6 @@ fn_calcUI <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
   
   # Causes of death for this age group
   v_cod <- CODALL[CODALL %in% names(L_CSMFDRAWS[[1]])]
-  # Causes of death for this age group
-  #v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
-  #v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
-  #v_cod <- v_cod[v_cod %in% names(L_CSMFDRAWS[[1]])]
   
   # One data frame with identifying columns that are shared across all draws
   df_idcols <- L_CSMFDRAWS[[1]][, !names(L_CSMFDRAWS[[1]]) %in% c("Deaths1", "Rate1", "Deaths2", "Rate2", paste(v_cod))]
@@ -106,7 +102,7 @@ fn_calcUI <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
     #------------------------#
   }
   
-  # Format arrays in to data frames
+  # Format arrays into data frames
   df_frac_lb <- as.data.frame(cbind(df_idcols, 
                                     Variable = rep("Fraction", nrow(df_idcols)),
                                     Quantile = rep("Lower", nrow(df_idcols)), 
@@ -152,14 +148,6 @@ fn_calcUI <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
     df_res <- df_res[order(df_res$Region, df_res$Year, df_res$Sex, df_res$Variable, df_res$Quantile),]
   }
   rownames(df_res) <- NULL
-  
-  # Checking 2023.06.14 PATCH adjustment
-  # idqx_check
-  # 421  422 1387 1388 3763 4008 4009 4011 4012 4013 4014 4015
-  #m_rates_ub[421,]
-  #df_idcols[421,]
-  #subset(df_env, ISO3 == "BIH" & Year == 2002)
-  #subset(df_res, ISO3 == "BIH" & Year == 2002)
   
   return(df_res)
 }

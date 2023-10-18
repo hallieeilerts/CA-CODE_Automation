@@ -6,7 +6,7 @@ fn_combineUIpoint <- function(UI, CSMFSQZ, CODALL, REGIONAL = FALSE){
   #
   #' @param CSMFSQZ Data frame with CSMFs that have been processed in squeezing pipeline (contains all countries, even those not subject to squeezing).
   #' @param UI     Data frame with lower and upper quantiles for each COD for deaths, fractions, rates.
-  #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
   #' @return Data frame with point estimates, lower, and upper bounds for CSMFs, deaths, and rates.
   
   # Causes of death for this age group

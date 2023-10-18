@@ -6,7 +6,7 @@ fn_roundPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
   #' When cause-specific deaths point estimate is between 0 and 1, change LB of fractions/rates/deaths to 0.
   #
   #' @param POINTINT Data frame with point estimates, lower, and upper bounds for fractions/deaths/and rates
-  #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
   #' @param REGIONAL Boolean with true/false value if regional estimates.
   #' @return Data frame with rounded point estimates, lower, and upper bounds for fractions/deaths/and rates
   
@@ -14,8 +14,6 @@ fn_roundPointInt <- function(POINTINT, CODALL, REGIONAL = FALSE){
   
   # Causes of death for this age group
   v_cod <- CODALL[CODALL %in% names(dat)]
-  #v_cod <- unique(KEY_COD$Reclass)  # Vector with ALL CAUSES OF DEATH (including single-cause estimates)
-  #v_cod <- v_cod[!v_cod %in% c("Other", "Undetermined")]
   
   ## Deaths
   

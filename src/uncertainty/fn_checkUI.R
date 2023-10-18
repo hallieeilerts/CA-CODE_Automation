@@ -5,7 +5,7 @@ fn_checkUI <- function(POINTINT, CODALL, REGIONAL = FALSE, QUANTILE = "point"){
   #' @description Checks for country-years where point estimate for deaths, fractions, or rates are outside of uncertainty intervals.
   #
   #' @param POINTINT Data frame with rounded point estimates, lower, and upper bounds for fractions/deaths/rates
-  #' @param KEY_COD Data frame with age-specific CODs with different levels of classification.
+  #' @param CODALL Vector with CODs for all age groups in correct order.
   #' @param QUANTILE String of either "point" or "median" to determine which should be checked
   #' @return Data frame with rows where death/fraction/rate point estimates are outside of uncertainty intervals.
   
