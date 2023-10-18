@@ -9,9 +9,7 @@ rm(list = ls())
 source("./src/visualizations/visualizations_inputs.R")
 source("./src/visualizations/visualizations_functions.R")
 
-v_sample <- c("AFG", "BRA", "BIH", "CHN",  "HTI", "IND", "IRN", "MEX", "NGA", "SDN", "TUR", "UKR", "YEM")
-
-#### Audit
+# Audit -------------------------------------------------------------------
 
 # Compare between my and Pancho's estimates for this round
 # I have restructured his code, but these should match almost exactly.
@@ -38,7 +36,7 @@ ggsave(paste("./gen/visualizations/audit/ui_comparison_regional_", ageGroup,"_",
 #' I calculate the national estimates, aggregate to regional, and everything is rounded at the end.
 #' Pancho's regional point estimates were calculated from the rounded national estimates in RegionalPointEstimates.R
 
-#### Output
+# Output ------------------------------------------------------------------
 
 # Compare between my estimates for this round and those of previous round
 

@@ -12,19 +12,16 @@ library(data.table) # melt, dcast
 source("./src/prepare-session/set-inputs.R")
 source("./src/prepare-session/create-session-variables.R")
 
-#' Estimates that have been processed in squeezing and formatted in results (intermediate results)
+#' Estimates that have been processed in squeezing piepline and formatted in results (intermediate results)
 #' Note: Use these for creating visualizations when uncertainty pipeline isn't ready.
 #' Some point estimates for fractions will be slightly different from the results produced in the uncertainty pipeline.
 #' The function fn_adjustCSMFZeroDeaths performs some adjustments that happen in fn_adjustPointIntZeroDeaths(), but not all. 
 #point <- read.csv(paste("./gen/results/temp/PointEstimates_National_", ageGroup,"_", resDate, ".csv", sep=""))
 #point_REG <- read.csv(paste("./gen/results/temp/PointEstimates_Regional_", ageGroup,"_", resDate, ".csv", sep=""))
 
-
 #' Estimates that have been processed in uncertainty pipeline and formatted in results (final results)
-#' Note: Some point estimates for fractions are slightly different from csmfSqz because they were adjusted in fn_adjustPointIntZeroDeaths()
 point <- read.csv(paste("./gen/results/output/PointEstimates_National_", ageGroup,"_20231002.csv", sep=""))
 point_REG <- read.csv(paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_20231002.csv", sep=""))
-# Point estimates, lower, and upper bounds for fractions/deaths/rates that have been processed in uncertainty pipeline
 pointInt <- read.csv(paste("./gen/results/output/Uncertainty_National_", ageGroup, "_20231002.csv", sep = ""))
 pointInt_REG <- read.csv(paste("./gen/results/output/Uncertainty_Regional_", ageGroup, "_20231002.csv", sep = ""))
 
