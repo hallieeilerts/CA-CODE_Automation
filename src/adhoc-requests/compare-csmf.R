@@ -11,7 +11,8 @@ rm(list = ls())
 
 library(ggplot2)
 library(gridExtra)
-
+library(data.table) # melt()
+library(plyr) # dlply()
 
 # Set age group -----------------------------------------------------------
 
@@ -23,18 +24,16 @@ ageGroup <- "05to09"
 # Load data ---------------------------------------------------------------
 
 # Final estimates from current round
-point <- read.csv(paste("./gen/results/output/PointEstimates_National_", ageGroup,"_20231002.csv", sep=""))
-point_REG <- read.csv(paste("./gen/results/output/PointEstimates_Regional_", ageGroup,"_20231002.csv", sep=""))
 pointInt <- read.csv(paste("./gen/results/output/Uncertainty_National_", ageGroup, "_20231002.csv", sep = ""))
 pointInt_REG <- read.csv(paste("./gen/results/output/Uncertainty_Regional_", ageGroup, "_20231002.csv", sep = ""))
 
-#' Pancho's estimates from previous estimation round
+# Pancho's estimates from previous estimation round
 if(ageGroup == "05to09"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates5to9-National.csv")
                          point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates5to9-Regional.csv")}
 if(ageGroup == "10to14"){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates10to14-National.csv")
                          point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates10to14-Regional.csv")}
 if(ageGroup %in% c("15to19f", "15to19m")){point_PrevResults <- read.csv("./data/previous-results/2000-2019/PointEstimates15to19-National.csv")
-                         point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates15to19-Regional.csv")}
+                                          point_PrevResults_REG <- read.csv("./data/previous-results/2000-2019/PointEstimates15to19-Regional.csv")}
 
 # Harmonize format --------------------------------------------------------
 
@@ -69,6 +68,7 @@ DAT2 <- DAT2[-grep(c("ISO3|Region|FragileState|WHOname|SDGregion|UNICEFReportReg
 DAT2_REG <- DAT2_REG[-grep(c("ISO3|Region|FragileState|WHOname|SDGregion|UNICEFReportRegion1|UNICEFReportRegion2|Deaths|Rate|Qx|Model|Variable|Quantile"), names(DAT2_REG))]
 
 # Harmonize Sex names
+sexLabels <- c("Both", "Female", "Male") 
 DAT1$Sex[DAT1$Sex == "Total"] <- sexLabels[1]
 DAT1$Sex[DAT1$Sex == "T"] <- sexLabels[1]
 DAT1$Sex[DAT1$Sex == "B"] <- sexLabels[1]
@@ -120,7 +120,7 @@ dat$update <- factor(dat$update, levels = c("2021","2019"))
 
 # To test single plot
 # dattest <- subset(dat, name == "Afghanistan")
-# ggplot(dattest) + 
+# ggplot(dattest) +
 #   geom_line(aes(x=Year, y=value, color = update), linewidth = 1) +
 #   labs(subtitle = dattest$name) + xlab("") + ylab("") +
 #   coord_cartesian(xlim = c(2000,2020), ylim = c(0,.8)) +
@@ -136,7 +136,7 @@ dat$update <- factor(dat$update, levels = c("2021","2019"))
 #         plot.subtitle = element_text(hjust = 0),
 #         axis.text = element_text(size = 8))
 
-plots <- dlply(dat, ~name,
+plots <- dlply(subset(dat, name %in% c("Afghanistan", "Burkina Faso")), ~name,
                function(x)
                  ggplot(data = x) + 
                  geom_line(aes(x=Year, y=value, color = update), linewidth = 1) +
@@ -157,4 +157,4 @@ plots <- dlply(dat, ~name,
 
 mg <- marrangeGrob(grobs = plots, nrow=1, ncol=1, top = NULL)
 
-ggsave(paste("./gen/visualizations/output/Compare_estimates_", ageGroup,"_", resDate, ".pdf", sep=""), mg, height = 10, width = 8, units = "in")
+ggsave(paste("./gen/visualizations/output/Compare_estimates_", ageGroup,"_", format(Sys.Date(), format="%Y%m%d"), ".pdf", sep=""), mg, height = 10, width = 8, units = "in")
