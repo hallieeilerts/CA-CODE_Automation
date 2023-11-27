@@ -11,6 +11,18 @@ fn_calcAggAges <- function(AGELB, AGEUB, CODALL, CSMF_5TO9 = NULL, CSMF_10TO14 =
   #' @param ENV Data frame IGME envelopes with crisis-included deaths and rates for all ages.
   #' @return Data frame with CSMFs and all-cause crisis-free and crisis-included deaths and rates for aggregate age groups
   
+  # # 
+  # AGELB=15
+  # AGEUB=19
+  # CODALL=codAll
+  # CSMF_5TO9 = csmfSqzDraws_05to09
+  # CSMF_10TO14 = csmfSqzDraws_10to14
+  # CSMF_15TO19F = csmfSqzDraws_15to19f
+  # CSMF_15TO19M = csmfSqzDraws_15to19m
+  # ENV = envDraws_SAMP_15to19
+  # UNCERTAINTY = TRUE
+  # REGIONAL = FALSE
+  
   env <- ENV
   v_cod <- CODALL
   dat5to9 <- CSMF_5TO9

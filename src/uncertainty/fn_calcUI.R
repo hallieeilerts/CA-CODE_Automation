@@ -98,6 +98,9 @@ fn_calcUI <- function(L_CSMFDRAWS, UI, CODALL, ENV = NULL, REGIONAL = FALSE){
       m_rates_ub_Aux      <- apply(simplify2array(l_rates_Aux), c(1,2), quantile, .999, na.rm = T)
       m_rates_ub[idqx, ]  <- m_rates_ub_Aux
     }
+    
+    # Hal note: Not sure why this is only done for rates. Is there a need to check if upper bound of all-cause Deaths2 in the draw is ever below the IGME envelope value for Deaths2? 
+    
     # END PATCH
     #------------------------#
   }

@@ -40,7 +40,7 @@ csmfSqzDraws_15to19f  <- readRDS(paste("./gen/uncertainty/temp/csmfSqzDraws_15to
 csmfSqzDraws_15to19m  <- readRDS(paste("./gen/uncertainty/temp/csmfSqzDraws_15to19m.rds", sep=""))
 
 # Pancho's point estimates from current estimation round
-csmfSqz_PanchoResults_10to19 <- read.csv("./data/previous-results/PointEstimates10to19-National.csv")
-csmfSqz_PanchoResults_10to19REG <- read.csv("./data/previous-results/PointEstimates10to19-Regional.csv")
+csmfSqz_PanchoResults_10to19 <- read.csv("./data/previous-results/2000-2021/PointEstimates10to19-National.csv")
+csmfSqz_PanchoResults_10to19REG <- read.csv("./data/previous-results/2000-2021/PointEstimates10to19-Regional.csv")
 
 ################################################################################
