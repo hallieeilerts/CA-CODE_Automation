@@ -6,8 +6,8 @@ Demo-ing automation for CA-CODE simple update to 2021.
 ## Developer instructions
 
 -   Clone repository to computer
--   Add data inputs from [CA-CODE_Warehouse](https://www.dropbox.com/scl/fo/iilncw5lay5cppoj9jg6n/h?rlkey=gcgqspqan03c1fup5ydlczl40&dl=0) folder on Dropbox into `/data`
--   If necessary, replace code in `/src/data-management` with code from `/src/archive` (to match the years of the update)
+-   Add data inputs from [CA-CODE_Warehouse](https://www.dropbox.com/scl/fo/iilncw5lay5cppoj9jg6n/h?rlkey=gcgqspqan03c1fup5ydlczl40&dl=0) folder on Dropbox to local `/data` folder
+-   The current files in `/src/data-management` are for the Simple Update 2000-2021. If producing estimates for a different set of years, replace with appropriate `data-management` code in `/src/archive`.
 -   Manually set variables in `/src/prepare-session/set-inputs`
     -   Do not make changes to any other scripts
 -   Run make file
@@ -50,8 +50,6 @@ Each subdirectory in `gen` contains the following subdirectories:
 -   `audit`: quality checks, diagnostic information on the performance of each step in the pipeline. For example, in `/data-management/audit` this could be a txt file with information on missing observations in the final dataset.
 
 ## Resources
-
-[Modelling processes](https://docs.google.com/spreadsheets/d/1Yi904nUtTaoQu0HJcjPuPzmXdDtzOLPuktkfNjG4a2k/edit#gid=484739312)
 
 [Dictionary and style guide](https://docs.google.com/spreadsheets/d/1g3oknz_RNwO5iuzxfyUoE4fl8oLL3Hj_u94alKk0OKo/edit#gid=219546148)
 
