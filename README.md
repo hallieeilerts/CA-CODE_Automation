@@ -51,6 +51,9 @@ Each subdirectory in `gen` contains the following subdirectories:
 
 ## Resources
 
-[Dictionary and style guide](https://docs.google.com/spreadsheets/d/1g3oknz_RNwO5iuzxfyUoE4fl8oLL3Hj_u94alKk0OKo/edit#gid=219546148)
+[Objective 1 timeline](https://docs.google.com/spreadsheets/d/1daewLt2dCeYvt5EB01fpR3cPNWxtdGlVVz8cpcNvm3M/edit#gid=1309778647)
 
-[Procurement timelines](https://docs.google.com/spreadsheets/d/1BnVdzqHqocNhnASHD5cCIbbq1Kds605Pd2lUwRhA0A4/edit#gid=0)
+[Data procurement for 2000-2023](https://docs.google.com/spreadsheets/d/1BnVdzqHqocNhnASHD5cCIbbq1Kds605Pd2lUwRhA0A4/edit#gid=0)
+
+[Dictionary and code style guide](https://docs.google.com/spreadsheets/d/1g3oknz_RNwO5iuzxfyUoE4fl8oLL3Hj_u94alKk0OKo/edit#gid=219546148)
+
