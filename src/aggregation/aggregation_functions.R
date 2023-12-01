@@ -15,6 +15,8 @@ source("./src/results/fn_roundCSMFsqz.R")
 source("./src/results/fn_publishEstimates.R")
 source("./src/visualizations/fn_reshapePanchoRegAndAgg.R")
 source("./src/visualizations/fn_compareCSMF.R")
+source("./src/visualizations/fn_plotSingleCSMF.R")
+source("./src/visualizations/fn_plotSingleUI.R")
 ################################################################################
 
 
