@@ -5,9 +5,20 @@
 # Clear environment
 rm(list = ls())
 
-# Load inputs and functions
+# Load section inputs and functions
 source("./src/aggregation/aggregation_inputs.R")
 source("./src/aggregation/aggregation_functions.R")
+
+# Envelope draws for 15-19 sexes combined
+envDraws_15to19 <- readRDS("./gen/data-management/output/envDraws_15to19.rds")
+# Sampling vectors for IGME envelope draws based on number of HMM/LMM draws
+v_sample <- readRDS("./gen/uncertainty/temp/sampleDraws.rds")
+
+# CSMF draws that have been processed in squeezing pipeline for all age groups 
+csmfSqzDraws_05to09  <- readRDS(paste("./gen/uncertainty/temp/csmfSqzDraws_05to09.rds", sep=""))
+csmfSqzDraws_10to14  <- readRDS(paste("./gen/uncertainty/temp/csmfSqzDraws_10to14.rds", sep=""))
+csmfSqzDraws_15to19f  <- readRDS(paste("./gen/uncertainty/temp/csmfSqzDraws_15to19f.rds", sep=""))
+csmfSqzDraws_15to19m  <- readRDS(paste("./gen/uncertainty/temp/csmfSqzDraws_15to19m.rds", sep=""))
 
 # Calculate aggregate age group medians, uncertainty intervals -----------------------------------------------
 
@@ -63,95 +74,34 @@ ui_10to19REG <- fn_calcUI(csmfSqzDraws_10to19REG, UI = 0.95, CODALL = codAll, RE
 ui_15to19REG <- fn_calcUI(csmfSqzDraws_15to19REG, UI = 0.95, CODALL = codAll, REGIONAL = TRUE)
 
 # Round median estimates with uncertainty intervals
-pointInt_FRMT_05to14 <- fn_roundPointInt(ui_05to14, codAll)
-pointInt_FRMT_05to19 <- fn_roundPointInt(ui_05to19, codAll)
-pointInt_FRMT_10to19 <- fn_roundPointInt(ui_10to19, codAll)
-pointInt_FRMT_15to19 <- fn_roundPointInt(ui_15to19, codAll)
-pointInt_FRMT_05to14REG <- fn_roundPointInt(ui_05to14REG, codAll, REGIONAL = TRUE)
-pointInt_FRMT_05to19REG <- fn_roundPointInt(ui_05to19REG, codAll, REGIONAL = TRUE)
-pointInt_FRMT_10to19REG <- fn_roundPointInt(ui_10to19REG, codAll, REGIONAL = TRUE)
-pointInt_FRMT_15to19REG <- fn_roundPointInt(ui_15to19REG, codAll, REGIONAL = TRUE)
-
-# Audit: confirm that median estimates fall in uncertainty bounds
-pointInt_AUD_05to14 <- fn_checkUI(pointInt_FRMT_05to14, codAll, QUANTILE = "median")
-pointInt_AUD_05to19 <- fn_checkUI(pointInt_FRMT_05to19, codAll, QUANTILE = "median")
-pointInt_AUD_10to19 <- fn_checkUI(pointInt_FRMT_10to19, codAll, QUANTILE = "median")
-pointInt_AUD_15to19 <- fn_checkUI(pointInt_FRMT_15to19, codAll, QUANTILE = "median")
-pointInt_AUD_05to14REG <- fn_checkUI(pointInt_FRMT_05to14REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
-pointInt_AUD_05to19REG <- fn_checkUI(pointInt_FRMT_05to19REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
-pointInt_AUD_10to19REG <- fn_checkUI(pointInt_FRMT_10to19REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
-pointInt_AUD_15to19REG <- fn_checkUI(pointInt_FRMT_15to19REG, codAll, QUANTILE = "median", REGIONAL = TRUE)
-sum(unlist(lapply(list(pointInt_AUD_05to14, pointInt_AUD_05to19, pointInt_AUD_10to19, pointInt_AUD_15to19, 
-                       pointInt_AUD_05to14REG, pointInt_AUD_05to19REG, pointInt_AUD_10to19REG, pointInt_AUD_15to19REG), nrow)))
+medInt_ADJ_05to14 <- fn_roundPointInt(ui_05to14, codAll)
+medInt_ADJ_05to19 <- fn_roundPointInt(ui_05to19, codAll)
+medInt_ADJ_10to19 <- fn_roundPointInt(ui_10to19, codAll)
+medInt_ADJ_15to19 <- fn_roundPointInt(ui_15to19, codAll)
+medInt_ADJ_05to14REG <- fn_roundPointInt(ui_05to14REG, codAll, REGIONAL = TRUE)
+medInt_ADJ_05to19REG <- fn_roundPointInt(ui_05to19REG, codAll, REGIONAL = TRUE)
+medInt_ADJ_10to19REG <- fn_roundPointInt(ui_10to19REG, codAll, REGIONAL = TRUE)
+medInt_ADJ_15to19REG <- fn_roundPointInt(ui_15to19REG, codAll, REGIONAL = TRUE)
 
 # Add age columns for aggregate group groups
-pointInt_FRMT_05to14 <- fn_addAgeCol(pointInt_FRMT_05to14, 5, 14)
-pointInt_FRMT_05to19 <- fn_addAgeCol(pointInt_FRMT_05to19, 5, 19)
-pointInt_FRMT_10to19 <- fn_addAgeCol(pointInt_FRMT_10to19, 10, 19)
-pointInt_FRMT_15to19 <- fn_addAgeCol(pointInt_FRMT_15to19, 15, 19)
-pointInt_FRMT_05to14REG <- fn_addAgeCol(pointInt_FRMT_05to14REG, 5, 14)
-pointInt_FRMT_05to19REG <- fn_addAgeCol(pointInt_FRMT_05to19REG, 5, 19)
-pointInt_FRMT_10to19REG <- fn_addAgeCol(pointInt_FRMT_10to19REG, 10, 19)
-pointInt_FRMT_15to19REG <- fn_addAgeCol(pointInt_FRMT_15to19REG, 15, 19)
+medInt_ADJ_05to14 <- fn_addAgeCol(medInt_ADJ_05to14, 5, 14)
+medInt_ADJ_05to19 <- fn_addAgeCol(medInt_ADJ_05to19, 5, 19)
+medInt_ADJ_10to19 <- fn_addAgeCol(medInt_ADJ_10to19, 10, 19)
+medInt_ADJ_15to19 <- fn_addAgeCol(medInt_ADJ_15to19, 15, 19)
+medInt_ADJ_05to14REG <- fn_addAgeCol(medInt_ADJ_05to14REG, 5, 14)
+medInt_ADJ_05to19REG <- fn_addAgeCol(medInt_ADJ_05to19REG, 5, 19)
+medInt_ADJ_10to19REG <- fn_addAgeCol(medInt_ADJ_10to19REG, 10, 19)
+medInt_ADJ_15to19REG <- fn_addAgeCol(medInt_ADJ_15to19REG, 15, 19)
 
 # Save
-write.csv(pointInt_FRMT_05to14, paste("./gen/aggregation/temp/pointInt_05to14.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_05to19, paste("./gen/aggregation/temp/pointInt_05to19.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_10to19, paste("./gen/aggregation/temp/pointInt_10to19.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_15to19, paste("./gen/aggregation/temp/pointInt_15to19.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_05to14REG, paste("./gen/aggregation/temp/pointInt_05to14REG.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_05to19REG, paste("./gen/aggregation/temp/pointInt_05to19REG.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_10to19REG, paste("./gen/aggregation/temp/pointInt_10to19REG.csv", sep=""), row.names = FALSE)
-write.csv(pointInt_FRMT_15to19REG, paste("./gen/aggregation/temp/pointInt_15to19REG.csv", sep=""), row.names = FALSE)
-
-# Publish estimates from uncertainty pipeline -----------------------------
-
-## HAVENT FINALIZED THIS SECTION
-
-# Load (if necessary)
-# pointInt_FRMT_05to14 <- read.csv(paste("./gen/aggregation/temp/pointInt_05to14.csv", sep = ""))
-# pointInt_FRMT_05to19 <- read.csv(paste("./gen/aggregation/temp/pointInt_05to19.csv", sep = ""))
-# pointInt_FRMT_10to19 <- read.csv(paste("./gen/aggregation/temp/pointInt_10to19.csv", sep = ""))
-# pointInt_FRMT_15to19 <- read.csv(paste("./gen/aggregation/temp/pointInt_15to19.csv", sep = ""))
-# pointInt_FRMT_05to14REG <- read.csv(paste("./gen/aggregation/temp/pointInt_05to14REG.csv", sep = ""))
-# pointInt_FRMT_05to19REG <- read.csv(paste("./gen/aggregation/temp/pointInt_05to19REG.csv", sep = ""))
-# pointInt_FRMT_10to19REG <- read.csv(paste("./gen/aggregation/temp/pointInt_10to19REG.csv", sep = ""))
-# pointInt_FRMT_15to19REG <- read.csv(paste("./gen/aggregation/temp/pointInt_15to19REG.csv", sep = ""))
-
-# Format estimates
-point_PUB_05to14 <- fn_publishEstimates(pointInt_FRMT_05to14, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE)
-point_PUB_05to19 <- fn_publishEstimates(pointInt_FRMT_05to19, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE)
-point_PUB_10to19 <- fn_publishEstimates(pointInt_FRMT_10to19, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE)
-point_PUB_15to19 <- fn_publishEstimates(pointInt_FRMT_15to19, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE)
-point_PUB_05to14REG <- fn_publishEstimates(pointInt_FRMT_05to14REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
-point_PUB_05to19REG <- fn_publishEstimates(pointInt_FRMT_05to19REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
-point_PUB_10to19REG <- fn_publishEstimates(pointInt_FRMT_10to19REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
-point_PUB_15to19REG <- fn_publishEstimates(pointInt_FRMT_15to19REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = FALSE, REGIONAL = TRUE)
-pointInt_PUB_05to14 <- fn_publishEstimates(pointInt_FRMT_05to14, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE)
-pointInt_PUB_05to19 <- fn_publishEstimates(pointInt_FRMT_05to19, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE)
-pointInt_PUB_10to19 <- fn_publishEstimates(pointInt_FRMT_10to19, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE)
-pointInt_PUB_15to19 <- fn_publishEstimates(pointInt_FRMT_15to19, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE)
-pointInt_PUB_05to14REG <- fn_publishEstimates(pointInt_FRMT_05to14REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
-pointInt_PUB_05to19REG <- fn_publishEstimates(pointInt_FRMT_05to19REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
-pointInt_PUB_10to19REG <- fn_publishEstimates(pointInt_FRMT_10to19REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
-pointInt_PUB_15to19REG <- fn_publishEstimates(pointInt_FRMT_15to19REG, key_region_u20, key_ctryclass_u20, codAll, UNCERTAINTY = TRUE, REGIONAL = TRUE)
-
-# Save
-write.csv(point_PUB_05to14, paste("./gen/aggregation/output/PointEstimates_National_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_05to19, paste("./gen/aggregation/output/PointEstimates_National_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_10to19, paste("./gen/aggregation/output/PointEstimates_National_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_15to19, paste("./gen/aggregation/output/PointEstimates_National_15to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_05to14REG, paste("./gen/aggregation/output/PointEstimates_Regional_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_05to19REG, paste("./gen/aggregation/output/PointEstimates_Regional_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_10to19REG, paste("./gen/aggregation/output/PointEstimates_Regional_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(point_PUB_15to19REG, paste("./gen/aggregation/output/PointEstimates_Regional_15to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_05to14, paste("./gen/aggregation/output/Uncertainty_National_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_05to19, paste("./gen/aggregation/output/Uncertainty_National_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_10to19, paste("./gen/aggregation/output/Uncertainty_National_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_15to19, paste("./gen/aggregation/output/Uncertainty_National_15to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_05to14REG, paste("./gen/aggregation/output/Uncertainty_Regional_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_05to19REG, paste("./gen/aggregation/output/Uncertainty_Regional_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_10to19REG, paste("./gen/aggregation/output/Uncertainty_Regional_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
-write.csv(pointInt_PUB_15to19REG, paste("./gen/aggregation/output/Uncertainty_Regional_15to19_", resDate, ".csv", sep=""), row.names = FALSE)
-
+# Note: Typically temporary files don't have a results date. These do because want to keep track of which set of results were aggregated.
+# Need to delete old files from this /temp folder every now and then.
+write.csv(medInt_ADJ_05to14, paste("./gen/aggregation/temp/medInt_05to14_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_05to19, paste("./gen/aggregation/temp/medInt_05to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_10to19, paste("./gen/aggregation/temp/medInt_10to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_15to19, paste("./gen/aggregation/temp/medInt_15to19_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_05to14REG, paste("./gen/aggregation/temp/medInt_05to14REG_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_05to19REG, paste("./gen/aggregation/temp/medInt_05to19REG_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_10to19REG, paste("./gen/aggregation/temp/medInt_10to19REG_", resDate, ".csv", sep=""), row.names = FALSE)
+write.csv(medInt_ADJ_15to19REG, paste("./gen/aggregation/temp/medInt_15to19REG_", resDate, ".csv", sep=""), row.names = FALSE)
 
